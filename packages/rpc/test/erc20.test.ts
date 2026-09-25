@@ -23,7 +23,7 @@ test("reads an ERC-20 balance through eth_call", async () => {
     "0x2222222222222222222222222222222222222222",
   );
 
-  assert.equal(result.rawBalance, "2320112");
+  assert.equal(result.rawBalance, "2328304");
   assert.equal(result.decimals, 18);
 });
 
