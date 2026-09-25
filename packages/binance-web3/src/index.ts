@@ -1,5 +1,6 @@
 export { BinanceWeb3Client } from "./client.js";
 export { BinanceTransactionClient } from "./transaction.js";
+export { BinanceWalletClient } from "./wallet.js";
 
 export type { BinanceWeb3Config } from "./client.js";
 
