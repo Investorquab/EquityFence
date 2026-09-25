@@ -33,6 +33,23 @@ export interface GuardedSimulationResult {
   simulation: SimulationResult | null;
 }
 
+export interface SafetyPipelineResult extends SafetyCheckResult {
+  simulation: SimulationResult | null;
+}
+
+export async function evaluateAndSimulate(
+  source: RwaStateSource,
+  exposureSource: ExposureSource,
+  simulationSource: SimulationSource,
+  previous: StateSnapshot,
+  input: SafetyCheckInput,
+  transaction: { binanceChainId: string; evmTx: EvmTransaction },
+): Promise<SafetyPipelineResult> {
+  const safety = await evaluateSafety(source, exposureSource, previous, input);
+  const guarded = await simulateIfAllowed(simulationSource, safety.assessment, transaction);
+  return { ...safety, assessment: guarded.assessment, simulation: guarded.simulation };
+}
+
 export async function simulateIfAllowed(
   simulationSource: SimulationSource,
   assessment: RiskAssessment,
