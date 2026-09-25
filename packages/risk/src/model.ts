@@ -45,7 +45,8 @@ export function assessRisk(input: RiskInput): RiskAssessment {
     ]);
   }
 
-  const assetAffected = transition.current.assetId === intent.assetId;
+  const assetAffected =
+    transition.current.assetId.toLowerCase() === intent.assetId.toLowerCase();
 
   if (!assetAffected) {
     return decisionFor("ALLOW", [
@@ -60,6 +61,15 @@ export function assessRisk(input: RiskInput): RiskAssessment {
   }
 
   if (exposureStatus === "KNOWN_EXPOSED") {
+    if (
+      exposure.assetId.toLowerCase() !== intent.assetId.toLowerCase() ||
+      exposure.wallet.toLowerCase() !== intent.wallet.toLowerCase()
+    ) {
+      return decisionFor("ALLOW", [
+        "The wallet's verified exposure does not match the proposed transaction target.",
+      ]);
+    }
+
     return decisionFor("BLOCK", [
       ...transition.reasons,
       "The wallet has verified exposure to the affected asset.",
