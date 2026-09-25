@@ -1,0 +1,10 @@
+{
+  "name": "equityfence",
+  "private": true,
+  "version": "0.1.0",
+  "packageManager": "pnpm@10.15.0",
+  "scripts": {
+    "check": "pnpm -r check",
+    "test": "pnpm -r test"
+  }
+}
