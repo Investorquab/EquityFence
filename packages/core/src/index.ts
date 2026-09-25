@@ -11,7 +11,7 @@ export interface EconomicState {
 export interface Exposure {
   assetId: string;
   wallet: string;
-  quantity: string;
+  rawBalance: string;
 }
 
 export interface TransactionIntent {
@@ -37,7 +37,7 @@ export function assessStateTransition(
 
   const positionAffected =
     exposure.assetId === current.assetId &&
-    exposure.quantity !== "0";
+    BigInt(exposure.rawBalance) > 0n;
 
   const intentAffected =
     intent.assetId === current.assetId &&
