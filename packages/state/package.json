@@ -1,0 +1,17 @@
+{
+  "name": "@equityfence/state",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "check": "tsc --noEmit",
+    "test": "node --import tsx --test"
+  },
+  "dependencies": {
+    "@equityfence/core": "workspace:*"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.5",
+    "typescript": "^5.9.2"
+  }
+}
