@@ -1,6 +1,7 @@
 import type { RwaToken } from "@equityfence/binance-web3";
 import type { ExposurePosition, ExposureSource } from "@equityfence/exposure";
 import type { RiskAssessment, TransactionIntent } from "@equityfence/core";
+import type { EvmTransaction, SimulationResult } from "@equityfence/binance-web3";
 import { assessRisk } from "@equityfence/risk";
 import { detectStateTransition, type StateSnapshot } from "@equityfence/state";
 
@@ -18,6 +19,32 @@ export interface SafetyCheckResult {
   assessment: RiskAssessment;
   transition: ReturnType<typeof detectStateTransition>;
   exposure: ExposurePosition | null;
+}
+
+export interface SimulationSource {
+  simulateTransaction(request: {
+    binanceChainId: string;
+    evmTx: EvmTransaction;
+  }): Promise<SimulationResult>;
+}
+
+export interface GuardedSimulationResult {
+  assessment: RiskAssessment;
+  simulation: SimulationResult | null;
+}
+
+export async function simulateIfAllowed(
+  simulationSource: SimulationSource,
+  assessment: RiskAssessment,
+  request: { binanceChainId: string; evmTx: EvmTransaction },
+): Promise<GuardedSimulationResult> {
+  if (assessment.decision !== "ALLOW") {
+    return { assessment, simulation: null };
+  }
+
+  const simulation = await simulationSource.simulateTransaction(request);
+
+  return { assessment, simulation };
 }
 
 function toSnapshot(asset: RwaToken): StateSnapshot {
