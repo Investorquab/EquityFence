@@ -1,6 +1,11 @@
 {
-  "files": [],
-  "references": [
-    { "path": "./packages/core" }
-  ]
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true
+  },
+  "files": []
 }
