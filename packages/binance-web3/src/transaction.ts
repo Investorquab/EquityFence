@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 
 const BASE_URL = "https://web3.binance.com/build";
 
@@ -69,6 +69,7 @@ export class BinanceTransactionClient {
     const path = "/api/v1/dex/pre-transaction/simulate";
     const timestamp = new Date().toISOString();
     const requestPath = "/build" + path;
+    const nonce = randomUUID();
     const signature = createHmac("sha256", this.secretKey)
       .update(timestamp + "POST" + requestPath + body, "utf8")
       .digest("base64");
@@ -81,6 +82,7 @@ export class BinanceTransactionClient {
         "X-OC-TIMESTAMP": timestamp,
         "X-OC-SIGN": signature,
         "X-OC-RECV-WINDOW": String(this.recvWindowMs),
+        "X-OC-NONCE": nonce,
       },
       body,
     });
