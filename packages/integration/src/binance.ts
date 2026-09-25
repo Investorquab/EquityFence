@@ -11,8 +11,6 @@ export class BinanceRwaStateSource implements RwaStateSource {
   ) {}
 
   async getAsset(assetId: string): Promise<RwaToken> {
-    return (
-      await this.client.getRwaTokenByContract(assetId, this.platformId)
-    ).data;
+    return this.client.getRwaTokenByContract(assetId, this.platformId);
   }
 }
