@@ -5,7 +5,17 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "forceConsistentCasingInFileNames": true,
+    "baseUrl": ".",
+    "paths": {
+      "@equityfence/core": ["packages/core/src/index.ts"],
+      "@equityfence/state": ["packages/state/src/index.ts"],
+      "@equityfence/exposure": ["packages/exposure/src/index.ts"],
+      "@equityfence/risk": ["packages/risk/src/index.ts"],
+      "@equityfence/binance-web3": ["packages/binance-web3/src/index.ts"],
+      "@equityfence/rpc": ["packages/rpc/src/index.ts"],
+      "@equityfence/integration": ["packages/integration/src/index.ts"]
+    }
   },
   "files": []
 }
