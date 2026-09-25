@@ -61,6 +61,13 @@ export function assessRisk(input: RiskInput): RiskAssessment {
   }
 
   if (exposureStatus === "KNOWN_EXPOSED") {
+    if (!exposure) {
+      return decisionFor("BLOCK", [
+        "Exposure status is inconsistent with the supplied exposure record.",
+        "The safety layer fails closed on inconsistent exposure data.",
+      ]);
+    }
+
     if (
       exposure.assetId.toLowerCase() !== intent.assetId.toLowerCase() ||
       exposure.wallet.toLowerCase() !== intent.wallet.toLowerCase()
