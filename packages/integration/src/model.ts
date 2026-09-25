@@ -44,6 +44,21 @@ export async function simulateIfAllowed(
 
   const simulation = await simulationSource.simulateTransaction(request);
 
+  if (simulation.status !== "SUCCESS") {
+    return {
+      assessment: {
+        decision: "BLOCK",
+        reasons: [
+          "The transaction passed the economic-state risk gate but failed simulation.",
+          simulation.failReason
+            ? "Simulation failure: " + simulation.failReason
+            : "The simulator did not report SUCCESS.",
+        ],
+      },
+      simulation,
+    };
+  }
+
   return { assessment, simulation };
 }
 
