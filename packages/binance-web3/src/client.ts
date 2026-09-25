@@ -1,4 +1,4 @@
-import { createHmac } from "node:crypto";
+import { createHmac, randomUUID } from "node:crypto";
 import type {
   BinanceResponse,
   RwaSearchResult,
@@ -66,6 +66,36 @@ export class BinanceWeb3Client {
     );
   }
 
+  async getRwaTokenByContract(tokenContractAddress: string, platformId?: "ondo" | "bstock") {
+    const results = await this.searchRwaToken(tokenContractAddress, platformId);
+    const assets = results.data.flatMap((result) => result.assets);
+    const match = assets.find(
+      (asset) =>
+        asset.binanceChainId === "56" &&
+        asset.tokenContractAddress.toLowerCase() === tokenContractAddress.toLowerCase(),
+    );
+
+    if (!match) {
+      throw new Error("RWA token not found on BSC: " + tokenContractAddress);
+    }
+
+    const tokens = await this.getRwaTokens({
+      binanceChainId: "56",
+      platformId: match.platformId as "ondo" | "bstock",
+    });
+
+    const token = tokens.data.find(
+      (item) =>
+        item.tokenContractAddress.toLowerCase() === tokenContractAddress.toLowerCase(),
+    );
+
+    if (!token) {
+      throw new Error("RWA token details not found: " + tokenContractAddress);
+    }
+
+    return token;
+  }
+
   async getRwaPrices(tokenContractAddresses: string[]) {
     if (tokenContractAddresses.length === 0) {
       throw new Error("At least one token contract address is required");
@@ -98,6 +128,7 @@ export class BinanceWeb3Client {
     const fullPath = queryString ? `${path}?${queryString}` : path;
     const requestPath = `/build${fullPath}`;
     const timestamp = new Date().toISOString();
+    const nonce = randomUUID();
     const signature = createHmac(
       "sha256",
       this.secretKey,
@@ -112,6 +143,7 @@ export class BinanceWeb3Client {
         "X-OC-TIMESTAMP": timestamp,
         "X-OC-SIGN": signature,
         "X-OC-RECV-WINDOW": String(this.recvWindowMs),
+        "X-OC-NONCE": nonce,
       },
     });
 
