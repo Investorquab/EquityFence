@@ -11,7 +11,8 @@
     "@equityfence/binance-web3": "workspace:*",
     "@equityfence/exposure": "workspace:*",
     "@equityfence/risk": "workspace:*",
-    "@equityfence/state": "workspace:*"
+    "@equityfence/state": "workspace:*",
+    "@equityfence/core": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.20.5",
