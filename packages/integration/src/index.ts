@@ -1,4 +1,5 @@
 export { BinanceRwaStateSource } from "./binance.js";
+export { BinanceExposureSource } from "./binance-wallet.js";
 export {
   evaluateSafety,
   snapshotFromRwaToken,
@@ -11,4 +12,4 @@ export type {
   SafetyCheckInput,
   SafetyCheckResult,
   SimulationSource,
-} from "./model.js"
+} from "./model.js";
