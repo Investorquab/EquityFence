@@ -14,12 +14,14 @@
     "snapshot": "node --env-file=../../.env --import tsx src/snapshot.ts",
     "replay": "node --import tsx src/replay.ts",
     "pipeline-replay": "node --import tsx src/pipeline-replay.ts",
-    "simulate": "node --env-file=../../.env --import tsx src/simulate.ts"
+    "simulate": "node --env-file=../../.env --import tsx src/simulate.ts",
+    "showcase": "node --env-file=../../.env --import tsx src/showcase.ts"
   },
   "dependencies": {
     "@equityfence/binance-web3": "workspace:*",
     "@equityfence/integration": "workspace:*",
-    "@equityfence/state": "workspace:*"
+    "@equityfence/state": "workspace:*",
+    "@equityfence/risk": "workspace:*"
   },
   "devDependencies": {
     "tsx": "^4.20.5",
