@@ -10,7 +10,8 @@
     "discover": "node --env-file=../../.env --import tsx src/discover.ts",
     "inspect": "node --env-file=../../.env --import tsx src/inspect.ts",
     "exposure": "node --env-file=../../.env --import tsx src/exposure.ts",
-    "safety-check": "node --env-file=../../.env --import tsx src/safety-check.ts"
+    "safety-check": "node --env-file=../../.env --import tsx src/safety-check.ts",
+    "snapshot": "node --env-file=../../.env --import tsx src/snapshot.ts"
   },
   "dependencies": {
     "@equityfence/binance-web3": "workspace:*",
