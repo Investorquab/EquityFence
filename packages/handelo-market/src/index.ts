@@ -27,7 +27,7 @@ export class HandeloMarketClient {
     return envelope.data;
   }
   async search(ticker:string):Promise<Array<{ticker:string;companyName:string;assets:Array<{platformId:string;binanceChainId:string;tokenContractAddress:string;tokenSymbol:string;assetType:number}>}>>{
-    return this.request("/GET".startsWith("/")?"GET":"GET","/api/v1/dex/market/rwa/search",undefined,{keyword:ticker});
+    return this.request("GET","/api/v1/dex/market/rwa/search",undefined,{keyword:ticker});
   }
   async tokens():Promise<RwaAsset[]>{
     return this.request("GET","/api/v1/dex/market/rwa/tokens",undefined,{binanceChainId:"56"}) as Promise<RwaAsset[]>;
