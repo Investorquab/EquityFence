@@ -13,7 +13,8 @@
     "safety-check": "node --env-file=../../.env --import tsx src/safety-check.ts",
     "snapshot": "node --env-file=../../.env --import tsx src/snapshot.ts",
     "replay": "node --import tsx src/replay.ts",
-    "pipeline-replay": "node --import tsx src/pipeline-replay.ts"
+    "pipeline-replay": "node --import tsx src/pipeline-replay.ts",
+    "simulate": "node --env-file=../../.env --import tsx src/simulate.ts"
   },
   "dependencies": {
     "@equityfence/binance-web3": "workspace:*",
