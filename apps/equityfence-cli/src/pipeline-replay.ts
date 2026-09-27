@@ -31,7 +31,7 @@ const current: RwaToken = {
   tokenToShareRatio: "1",
   statusInfo: {
     openState: false,
-    marketStatus: "paused",
+    marketStatus: "pause",
     reasonCode: "MARKET_PAUSED",
     reasonMsg: "Controlled replay",
     nextOpenTime: null,
