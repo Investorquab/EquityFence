@@ -1,4 +1,4 @@
-import { createLlmClient } from "@handelo/llm";
+import { createLlmClient, type LlmClient } from "@handelo/llm";
 import { HandeloMarketClient, marketClientFromEnv, type RwaAsset } from "@handelo/market";
 
 export interface UserIntent { action:"research"|"buy"|"sell"|"invest"; ticker:string|null; amountUsd:number|null; horizon:string|null; riskTolerance:"low"|"medium"|"high"|"unknown"; }
@@ -26,7 +26,7 @@ function marketBrief(asset:RwaAsset):MarketBrief{
 
 export class HandeloAgent {
   private readonly llm; private readonly market:HandeloMarketClient;
-  constructor(opts:{llmApiKey?:string;marketClient?:HandeloMarketClient}={}){this.llm=createLlmClient(opts.llmApiKey);this.market=opts.marketClient??marketClientFromEnv();}
+  constructor(opts:{llmApiKey?:string;llmClient?:LlmClient;marketClient?:HandeloMarketClient}={}){this.llm=opts.llmClient??createLlmClient(opts.llmApiKey);this.market=opts.marketClient??marketClientFromEnv();}
   async run(message:string):Promise<AgentResult>{
     const intent=await this.llm.generateJson<UserIntent>({schemaName:"handelo_intent",schema:INTENT_SCHEMA,system:"You are Handelo's intent parser. Extract the user's investment intent without inventing a ticker or amount. If they did not name a stock, ticker is null. Amount is USD when explicitly stated.",user:message});
     let market:MarketBrief|null=null;
