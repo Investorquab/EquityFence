@@ -1,46 +1,79 @@
-# EquityFence
+# Handelo
 
-**An equity circuit breaker for tokenized assets.**
+**The agent that understands the market for the user, rather than simply trading for the user.**
 
-EquityFence is protocol-side safety infrastructure for tokenized equities on BNB Chain. It detects relevant economic-state changes, evaluates whether a proposed DeFi action is affected, and returns a deterministic **ALLOW**, **WARN**, or **BLOCK** decision before execution.
+Handelo is an AI-native interface for tokenized stocks on BNB Smart Chain. It is designed for people who may know what they want to invest in without knowing the mechanics underneath: market hours, reference prices, on-chain prices, tokenized representations, and execution conditions.
 
-## Core flow
+## Current architecture
 
 ```
-Tokenized-equity state
-        ↓
-State analysis
-        ↓
-Exposure check
-        ↓
-Risk decision
-        ↓
-ALLOW / WARN / BLOCK
-        ↓
-Transaction simulation
-        ↓
-Execute only when permitted
+User
+  ↓
+Handelo Agent
+  ├── Intent understanding
+  ├── Live tokenized-stock market intelligence
+  ├── Reference vs on-chain price context
+  └── Explanation
+       ↓
+BNB Chain / Binance Web3 infrastructure
 ```
 
-## Current build scope
+## First working slice
 
-The first milestone is intentionally narrow:
+The repository now contains a provider-agnostic LLM layer, a live Binance Web3 tokenized-stock market client, and a Handelo agent API.
 
-1. Connect to real BNB/tokenized-equity data.
-2. Represent the relevant economic state.
-3. Detect a state transition.
-4. Determine whether an exposed position is affected.
-5. Produce a deterministic safety decision.
-6. Simulate the proposed transaction.
-7. Prove the ALLOW → BLOCK transition in a reproducible demo.
+The agent accepts a normal-language request, resolves the relevant BSC tokenized-stock record, and explains the market state using live data.
 
-We are not building a trading bot, generic portfolio dashboard, oracle, lending protocol, tax engine, or generic corporate-action API.
+## AI provider
 
-## Status
+Set one key:
 
-Early implementation. The repository is being built incrementally with real integrations and tests rather than placeholder data.
+- `HANDELO_API_KEY=...` (or `API_KEY=...`)
 
-## Product
+Handelo recognizes Groq, OpenAI, and Anthropic keys automatically and chooses a hardcoded supported model for the detected provider. No model dropdown is required.
 
-**EquityFence**  
-*An equity circuit breaker for tokenized assets.*
+For the current Groq path, the implementation uses `openai/gpt-oss-120b`, which supports tool use and structured output. cite_note_not_applicable
+
+## Binance Web3
+
+Set:
+
+- `BINANCE_WEB3_API_KEY=...`
+- `BINANCE_WEB3_SECRET_KEY=...`
+
+Do not commit secrets.
+
+## Run the agent
+
+```bash
+pnpm install
+pnpm --filter @handelo/api dev
+```
+
+Then:
+
+```bash
+curl -X POST http://localhost:8787/api/chat \
+  -H "content-type: application/json" \
+  -d '{"message":"I have $20. Tell me what is happening with NVIDIA."}'
+```
+
+## Build direction
+
+Handelo will grow in this order:
+
+1. market intelligence
+2. portfolio understanding
+3. decision and safety layer
+4. real BSC execution
+5. agent wallet integration
+6. MCP and SDK
+7. Telegram
+8. premium web product and storytelling landing page
+9. live demo and developer-experience documentation
+
+The legacy EquityFence modules are being audited and replaced selectively rather than carried forward as a separate product.
+
+## Security principle
+
+The language model does not receive private keys. AI decides *what the user is asking* and *what market context means*; deterministic application code and the wallet/execution layer remain responsible for transaction construction, policy checks, signing, and verification.
