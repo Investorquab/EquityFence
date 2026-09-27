@@ -41,6 +41,19 @@ test("failed simulation becomes block", async () => {
   assert.equal(result.simulation?.failReason, "simulation failed");
 });
 
+test("simulation error fails closed", async () => {
+  const sim = {
+    simulateTransaction: async () => {
+      throw new Error("Binance simulation unavailable");
+    },
+  };
+  const result = await simulateIfAllowed(sim, { decision: "ALLOW", reasons: [] }, tx);
+  assert.equal(result.assessment.decision, "BLOCK");
+  assert.equal(result.simulation, null);
+  assert.match(result.assessment.reasons[0] ?? "", /simulation was unavailable/);
+  assert.match(result.assessment.reasons[1] ?? "", /Binance simulation unavailable/);
+});
+
 test("blocked assessment skips simulator", async () => {
   const sim = simulator();
   const result = await simulateIfAllowed(sim, { decision: "BLOCK", reasons: ["state changed"] }, tx);
