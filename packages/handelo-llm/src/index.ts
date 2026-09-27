@@ -28,7 +28,7 @@ function providerFromKey(key: string): LlmProvider {
 
 function jsonText(value: unknown): string {
   const text = typeof value === "string" ? value : JSON.stringify(value);
-  const fenced = text.match(/\`\`\`(?:json)?\\s*([\\s\\S]*?)\`\`\`/i);
+  const fenced = text.match(/```(?:json)?\s*([\s\S]*?)```/i);
   return (fenced?.[1] ?? text).trim();
 }
 
