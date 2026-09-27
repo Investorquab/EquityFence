@@ -59,24 +59,37 @@ export async function simulateIfAllowed(
     return { assessment, simulation: null };
   }
 
-  const simulation = await simulationSource.simulateTransaction(request);
+  try {
+    const simulation = await simulationSource.simulateTransaction(request);
 
-  if (simulation.status !== "SUCCESS") {
+    if (simulation.status !== "SUCCESS") {
+      return {
+        assessment: {
+          decision: "BLOCK",
+          reasons: [
+            "The transaction passed the economic-state risk gate but failed simulation.",
+            simulation.failReason
+              ? "Simulation failure: " + simulation.failReason
+              : "The simulator did not report SUCCESS.",
+          ],
+        },
+        simulation,
+      };
+    }
+
+    return { assessment, simulation };
+  } catch (error) {
     return {
       assessment: {
         decision: "BLOCK",
         reasons: [
-          "The transaction passed the economic-state risk gate but failed simulation.",
-          simulation.failReason
-            ? "Simulation failure: " + simulation.failReason
-            : "The simulator did not report SUCCESS.",
+          "The transaction passed the economic-state risk gate but simulation was unavailable.",
+          "Simulation error: " + (error instanceof Error ? error.message : String(error)),
         ],
       },
-      simulation,
+      simulation: null,
     };
   }
-
-  return { assessment, simulation };
 }
 
 function toSnapshot(asset: RwaToken): StateSnapshot {
