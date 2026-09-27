@@ -32,7 +32,7 @@ Set one key:
 
 Handelo recognizes Groq, OpenAI, and Anthropic keys automatically and chooses a hardcoded supported model for the detected provider. No model dropdown is required.
 
-For the current Groq path, the implementation uses `openai/gpt-oss-120b`, which supports tool use and structured output. cite_note_not_applicable
+The current Groq path uses `openai/gpt-oss-120b`.
 
 ## Binance Web3
 
