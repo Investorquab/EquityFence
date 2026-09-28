@@ -170,3 +170,10 @@ test("disabled follow-up actions have a waiting state", () => {
   assert.match(styles, /\.secondary-button:disabled/);
   assert.match(styles, /cursor:wait/);
 });
+
+
+test("disabled primary actions have a waiting state", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.primary-button:disabled/);
+  assert.match(styles, /cursor:wait/);
+});
