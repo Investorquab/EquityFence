@@ -19,17 +19,15 @@ async function handle(message:JsonRpc){
   if(message.method==="tools/list") return reply(message.id,{tools});
   if(message.method!=="tools/call") return error(message.id,-32601,"Method not found");
   const name=String(message.params?.name??"");
-  const args=(message.params?.arguments??{}) as Record<string,unknown>;
+  const args=message.params?.arguments;
   try{
     if(name==="handelo_market_lookup"){
-      const ticker=String(args.ticker??"").trim();
-      if(!ticker) throw new Error("ticker is required");
+      const ticker=readTicker(args);
       const asset=await market.find(ticker);
       return reply(message.id,{content:[{type:"text",text:JSON.stringify({ticker:asset.underlyingTicker,tokenSymbol:asset.tokenSymbol,provider:asset.platformId,tokenPrice:asset.tokenPrice,referencePrice:asset.referencePrice,market:asset.statusInfo,contract:asset.tokenContractAddress},null,2)}]});
     }
     if(name==="handelo_market_search"){
-      const ticker=String(args.ticker??"").trim();
-      if(!ticker) throw new Error("ticker is required");
+      const ticker=readTicker(args);
       const results=await market.search(ticker);
       return reply(message.id,{content:[{type:"text",text:JSON.stringify(results,null,2)}]});
     }
