@@ -131,16 +131,18 @@ function addReviewCard(data, amountUsd) {
       <span>SECURITY</span>
       <strong>${escapeHtml(securityLabel)}${security?.riskLevel !== undefined ? ` · LEVEL ${escapeHtml(security.riskLevel)}` : ""}</strong>
     </div>
+    <div class="review-checks">
+      <div class="review-checks-head"><span>POLICY CHECKS</span><span>${(policy.checks || []).filter(check => check.passed).length}/${(policy.checks || []).length} passed</span></div>
+      <div class="review-check-list">
+        ${(policy.checks || []).map(check => `<div class="review-check ${check.passed ? "passed" : "warning"}"><span>${check.passed ? "✓" : "!"}</span><div><strong>${escapeHtml(check.name.replaceAll("_", " ").toUpperCase())}</strong><small>${escapeHtml(check.detail)}</small></div></div>`).join("")}
+      </div>
+    </div>
     <div class="review-reasons">
       ${(policy.reasons || []).map(reason => `<div>• ${escapeHtml(reason)}</div>`).join("")}
       ${data.securityAuditError ? `<div class="review-warning">• ${escapeHtml(data.securityAuditError)}</div>` : ""}
       ${security?.riskLevel !== undefined && security.riskLevel >= 4 ? `<div class="review-warning">• Binance security audit reports high risk. Execution is blocked.</div>` : ""}
       ${data.quoteError ? `<div class="review-warning">• ${escapeHtml(data.quoteError)}</div>` : ""}
-    </div>
-    <div class="review-actions">
-      <button type="button" class="secondary-action" data-cancel>Cancel</button>
-      <button type="button" class="primary-action" data-confirm ${decision === "BLOCK" || !quote || securityBlocked ? "disabled" : ""}>Confirm purchase</button>
-    </div>`;
+    </div>;
 
   card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
   card.querySelector("[data-confirm]").addEventListener("click", () => confirmTrade(data, amountUsd, card));
