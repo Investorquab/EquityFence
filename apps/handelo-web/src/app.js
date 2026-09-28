@@ -187,6 +187,8 @@ function addExecutionResult(data) {
   const result = data.result || {};
   const node = document.createElement("article");
   node.className = "execution-result";
+  node.setAttribute("role", "status");
+  node.setAttribute("aria-live", "polite");
   const ticker = escapeHtml(data.asset?.ticker || "Asset");
   const orderId = escapeHtml(result.orderId || "—");
   const receivedAmount = result.toCoinAmount ? escapeHtml(result.toCoinAmount) : null;
