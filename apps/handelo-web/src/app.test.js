@@ -268,3 +268,10 @@ test("disabled execution follow-up actions signal disabled state", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /cursor:not-allowed/);
 });
+
+
+test("disabled execution follow-up actions prevent text selection", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /user-select:none/);
+});
