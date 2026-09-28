@@ -22,7 +22,7 @@ BNB Chain / Binance Web3 infrastructure
 
 The repository now contains a provider-agnostic LLM layer, a live Binance Web3 tokenized-stock market client, and a Handelo agent API.
 
-The agent accepts a normal-language request, resolves the relevant BSC tokenized-stock record, and explains the market state using live data.
+The agent accepts a normal-language request, resolves the relevant BSC tokenized-stock record, or discovers live BSC candidates when the user has not named a stock, and explains the market state using live data.\n\nPortfolio data is exposed through `GET /api/portfolio?wallet=...` and the developer surface is available through the read-only Handelo MCP server and `@handelo/sdk`.
 
 ## AI provider
 
@@ -63,14 +63,14 @@ curl -X POST http://localhost:8787/api/chat \
 Handelo will grow in this order:
 
 1. market intelligence
-2. portfolio understanding
-3. decision and safety layer
-4. real BSC execution
-5. agent wallet integration
-6. MCP and SDK
-7. Telegram
-8. premium web product and storytelling landing page
-9. live demo and developer-experience documentation
+2. portfolio understanding\n3. market discovery and candidate analysis
+4. decision and safety layer
+5. real BSC execution
+6. agent wallet integration
+7. MCP and SDK
+8. Telegram
+9. premium web product and storytelling landing page
+10. live demo and developer-experience documentation
 
 The legacy EquityFence modules are being audited and replaced selectively rather than carried forward as a separate product.
 
