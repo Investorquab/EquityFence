@@ -161,6 +161,7 @@ async function confirmTrade(data, amountUsd, card) {
         ticker: data.asset.ticker,
         amountUsd,
         fromToken: data.quoteToken,
+        reviewToken: data.reviewToken,
         confirmed: true
       })
     });
