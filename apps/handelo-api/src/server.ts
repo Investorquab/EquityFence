@@ -57,6 +57,14 @@ async function verifyWalletAuth(qrCodeId: string) {
   }
 }
 
+function parseJsonBody<T>(raw: string): T {
+  try {
+    return JSON.parse(raw) as T;
+  } catch {
+    throw new SyntaxError("Request body must be valid JSON.");
+  }
+}
+
 function marketErrorStatus(error: unknown): 404 | 409 | 503 | null {
   if (error instanceof MarketResolutionError) return error.kind === "NOT_FOUND" ? 404 : 409;
   if (error instanceof MarketUpstreamError) return 503;
@@ -191,13 +199,13 @@ const server = createServer(async (req, res) => {
     try {
       let raw = "";
       for await (const chunk of req) raw += chunk;
-      const body = JSON.parse(raw) as {
+      const body = parseJsonBody<{
         ticker?: unknown;
         amountUsd?: unknown;
         action?: unknown;
         fromToken?: unknown;
         slippage?: unknown;
-      };
+      }>(raw);
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const amountUsd = Number(body.amountUsd);
@@ -298,7 +306,7 @@ const server = createServer(async (req, res) => {
         }) : null
       });
     } catch (error) {
-      const status = marketErrorStatus(error);
+      const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
@@ -379,7 +387,7 @@ const server = createServer(async (req, res) => {
         slippage?: unknown;
         confirmed?: unknown;
         reviewToken?: unknown;
-      };
+      }>(raw);
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const fromToken = String(body.fromToken ?? "").trim();
@@ -486,7 +494,7 @@ const server = createServer(async (req, res) => {
   try {
     let raw = "";
     for await (const chunk of req) raw += chunk;
-    const body = JSON.parse(raw) as { message?: unknown };
+    const body = parseJsonBody<{ message?: unknown }>(raw);
 
     if (typeof body.message !== "string" || !body.message.trim()) {
       return json(res, 400, { error: "message is required" });
