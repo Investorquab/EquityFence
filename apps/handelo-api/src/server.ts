@@ -87,6 +87,12 @@ function marketErrorStatus(error: unknown): 404 | 409 | 503 | null {
   return null;
 }
 
+function requestBodyErrorStatus(error: unknown): 400 | 413 | null {
+  if (error instanceof SyntaxError) return 400;
+  if (error instanceof RangeError) return 413;
+  return null;
+}
+
 function errorMessage(error: unknown): string {
   return error instanceof Error ? error.message : String(error);
 }
@@ -324,7 +330,7 @@ const server = createServer(async (req, res) => {
         }) : null
       });
     } catch (error) {
-      const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
+      const status = requestBodyErrorStatus(error) ?? marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
