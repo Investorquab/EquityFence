@@ -317,12 +317,17 @@ async function connectWallet() {
 
     showWalletAuth(data);
     const poll = setInterval(async () => {
-      const statusResponse = await fetch(API_BASE + "/api/wallet/status");
-      const status = await statusResponse.json();
-      if (status.status === "CONNECTED") {
+      const authResponse = await fetch(API_BASE + "/api/wallet/auth");
+      const auth = await authResponse.json();
+
+      if (auth.status === "SUCCESS") {
         clearInterval(poll);
         closeWalletAuth();
         await refreshWalletStatus();
+      } else if (auth.status === "FAILED") {
+        clearInterval(poll);
+        closeWalletAuth();
+        addAgentMessage({ answer: `Wallet connection failed: ${auth.error || "The wallet did not complete authentication."}` });
       }
     }, 2500);
 
