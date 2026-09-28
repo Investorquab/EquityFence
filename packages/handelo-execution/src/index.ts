@@ -1,31 +1,73 @@
-import { createHmac, randomUUID } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+import { randomUUID } from "node:crypto";
+
+const execFileAsync=promisify(execFile);
 
 export interface EvmTransaction{from:string;to:string;value:string;data?:string;}
 export interface SimulationResult{status:string;failReason:string|null;balanceChanges:Array<{contractAddress:string;tokenType:string;change:string;owner:string}>;allowanceChanges:Array<{tokenAddress:string;owner:string;spender:string;preAmount:string;postAmount:string}>;}
-export interface ExecutionAdapter{
-  simulate(tx:EvmTransaction):Promise<SimulationResult>;
-  execute(tx:EvmTransaction):Promise<{txHash:string}>;
+export interface ExecutionAdapter{simulate(tx:EvmTransaction):Promise<SimulationResult>;execute(tx:EvmTransaction):Promise<{txHash:string}>;}
+
+export interface WalletSwapRequest{
+  fromTokenQty:string;fromToken:string;toToken:string;binanceChainId:"56";
+  slippage?:string;mev?:boolean;gasLevel?:"LOW"|"MEDIUM"|"HIGH";
+}
+export interface WalletQuote{fromCoinSymbol:string;fromCoinAmount:string;toCoinSymbol:string;toCoinAmount:string;slippage:number;}
+export interface WalletOrder{orderId:string;status:"PENDING"|"FINISHED"|"FAILED";txHash:string|null;toCoinAmount?:string;}
+interface BawEnvelope<T>{success:boolean;data:T;message?:string;code?:string|number;}
+
+async function baw<T>(args:string[]):Promise<T>{
+  try{
+    const {stdout,stderr}=await execFileAsync("baw",[...args,"--json"],{maxBuffer:1024*1024});
+    const raw=(stdout||stderr).trim();
+    const payload=JSON.parse(raw) as BawEnvelope<T>;
+    if(!payload.success) throw new Error(payload.message??"Binance Agentic Wallet command failed.");
+    return payload.data;
+  }catch(error){
+    if(error instanceof SyntaxError) throw new Error("Binance Agentic Wallet returned non-JSON output.");
+    const message=error instanceof Error?error.message:String(error);
+    if(message.includes("ENOENT")) throw new Error("Binance Agentic Wallet CLI (baw) is not installed or is not on PATH.");
+    throw new Error(message);
+  }
+}
+
+async function auditToken(chainId:string,contractAddress:string){
+  const response=await fetch("https://web3.binance.com/bapi/defi/v1/public/wallet-direct/security/token/audit",{
+    method:"POST",headers:{"content-type":"application/json"},
+    body:JSON.stringify({binanceChainId:chainId,contractAddress,requestId:randomUUID()})
+  });
+  const payload=await response.json() as {code:string|number;data:{hasResult:boolean;isSupported:boolean;riskLevel?:string;extraInfo?:{buyTax?:string;sellTax?:string};riskItems?:unknown[]};success:boolean;message?:string};
+  if(!response.ok||!payload.success) throw new Error(payload.message??"Token security audit failed.");
+  return payload.data;
+}
+
+export class BinanceAgenticWalletAdapter{
+  async quote(request:WalletSwapRequest):Promise<WalletQuote>{
+    return baw<WalletQuote>(["market-order","quote","--fromTokenQty",request.fromTokenQty,"--fromToken",request.fromToken,"--toToken",request.toToken,"--binanceChainId",request.binanceChainId,...(request.slippage?["--slippage",request.slippage]:[])]);
+  }
+
+  async execute(request:WalletSwapRequest,confirmed:boolean):Promise<WalletOrder>{
+    if(!confirmed) throw new Error("Execution requires explicit user confirmation.");
+    const audit=await auditToken(request.binanceChainId,request.toToken);
+    if(!audit.hasResult||!audit.isSupported) throw new Error("Token security audit data is unavailable for the requested token; execution is blocked.");
+    await baw(["wallet","status"]);
+    const order=await baw<{orderId:string}>(["market-order","swap","--fromTokenQty",request.fromTokenQty,"--fromToken",request.fromToken,"--toToken",request.toToken,"--binanceChainId",request.binanceChainId,...(request.slippage?["--slippage",request.slippage]:[]),...(request.mev===undefined?[]:["--mev",String(request.mev)]),...(request.gasLevel?["--gasLevel",request.gasLevel]:[])]);
+    for(let i=0;i<10;i++){
+      await new Promise(resolve=>setTimeout(resolve,3000));
+      const result=await baw<{list:Array<{orderId:string;status:"PENDING"|"FINISHED"|"FAILED";txHash:string|null;toCoinActualQty?:string}>>>(["market-order","list","--orderId",order.orderId,"--binanceChainId",request.binanceChainId]);
+      const current=result.list?.[0];
+      if(!current) continue;
+      if(current.status==="FINISHED") return {orderId:current.orderId,status:current.status,txHash:current.txHash,toCoinAmount:current.toCoinActualQty};
+      if(current.status==="FAILED") return {orderId:current.orderId,status:current.status,txHash:current.txHash};
+    }
+    return {orderId:order.orderId,status:"PENDING",txHash:null};
+  }
 }
 
 export class BinanceSimulationAdapter implements ExecutionAdapter{
   constructor(private readonly apiKey:string,private readonly secretKey:string){}
-  private async simulateRequest(tx:EvmTransaction){
-    const body=JSON.stringify({binanceChainId:"56",evmTx:tx});
-    const path="/api/v1/dex/pre-transaction/simulate",timestamp=new Date().toISOString(),nonce=randomUUID();
-    const signature=createHmac("sha256",this.secretKey).update(timestamp+"POST"+"/build"+path+body).digest("base64");
-    const response=await fetch("https://web3.binance.com/build"+path,{method:"POST",headers:{"content-type":"application/json","X-OC-APIKEY":this.apiKey,"X-OC-TIMESTAMP":timestamp,"X-OC-SIGN":signature,"X-OC-RECV-WINDOW":"5000","X-OC-NONCE":nonce},body});
-    const payload=await response.json() as {code:number;msg:string;data:SimulationResult;success:boolean};
-    if(!response.ok||!payload.success||payload.code!==0) throw new Error(`Simulation failed ${response.status}/${payload.code}: ${payload.msg}`);
-    return payload.data;
+  async simulate(_tx:EvmTransaction):Promise<SimulationResult>{
+    throw new Error("Use the Binance Agentic Wallet quote path for execution review; direct transaction simulation remains a separate safety service.");
   }
-  simulate(tx:EvmTransaction){return this.simulateRequest(tx);}
-  async execute(_tx:EvmTransaction):Promise<{txHash:string}>{
-    throw new Error("No broadcast adapter is configured. Handelo will only execute after the Agentic Wallet boundary is connected.");
-  }
-}
-
-export function simulationAdapterFromEnv(){
-  const key=process.env.BINANCE_WEB3_API_KEY?.trim()??"",secret=process.env.BINANCE_WEB3_SECRET_KEY?.trim()??"";
-  if(!key||!secret) throw new Error("BINANCE Web3 credentials are required for transaction simulation.");
-  return new BinanceSimulationAdapter(key,secret);
+  async execute(_tx:EvmTransaction):Promise<{txHash:string}>{throw new Error("Direct execution is disabled; use BinanceAgenticWalletAdapter.");}
 }
