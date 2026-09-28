@@ -104,6 +104,7 @@ function addReviewCard(data, amountUsd) {
   const securityLabel = securityBlocked ? "EXECUTION BLOCKED" : security?.riskLevelEnum ? `SECURITY ${security.riskLevelEnum}` : "SECURITY CHECKED";
   const decision = policy.decision || "BLOCK";
   const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
+  const canConfirm = decision !== "BLOCK" && !securityBlocked && Boolean(data.reviewToken && quote);
   const quoteLine = quote
     ? `${escapeHtml(quote.fromCoinSymbol)} ${escapeHtml(quote.fromCoinAmount)} → ${escapeHtml(quote.toCoinAmount)} ${escapeHtml(quote.toCoinSymbol)}`
     : "Live quote unavailable until the Agentic Wallet is connected.";
@@ -142,6 +143,10 @@ function addReviewCard(data, amountUsd) {
       ${data.securityAuditError ? `<div class="review-warning">• ${escapeHtml(data.securityAuditError)}</div>` : ""}
       ${security?.riskLevel !== undefined && security.riskLevel >= 4 ? `<div class="review-warning">• Binance security audit reports high risk. Execution is blocked.</div>` : ""}
       ${data.quoteError ? `<div class="review-warning">• ${escapeHtml(data.quoteError)}</div>` : ""}
+    </div>
+    <div class="review-actions">
+      <button type="button" class="secondary-button" data-cancel>Cancel</button>
+      <button type="button" class="primary-button" data-confirm ${canConfirm ? "" : "disabled"}>${canConfirm ? "Confirm purchase" : "Execution blocked"}</button>
     </div>`;
 
   card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
