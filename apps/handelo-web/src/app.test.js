@@ -97,3 +97,10 @@ test("history follow-up action disables itself before navigation", () => {
   assert.match(source, /\.disabled = true/);
   assert.match(source, /showView\("history"\)/);
 });
+
+
+test("portfolio refresh action exposes loading state", () => {
+  assert.match(source, /event\.currentTarget/);
+  assert.match(source, /aria-busy/);
+  assert.match(source, /showView\("portfolio"\)/);
+});
