@@ -376,10 +376,6 @@ const server = createServer(async (req, res) => {
           error: "ticker, positive amountUsd, fromToken, and reviewToken are required"
         });
       }
-        return json(res, 400, {
-          error: "ticker, positive amountUsd, and fromToken are required"
-        });
-      }
 
       if (fromToken.toLowerCase() !== DEFAULT_BSC_QUOTE_TOKEN.toLowerCase()) {
         return json(res, 400, { error: "Handelo's USD-notional execution path currently requires the BSC USDT quote token." });
