@@ -187,6 +187,10 @@ function addExecutionResult(data) {
   const result = data.result || {};
   const node = document.createElement("article");
   node.className = "execution-result";
+  const ticker = escapeHtml(data.asset?.ticker || "Asset");
+  const orderId = escapeHtml(result.orderId || "—");
+  const receivedAmount = result.toCoinAmount ? escapeHtml(result.toCoinAmount) : null;
+
   if (result.status === "FINISHED") {
     const txHash = String(result.txHash || "");
     const validTxHash = /^0x[a-fA-F0-9]{64}$/.test(txHash);
@@ -198,7 +202,9 @@ function addExecutionResult(data) {
       <div>
         <div class="message-label">EXECUTION CONFIRMED</div>
         <h3>Purchase complete.</h3>
-        <p>${escapeHtml(data.asset?.ticker || "Asset")} was purchased through the Agentic Wallet.</p>
+        <p>${ticker} was purchased through the Agentic Wallet.</p>
+        ${receivedAmount ? `<div class="execution-meta"><span>RECEIVED</span><strong>${receivedAmount} ${escapeHtml(result.toCoinSymbol || data.asset?.tokenSymbol || "")}</strong></div>` : ""}
+        <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
         ${txLink}
       </div>`;
   } else if (result.status === "PENDING") {
@@ -208,6 +214,7 @@ function addExecutionResult(data) {
         <div class="message-label">EXECUTION PENDING</div>
         <h3>Still processing.</h3>
         <p>The order was submitted, but Handelo has not received a terminal result yet.</p>
+        <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
       </div>`;
   } else {
     node.innerHTML = `
@@ -216,6 +223,7 @@ function addExecutionResult(data) {
         <div class="message-label">EXECUTION FAILED</div>
         <h3>The purchase did not complete.</h3>
         <p>Handelo received a terminal failure from the execution layer.</p>
+        <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
       </div>`;
   }
   conversation.appendChild(node);
