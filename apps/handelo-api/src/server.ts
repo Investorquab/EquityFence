@@ -179,6 +179,11 @@ const server = createServer(async (req, res) => {
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const amountUsd = Number(body.amountUsd);
       const action = body.action === "sell" ? "sell" : body.action === "invest" ? "invest" : "buy";
+      const executableAction = (await import("@handelo/policy")).executionAction(action);
+
+      if (!executableAction) {
+        return json(res, 400, { error: "Handelo execution currently supports buy/invest only. Sell execution is not enabled." });
+      }
 
       if (!ticker || !Number.isFinite(amountUsd) || amountUsd <= 0) {
         return json(res, 400, { error: "ticker and positive amountUsd are required" });
