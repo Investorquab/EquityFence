@@ -131,7 +131,7 @@ export class HandeloAgent {
 
     if (parsedIntent.ticker) {
       try {
-        const matches = await this.market.findAll(intent.ticker);
+        const matches = await this.market.findAll(parsedIntent.ticker);
         const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === parsedIntent.ticker!.trim().toLowerCase());
         if (exact.length === 1) {
           market = marketBrief(exact[0]);
