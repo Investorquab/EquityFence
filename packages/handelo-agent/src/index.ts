@@ -3,7 +3,7 @@ import { HandeloMarketClient, marketClientFromEnv, type RwaAsset } from "@handel
 
 export interface UserIntent { action:"research"|"buy"|"sell"|"invest"; ticker:string|null; amountUsd:number|null; horizon:string|null; riskTolerance:"low"|"medium"|"high"|"unknown"; }
 export interface MarketBrief { ticker:string; tokenSymbol:string; provider:string; tokenPrice:string; referencePrice:string; premiumPct:number|null; marketStatus:string; marketOpen:boolean; reason:string|null; nextOpenTime:number|null; nextCloseTime:number|null; contract:string; }
-export interface AgentResult { intent:UserIntent; market:MarketBrief|null; policy:PolicyResult|null; answer:string; provider:string; model:string; }
+export interface AgentResult { intent:UserIntent; market:MarketBrief|null; candidates:MarketBrief[]; policy:PolicyResult|null; answer:string; provider:string; model:string; }
 
 const INTENT_SCHEMA={type:"object",properties:{
   action:{type:"string",enum:["research","buy","sell","invest"]},
@@ -34,8 +34,8 @@ export class HandeloAgent {
       const asset=await this.market.find(intent.ticker);
       market=marketBrief(asset);
     }
-    const policy=market ? evaluatePolicy({action:intent.action,amountUsd:intent.amountUsd,marketOpen:market.marketOpen,premiumPct:market.premiumPct}) : null;\n    const context=market ? JSON.stringify({market,policy},null,2) : "No specific stock market record was resolved.";
+    const policy=market ? evaluatePolicy({action:intent.action,amountUsd:intent.amountUsd,marketOpen:market.marketOpen,premiumPct:market.premiumPct}) : null;\n    const context=market ? JSON.stringify({market,policy},null,2) : candidates.length ? JSON.stringify({candidateMarkets:candidates},null,2) : "No specific stock market record was resolved.";
     const response=await this.llm.generateJson<{answer:string}>({schemaName:"handelo_response",schema:RESPONSE_SCHEMA,system:"You are Handelo, a beginner-friendly tokenized-stock market agent on BNB Chain. Explain market structure in simple language. Never claim a trade happened unless execution evidence is supplied. If the market is closed, explain that the on-chain token may still trade while the latest reference price is stale. Mention the on-chain/reference gap when available. Do not give personalized certainty; present observations and let the user decide.",user:`User request: ${message}\nParsed intent: ${JSON.stringify(intent)}\nLive market context: ${context}\nRespond naturally and concisely.`});
-    return {intent,market,policy,answer:response.answer,provider:this.llm.provider,model:this.llm.model};
+    return {intent,market,candidates,policy,answer:response.answer,provider:this.llm.provider,model:this.llm.model};
   }
 }
