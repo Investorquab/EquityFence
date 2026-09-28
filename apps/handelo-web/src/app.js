@@ -206,6 +206,7 @@ function addExecutionResult(data) {
         ${receivedAmount ? `<div class="execution-meta"><span>RECEIVED</span><strong>${receivedAmount} ${escapeHtml(result.toCoinSymbol || data.asset?.tokenSymbol || "")}</strong></div>` : ""}
         <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
         ${txLink}
+        <div class="execution-actions"><button type="button" class="primary-button" data-refresh-portfolio>Refresh portfolio</button></div>
       </div>`;
   } else if (result.status === "PENDING") {
     node.innerHTML = `
@@ -227,6 +228,11 @@ function addExecutionResult(data) {
       </div>`;
   }
   conversation.appendChild(node);
+  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => {
+    document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === "portfolio"));
+    document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-portfolio"));
+    loadPortfolio();
+  });
   scrollConversation();
 }
 
