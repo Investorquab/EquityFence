@@ -303,6 +303,7 @@ button{cursor:pointer}
 .execution-actions button:disabled{border-color:transparent}
 .execution-actions button:disabled{background-color:transparent}
 .execution-actions button:disabled{color:var(--faint)}
+.execution-actions button:disabled{color:var(--faint)}
 .execution-actions button:disabled{user-select:none}
 .execution-actions button:disabled{transition:none}
 .execution-actions button:disabled{transform:none!important}
