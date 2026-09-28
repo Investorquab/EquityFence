@@ -216,7 +216,7 @@ function renderMarketContext(container, market) {
   const status = market.marketOpen ? "LIVE" : "CLOSED";
   container.innerHTML = `
     <div class="context-head">
-      <div class="context-name">${market.ticker} <span style="color:#5d5a53">/ ${market.tokenSymbol}</span></div>
+      <div class="context-name">${escapeHtml(market.ticker)} <span style="color:#5d5a53">/ ${escapeHtml(market.tokenSymbol)}</span></div>
       <div class="context-status ${market.marketOpen ? "" : "closed"}">${status} · BSC</div>
     </div>
     <div class="context-body">
