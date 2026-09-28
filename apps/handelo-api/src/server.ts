@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
-import { marketClientFromEnv } from "@handelo/market";
+import { isExecutableMarketAsset, marketClientFromEnv } from "@handelo/market";
 import { auditToken } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 
@@ -190,6 +190,9 @@ const server = createServer(async (req, res) => {
       }
 
       const asset = await market.find(ticker);
+      if (!isExecutableMarketAsset(asset)) {
+        return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so Handelo will not create an executable review." });
+      }
       const premiumPct = (() => {
         const token = Number(asset.tokenPrice);
         const reference = Number(asset.referencePrice);
@@ -363,6 +366,9 @@ const server = createServer(async (req, res) => {
       }
 
       const asset = await market.find(ticker);
+      if (!isExecutableMarketAsset(asset)) {
+        return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so execution is blocked." });
+      }
       const slippage = typeof body.slippage === "string" && body.slippage.trim() ? body.slippage.trim() : undefined;
 
       if (!verifyReviewToken(reviewToken, {
