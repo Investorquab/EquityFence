@@ -6,7 +6,7 @@ import type { HandeloMarketClient } from "@handelo/market";
 
 const asset={
   binanceChainId:"56",tokenContractAddress:"0x0000000000000000000000000000000000000001",
-  platformId:"ondo",tokenSymbol:"NVDAon",underlyingTicker:"NVDA",underlyingName:"NVIDIA",
+  platformId:"ondo",tokenSymbol:"NVDAon",decimals:"18",underlyingTicker:"NVDA",underlyingName:"NVIDIA",
   tokenToShareRatio:"1",tokenPrice:"120",referencePrice:"125",volume24H:"1000",marketCap:"1000000",
   statusInfo:{openState:false,marketStatus:"closed",reasonCode:"MARKET_CLOSED",reasonMsg:"US market closed",nextOpenTime:null,nextCloseTime:null}
 };
