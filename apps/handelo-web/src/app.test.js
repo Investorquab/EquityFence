@@ -133,3 +133,9 @@ test("portfolio refresh progress has an accessible label", () => {
 test("history navigation progress has an accessible label", () => {
   assert.match(source, /aria-label\", \"Opening transaction history/);
 });
+
+
+test("history navigation marks itself busy while opening", () => {
+  assert.match(source, /data-navigation-busy/);
+  assert.match(source, /aria-busy/);
+});
