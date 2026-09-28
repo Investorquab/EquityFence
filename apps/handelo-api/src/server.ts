@@ -326,6 +326,13 @@ const server = createServer(async (req, res) => {
       });
     }
 
+    const reviewTokenSecret = process.env.HANDELO_REVIEW_TOKEN_SECRET?.trim();
+    if (!reviewTokenSecret || reviewTokenSecret === "handelo-local-review-secret") {
+      return json(res, 503, {
+        error: "Execution is unavailable until HANDELO_REVIEW_TOKEN_SECRET is configured to a non-default value."
+      });
+    }
+
     try {
       let raw = "";
       for await (const chunk of req) raw += chunk;
