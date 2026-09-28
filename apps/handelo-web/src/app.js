@@ -245,7 +245,16 @@ function renderCandidates(container, candidates) {
     </div>`;
 }
 
-function safeExternalUrl(value) {\n  try {\n    const url = new URL(String(value || ""));\n    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "#";\n  } catch {\n    return "#";\n  }\n}\n\nfunction escapeHtml(value) {
+function safeExternalUrl(value) {
+  try {
+    const url = new URL(String(value || ""));
+    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "#";
+  } catch {
+    return "#";
+  }
+}
+
+function escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[char]));
