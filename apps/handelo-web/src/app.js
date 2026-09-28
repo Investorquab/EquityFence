@@ -73,8 +73,11 @@ function addReviewPrompt(market, amountUsd, action) {
 }
 
 async function reviewTrade(ticker, amountUsd, action, promptNode) {
-  promptNode.querySelector("button").disabled = true;
-  promptNode.querySelector("button").textContent = "Checking";
+  const button = promptNode.querySelector("button");
+  button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.setAttribute("aria-label", "Checking transaction review");
+  button.textContent = "Checking";
 
   try {
     const response = await fetch(API_BASE + "/api/review", {
@@ -87,8 +90,10 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
     promptNode.remove();
     addReviewCard(data, amountUsd);
   } catch (error) {
-    promptNode.querySelector("button").disabled = false;
-    promptNode.querySelector("button").textContent = "Review";
+    button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.removeAttribute("aria-label");
+    button.textContent = "Review";
     addAgentMessage({ answer: `I could not complete the transaction review. ${error.message}` });
   }
 }
@@ -158,6 +163,8 @@ function addReviewCard(data, amountUsd) {
 async function confirmTrade(data, amountUsd, card) {
   const button = card.querySelector("[data-confirm]");
   button.disabled = true;
+  button.setAttribute("aria-busy", "true");
+  button.setAttribute("aria-label", "Executing purchase");
   button.textContent = "Executing";
 
   try {
@@ -178,6 +185,8 @@ async function confirmTrade(data, amountUsd, card) {
     addExecutionResult(result);
   } catch (error) {
     button.disabled = false;
+    button.removeAttribute("aria-busy");
+    button.removeAttribute("aria-label");
     button.textContent = "Confirm purchase";
     addAgentMessage({ answer: `The transaction was not completed. ${error.message}` });
   }
