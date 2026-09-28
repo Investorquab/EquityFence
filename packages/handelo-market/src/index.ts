@@ -2,7 +2,7 @@ import { createHmac, randomUUID } from "node:crypto";
 
 export interface TokenBalance { assetId:string; wallet:string; rawBalance:string; decimals:number; }\n\nexport interface RwaAsset {
   binanceChainId:string; tokenContractAddress:string; platformId:string;
-  tokenSymbol:string; underlyingTicker:string; underlyingName:string;
+  tokenSymbol:string; decimals:string; underlyingTicker:string; underlyingName:string;
   tokenToShareRatio:string; tokenPrice:string; referencePrice:string;
   volume24H:string; marketCap:string;
   statusInfo:{openState:boolean;marketStatus:string;reasonCode:string;reasonMsg:string|null;nextOpenTime:number|null;nextCloseTime:number|null};
