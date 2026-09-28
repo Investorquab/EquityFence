@@ -375,10 +375,6 @@ const server = createServer(async (req, res) => {
         return json(res, 409, { error: "This transaction no longer matches the reviewed trade or the review has expired. Start a new review." });
       }
 
-      if (!consumeReviewToken(reviewToken)) {
-        return json(res, 409, { error: "This reviewed transaction has already been used. Start a new review before executing again." });
-      }
-
       const tokenPrice = Number(asset.tokenPrice);
       const referencePrice = Number(asset.referencePrice);
       const premiumPct = Number.isFinite(tokenPrice) && Number.isFinite(referencePrice) && referencePrice !== 0
@@ -412,6 +408,10 @@ const server = createServer(async (req, res) => {
         binanceChainId: "56",
         slippage: typeof body.slippage === "string" ? body.slippage : undefined
       });
+
+      if (!consumeReviewToken(reviewToken)) {
+        return json(res, 409, { error: "This reviewed transaction has already been used. Start a new review before executing again." });
+      }
 
       const result = await wallet.execute(
         {
