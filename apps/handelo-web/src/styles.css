@@ -261,6 +261,16 @@ button{cursor:pointer}
 .review-grid strong{display:block;margin-top:7px;font:11px var(--mono);font-weight:400;color:#ddd7cd}
 .review-quote{display:grid;gap:8px;padding:16px 0;border-bottom:1px solid var(--line)}
 .review-quote strong{font:11px var(--mono);font-weight:400;color:#d4cfc5}
+.review-checks{padding:15px 0;border-bottom:1px solid var(--line)}
+.review-checks-head{display:flex;justify-content:space-between;gap:12px;margin-bottom:10px;font:9px var(--mono);letter-spacing:.06em;color:var(--faint)}
+.review-check-list{display:grid;gap:7px}
+.review-check{display:grid;grid-template-columns:20px 1fr;gap:9px;align-items:start;padding:9px 10px;border:1px solid var(--line);border-radius:9px;background:rgba(255,255,255,.018)}
+.review-check>span{width:18px;height:18px;display:grid;place-items:center;border-radius:50%;font:10px var(--mono)}
+.review-check.passed>span{color:var(--green);background:rgba(87,211,155,.08)}
+.review-check.warning>span{color:var(--gold);background:rgba(240,185,11,.08)}
+.review-check strong{display:block;font:9px var(--mono);letter-spacing:.05em;color:#ddd7cd}
+.review-check small{display:block;margin-top:4px;font:10px/1.5 var(--mono);color:var(--muted)}
+
 .review-reasons{display:grid;gap:5px;padding:15px 0;font:10px/1.6 var(--mono);color:var(--muted)}
 .review-warning{color:var(--red)}
 .review-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:3px}
