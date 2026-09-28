@@ -139,3 +139,9 @@ test("history navigation marks itself busy while opening", () => {
   assert.match(source, /data-navigation-busy/);
   assert.match(source, /aria-busy/);
 });
+
+
+test("portfolio refresh marks itself busy while opening", () => {
+  assert.match(source, /data-navigation-busy/);
+  assert.match(source, /aria-busy/);
+});
