@@ -44,6 +44,16 @@ export class HandeloMarketClient {
     const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());
     return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};
   }
+
+  async tokenBalances(wallet:string,assetIds:string[]):Promise<Map<string,string>>{
+    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||assetIds.length>20) throw new Error("Invalid wallet or token list.");
+    const addresses=assetIds.map(assetId=>{
+      if(!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid token contract address.");
+      return {binanceChainId:"56",tokenContractAddress:assetId};
+    });
+    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:addresses});
+    return new Map(data.flatMap(group=>group.tokenAssets).map(asset=>[asset.tokenContractAddress.toLowerCase(),asset.rawBalance||"0"]));
+  }
   async transactions(wallet:string,limit=20):Promise<WalletTransaction[]>{
     if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
     const data=await this.request<Array<{transactionList:Array<{
