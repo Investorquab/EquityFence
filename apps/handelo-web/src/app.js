@@ -181,13 +181,18 @@ function addExecutionResult(data) {
   const node = document.createElement("article");
   node.className = "execution-result";
   if (result.status === "FINISHED") {
+    const txHash = String(result.txHash || "");
+    const validTxHash = /^0x[a-fA-F0-9]{64}$/.test(txHash);
+    const txLink = validTxHash
+      ? '<a class="tx-hash" href="https://bscscan.com/tx/' + encodeURIComponent(txHash) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(txHash.slice(0, 10) + "…" + txHash.slice(-8)) + " ↗</a>"
+      : '<span class="tx-hash">Transaction hash unavailable</span>';
     node.innerHTML = `
       <div class="execution-icon">✓</div>
       <div>
         <div class="message-label">EXECUTION CONFIRMED</div>
         <h3>Purchase complete.</h3>
         <p>${escapeHtml(data.asset?.ticker || "Asset")} was purchased through the Agentic Wallet.</p>
-        <span class="tx-hash">${escapeHtml(result.txHash || "Transaction hash unavailable")}</span>
+        ${txLink}
       </div>`;
   } else if (result.status === "PENDING") {
     node.innerHTML = `
