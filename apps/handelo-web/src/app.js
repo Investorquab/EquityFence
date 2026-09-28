@@ -38,7 +38,7 @@ function addAgentMessage(data) {
     renderMarketContext(context, data.market);
   } else if (Array.isArray(data.candidates) && data.candidates.length) {
     context.classList.add("visible");
-    renderCandidates(context, data.candidates);
+    renderCandidates(context, data.candidates, data.intent);
   }
 
   conversation.appendChild(node);
@@ -237,19 +237,37 @@ function renderMarketContext(container, market) {
     </div>`;
 }
 
-function renderCandidates(container, candidates) {
+function renderCandidates(container, candidates, intent) {
+  const action = intent?.action === "sell" ? "sell" : intent?.action === "invest" ? "invest" : intent?.action === "buy" ? "buy" : "research";
+  const amount = Number(intent?.amountUsd);
+  const canSelect = ["buy", "invest", "sell"].includes(action);
   container.innerHTML = `
     <div class="context-head">
       <div class="context-name">LIVE MARKET CONTEXT</div>
       <div class="context-status">BSC</div>
     </div>
     <div class="candidate-list">
-      ${candidates.map((market) => `
+      ${candidates.map((market, index) => `
         <div class="candidate">
           <div><strong>${escapeHtml(market.ticker)}</strong><small>${escapeHtml(market.tokenSymbol)} · ${escapeHtml(market.provider || "BSC")}</small></div>
           <div class="candidate-price"><strong>${money(market.tokenPrice)}</strong><small>${market.marketOpen ? "LIVE" : "CLOSED"}</small></div>
+          ${canSelect ? `<button type="button" class="candidate-select" data-candidate="${index}">Use ${escapeHtml(market.tokenSymbol)} ↗</button>` : ""}
         </div>`).join("")}
     </div>`;
+  if (canSelect) {
+    container.querySelectorAll("[data-candidate]").forEach((button) => {
+      button.addEventListener("click", () => {
+        const market = candidates[Number(button.dataset.candidate)];
+        if (!market) return;
+        const request = action === "research"
+          ? `research ${market.tokenSymbol}`
+          : Number.isFinite(amount) && amount > 0
+            ? `${action} ${money(amount)} of ${market.tokenSymbol}`
+            : `${action} ${market.tokenSymbol}`;
+        ask(request);
+      });
+    });
+  }
 }
 
 function formatMarketTime(value) {
