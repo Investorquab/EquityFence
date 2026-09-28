@@ -253,6 +253,7 @@ function addExecutionResult(data) {
     const button = event.currentTarget;
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
+    button.setAttribute("aria-disabled", "true");
     button.textContent = "Opening…";
     button.setAttribute("aria-label", "Opening transaction history");
     button.setAttribute("data-navigation-busy", "true");
