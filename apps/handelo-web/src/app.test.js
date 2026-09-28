@@ -128,3 +128,8 @@ test("history navigation action communicates progress", () => {
 test("portfolio refresh progress has an accessible label", () => {
   assert.match(source, /aria-label\", \"Refreshing portfolio/);
 });
+
+
+test("history navigation progress has an accessible label", () => {
+  assert.match(source, /aria-label\", \"Opening transaction history/);
+});
