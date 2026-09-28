@@ -226,3 +226,10 @@ test("disabled execution follow-up actions mute visual treatment", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /filter:grayscale\(1\)/);
 });
+
+
+test("disabled execution follow-up actions remove visual shadow", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /box-shadow:none/);
+});
