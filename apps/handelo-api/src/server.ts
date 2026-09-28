@@ -83,6 +83,12 @@ const server = createServer(async (req, res) => {
     try {
       const signin = await bawJson<{ urlForWeb?: string; qrCodeId?: string; pairingCode?: string; status?: string }>(["auth", "signin"]);
       if (signin.status === "ALREADY_CONNECTED") {
+        const status = await walletStatus();
+        if (status.status !== "CONNECTED") {
+          return json(res, 502, {
+            error: `Binance Agentic Wallet reported an existing session, but wallet status is ${status.status}.`
+          });
+        }
         walletAuth = { status: "SUCCESS" };
         return json(res, 200, walletAuth);
       }
@@ -112,7 +118,15 @@ const server = createServer(async (req, res) => {
       const status = await walletStatus();
       if (status.status !== "CONNECTED") return json(res, 200, { connected: false, address: null });
       const wallet = await bawJson<{ address?: string }>(["wallet", "address"]);
-      return json(res, 200, { connected: true, address: wallet.address ?? null });
+      const address = wallet.address?.trim() ?? "";
+      if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
+        return json(res, 502, {
+          connected: false,
+          address: null,
+          error: "Binance Agentic Wallet returned an invalid EVM wallet address."
+        });
+      }
+      return json(res, 200, { connected: true, address });
     } catch (error) {
       return json(res, 200, { connected: false, address: null, error: error instanceof Error ? error.message : String(error) });
     }
