@@ -26,12 +26,12 @@ function validateJsonRpc(value: unknown): JsonRpc {
   return value as JsonRpc;
 }
 
-function readTicker(args: unknown): string {
-  if (!args || typeof args !== "object" || Array.isArray(args)) throw new Error("arguments must be an object");
+class InvalidToolArgumentsError extends Error {}\n\nfunction readTicker(args: unknown): string {
+  if (!args || typeof args !== "object" || Array.isArray(args)) throw new InvalidToolArgumentsError("arguments must be an object");
   const ticker=(args as Record<string,unknown>).ticker;
-  if (typeof ticker !== "string" || !ticker.trim()) throw new Error("ticker is required");
+  if (typeof ticker !== "string" || !ticker.trim()) throw new InvalidToolArgumentsError("ticker is required");
   const normalized=ticker.trim().toUpperCase();
-  if (normalized.length > 20) throw new Error("ticker is too long");
+  if (normalized.length > 20) throw new InvalidToolArgumentsError("ticker is too long");
   return normalized;
 }
 
@@ -56,7 +56,7 @@ async function handle(message:JsonRpc){
       return reply(message.id,{content:[{type:"text",text:JSON.stringify(results,null,2)}]});
     }
     return error(message.id,-32602,"Unknown tool: "+name);
-  }catch(e){return error(message.id,-32000,e instanceof Error?e.message:String(e));}
+  }catch(e){\n    if(e instanceof InvalidToolArgumentsError) return error(message.id,-32602,e.message);\n    return error(message.id,-32000,e instanceof Error?e.message:String(e));\n  }
 }
 
 let buffer="";
