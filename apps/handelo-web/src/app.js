@@ -219,6 +219,9 @@ function addExecutionResult(data) {
         <h3>Still processing.</h3>
         <p>The order was submitted, but Handelo has not received a terminal result yet.</p>
         <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
+        <div class="execution-actions">
+          <button type="button" class="secondary-button" data-view-history>View history</button>
+        </div>
       </div>`;
   } else {
     node.innerHTML = `
@@ -228,6 +231,9 @@ function addExecutionResult(data) {
         <h3>The purchase did not complete.</h3>
         <p>Handelo received a terminal failure from the execution layer.</p>
         <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
+        <div class="execution-actions">
+          <button type="button" class="secondary-button" data-view-history>View history</button>
+        </div>
       </div>`;
   }
   conversation.appendChild(node);
