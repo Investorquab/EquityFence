@@ -248,7 +248,7 @@ function renderCandidates(container, candidates) {
 function safeExternalUrl(value) {
   try {
     const url = new URL(String(value || ""));
-    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "#";
+    return url.protocol === "https:" ? url.href : "#";
   } catch {
     return "#";
   }
