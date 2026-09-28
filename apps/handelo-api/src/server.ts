@@ -33,6 +33,14 @@ const server = createServer(async (req, res) => {
     return json(res, 200, { ok: true, service: "handelo-agent" });
   }
 
+  if (req.method === "GET" && req.url === "/api/markets") {
+    try {
+      return json(res, 200, await market.discover(8));
+    } catch (error) {
+      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
   if (req.method === "GET" && req.url?.startsWith("/api/portfolio")) {
     const walletAddress =
       new URL(req.url, "http://localhost").searchParams.get("wallet") ??
