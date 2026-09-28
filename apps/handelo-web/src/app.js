@@ -126,14 +126,11 @@ async function ask(message) {
 async function loadMarkets() {
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
-    const response = await fetch(API_BASE + "/api/chat", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ message: "Show me a concise view of the most active tokenized stock markets." })
-    });
-    const data = await response.json();
-    const markets = data.candidates || (data.market ? [data.market] : []);
-    if (!response.ok || !markets.length) throw new Error(data.error || "No market records returned.");
+    const response = await fetch(API_BASE + "/api/markets");
+    const markets = await response.json();
+    if (!response.ok || !Array.isArray(markets) || !markets.length) {
+      throw new Error(markets.error || "No market records returned.");
+    }
     marketGrid.innerHTML = markets.map(renderMarketCard).join("");
   } catch (error) {
     marketGrid.innerHTML = `<div class="loading-card">Market data is unavailable. ${escapeHtml(error.message)}</div>`;
