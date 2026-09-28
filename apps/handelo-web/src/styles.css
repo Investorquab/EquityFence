@@ -290,6 +290,10 @@ button{cursor:pointer}
 .execution-icon.failed{color:var(--red);background:rgba(239,118,110,.08);border-color:rgba(239,118,110,.25)}
 .execution-result h3{margin:5px 0 7px;font:400 26px var(--serif)}
 .execution-result p{margin:0 0 10px;font-size:11px;line-height:1.7;color:var(--muted)}
+.execution-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.execution-actions .primary-button,.execution-actions .secondary-button{width:auto;margin-top:0}
+.secondary-button{padding:10px 14px;border:1px solid var(--line);border-radius:9px;background:transparent;color:var(--muted);font-size:10px;transition:all 180ms ease-out}
+.secondary-button:hover{color:var(--text);border-color:rgba(238,232,219,.2);transform:translateY(-1px)}
 .tx-hash{display:block;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:9px var(--mono);color:var(--faint)}
 
 @media (max-width:620px){
