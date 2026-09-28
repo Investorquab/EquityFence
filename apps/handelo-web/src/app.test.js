@@ -247,3 +247,10 @@ test("disabled execution follow-up actions simplify outline", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /outline:none/);
 });
+
+
+test("disabled execution follow-up actions stop animation", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /animation:none/);
+});
