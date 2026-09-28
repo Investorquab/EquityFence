@@ -25,7 +25,7 @@ test("trade review renders explicit cancel and confirmation actions", () => {
 });
 
 test("wallet authentication resets active state when startup fails", () => {
-  assert.match(source, /catch \(error\) \{\n    walletAuthActive = false;/);
+  assert.match(source, /catch \(error\) \{\r?\n    walletAuthActive = false;/);
 });
 
 test("wallet authentication prevents duplicate sessions while active", () => {
