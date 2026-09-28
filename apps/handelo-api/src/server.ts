@@ -15,6 +15,10 @@ const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
+function isEvmAddress(value: string): boolean {
+  return /^0x[a-fA-F0-9]{40}$/.test(value.trim());
+}
+
 function normalizeSlippage(value: unknown): { value?: string; error?: string } {
   if (value === undefined || value === null || value === "") return {};
   if (typeof value !== "string" || !/^\d+(?:\.\d+)?$/.test(value.trim())) {
@@ -194,6 +198,9 @@ const server = createServer(async (req, res) => {
     if (!walletAddress) {
       return json(res, 400, { error: "wallet query parameter or HANDELO_WALLET is required" });
     }
+    if (!isEvmAddress(walletAddress)) {
+      return json(res, 400, { error: "wallet must be a valid EVM address" });
+    }
 
     try {
       return json(res, 200, { wallet: walletAddress, transactions: await market.transactions(walletAddress, 20) });
@@ -210,6 +217,9 @@ const server = createServer(async (req, res) => {
 
     if (!walletAddress) {
       return json(res, 400, { error: "wallet query parameter or HANDELO_WALLET is required" });
+    }
+    if (!isEvmAddress(walletAddress)) {
+      return json(res, 400, { error: "wallet must be a valid EVM address" });
     }
 
     try {
