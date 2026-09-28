@@ -109,6 +109,22 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === "GET" && req.url?.startsWith("/api/history")) {
+    const walletAddress =
+      new URL(req.url, "http://localhost").searchParams.get("wallet") ??
+      process.env.HANDELO_WALLET;
+
+    if (!walletAddress) {
+      return json(res, 400, { error: "wallet query parameter or HANDELO_WALLET is required" });
+    }
+
+    try {
+      return json(res, 200, { wallet: walletAddress, transactions: await market.transactions(walletAddress, 20) });
+    } catch (error) {
+      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
   if (req.method === "GET" && req.url?.startsWith("/api/portfolio")) {
     const walletAddress =
       new URL(req.url, "http://localhost").searchParams.get("wallet") ??
