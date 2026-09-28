@@ -57,6 +57,74 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === "POST" && req.url === "/api/review") {
+    try {
+      let raw = "";
+      for await (const chunk of req) raw += chunk;
+      const body = JSON.parse(raw) as {
+        ticker?: unknown;
+        amountUsd?: unknown;
+        action?: unknown;
+        fromToken?: unknown;
+        slippage?: unknown;
+      };
+
+      const ticker = String(body.ticker ?? "").trim().toUpperCase();
+      const amountUsd = Number(body.amountUsd);
+      const action = body.action === "sell" ? "sell" : body.action === "invest" ? "invest" : "buy";
+
+      if (!ticker || !Number.isFinite(amountUsd) || amountUsd <= 0) {
+        return json(res, 400, { error: "ticker and positive amountUsd are required" });
+      }
+
+      const asset = await market.find(ticker);
+      const premiumPct = (() => {
+        const token = Number(asset.tokenPrice);
+        const reference = Number(asset.referencePrice);
+        if (!Number.isFinite(token) || !Number.isFinite(reference) || reference === 0) return null;
+        return ((token - reference) / reference) * 100;
+      })();
+
+      const policy = (await import("@handelo/policy")).evaluatePolicy({
+        action,
+        amountUsd,
+        marketOpen: asset.statusInfo.openState,
+        premiumPct
+      });
+
+      let quote: unknown = null;
+      const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? "").trim();
+
+      if (fromToken && policy.decision !== "BLOCK") {
+        quote = await wallet.quote({
+          fromTokenQty: String(amountUsd),
+          fromToken,
+          toToken: asset.tokenContractAddress,
+          binanceChainId: "56",
+          slippage: typeof body.slippage === "string" ? body.slippage : undefined
+        });
+      }
+
+      return json(res, 200, {
+        asset: {
+          ticker: asset.underlyingTicker,
+          tokenSymbol: asset.tokenSymbol,
+          contract: asset.tokenContractAddress,
+          provider: asset.platformId,
+          tokenPrice: asset.tokenPrice,
+          referencePrice: asset.referencePrice,
+          premiumPct,
+          market: asset.statusInfo
+        },
+        policy,
+        quote,
+        quoteToken: fromToken || null
+      });
+    } catch (error) {
+      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
   if (req.method === "POST" && req.url === "/api/quote") {
     try {
       let raw = "";
