@@ -138,7 +138,12 @@ export class HandeloMarketClient {
   }
 
   async find(ticker:string):Promise<RwaAsset>{
-    const matches=await this.findAll(ticker);
+    const query=ticker.trim();
+    const exactToken= (await this.tokens()).filter(
+      asset => asset.binanceChainId==="56" && asset.tokenSymbol.trim().toLowerCase()===query.toLowerCase()
+    );
+    if(exactToken.length===1) return exactToken[0];
+    const matches=await this.findAll(query);
     const exact=matches.filter(x=>x.tokenSymbol.toLowerCase()===ticker.trim().toLowerCase());
     if(exact.length===1) return exact[0];
     if(matches.length>1) throw new MarketResolutionError("AMBIGUOUS",`Multiple BSC tokenized-stock representations found for ${ticker}: ${matches.map(x=>x.tokenSymbol+" ("+x.platformId+")").join(", ")}. Resolve the representation before trading.`);
