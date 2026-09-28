@@ -25,7 +25,10 @@ export function evaluatePolicy(input:PolicyInput):PolicyResult{
     const priceOk=Math.abs(input.premiumPct)<=maxPremium;
     checks.push({name:"reference_gap",passed:priceOk,detail:priceOk?"On-chain/reference gap is within the configured threshold.":"On-chain/reference gap exceeds the configured threshold."});
     if(!priceOk) return {decision:"CONFIRM",reasons:["The on-chain/reference price gap is larger than the configured threshold."],checks};
-  } else checks.push({name:"reference_gap",passed:false,detail:"Reference gap could not be calculated."});
+  } else {
+    checks.push({name:"reference_gap",passed:false,detail:"Reference gap could not be calculated."});
+    return {decision:"CONFIRM",reasons:["The reference price is unavailable, so Handelo cannot verify the on-chain/reference price gap."],checks};
+  }
   return {decision:"READY",reasons:["Policy checks passed for a reviewable transaction."],checks};
 }
 
