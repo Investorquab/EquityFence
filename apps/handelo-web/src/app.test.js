@@ -123,3 +123,8 @@ test("history navigation action communicates progress", () => {
   assert.match(source, /aria-busy/);
   assert.match(source, /button\.textContent = "Opening…"/);
 });
+
+
+test("portfolio refresh progress has an accessible label", () => {
+  assert.match(source, /aria-label\", \"Refreshing portfolio/);
+});
