@@ -55,6 +55,18 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false
 };
 
+export function validateAgentResponse(value: unknown): { answer: string } {
+  if (!value || typeof value !== "object") throw new Error("LLM returned an invalid response.");
+  const response = value as Record<string, unknown>;
+  if (typeof response.answer !== "string" || !response.answer.trim()) {
+    throw new Error("LLM returned an invalid answer.");
+  }
+  if (response.answer.length > 12000) {
+    throw new Error("LLM returned an answer that is too long.");
+  }
+  return { answer: response.answer.trim() };
+}
+
 export function normalizeUserMessage(message: string): string {
   const normalized = message.trim();
   if (!normalized) throw new Error("message is required");
@@ -186,12 +198,14 @@ Live market context: ${context}
 Respond naturally and concisely.`
     });
 
+    const validatedResponse = validateAgentResponse(response);
+
     return {
       intent: parsedIntent,
       market,
       candidates,
       policy,
-      answer: response.answer,
+      answer: validatedResponse.answer,
       provider: this.llm.provider,
       model: this.llm.model
     };
