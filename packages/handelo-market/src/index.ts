@@ -16,6 +16,20 @@ export interface RwaAsset {
 
 interface Envelope<T>{code:number;msg:string;data:T;timestamp:number;success:boolean}
 
+export class MarketResolutionError extends Error {
+  constructor(public readonly kind:"NOT_FOUND"|"AMBIGUOUS", message:string){
+    super(message);
+    this.name="MarketResolutionError";
+  }
+}
+
+export class MarketUpstreamError extends Error {
+  constructor(message:string){
+    super(message);
+    this.name="MarketUpstreamError";
+  }
+}
+
 export function normalizeTransactionLimit(limit:number):number{
   if(!Number.isFinite(limit)) return 20;
   return Math.min(Math.max(Math.floor(limit),1),100);
@@ -54,7 +68,7 @@ export class HandeloMarketClient {
     const signature=createHmac("sha256",this.secretKey).update(timestamp+method+"/build"+fullPath+payload).digest("base64");
     const response=await fetch(BASE+fullPath,{method,headers:{"X-OC-APIKEY":this.apiKey,"X-OC-TIMESTAMP":timestamp,"X-OC-SIGN":signature,"X-OC-RECV-WINDOW":"5000","X-OC-NONCE":nonce,"content-type":"application/json"},...(body===undefined?{}:{body:payload})});
     const envelope=await response.json() as Envelope<T>;
-    if(!response.ok||!envelope.success||envelope.code!==0) throw new Error(`Binance Web3 API error ${response.status}/${envelope.code}: ${envelope.msg}`);
+    if(!response.ok||!envelope.success||envelope.code!==0) throw new MarketUpstreamError(`Binance Web3 API error ${response.status}/${envelope.code}: ${envelope.msg}`);
     return envelope.data;
   }
   async search(ticker:string):Promise<Array<{ticker:string;companyName:string;assets:Array<{platformId:string;binanceChainId:string;tokenContractAddress:string;tokenSymbol:string;assetType:number}>}>>{
@@ -109,7 +123,7 @@ export class HandeloMarketClient {
     const query=ticker.trim();
     const results=await this.search(query);
     const assets=results.flatMap(x=>x.assets).filter(x=>x.binanceChainId==="56");
-    if(!assets.length) throw new Error(`No BSC tokenized-stock representation found for ${query}.`);
+    if(!assets.length) throw new MarketResolutionError("NOT_FOUND",`No BSC tokenized-stock representation found for ${query}.`);
     const all=await this.tokens();
     const contracts=new Set(assets.map(asset=>asset.tokenContractAddress.toLowerCase()));
     const normalizedTicker=query.toLowerCase();
@@ -119,7 +133,7 @@ export class HandeloMarketClient {
         asset.underlyingTicker.trim().toLowerCase()===normalizedTicker
     );
     const unique=new Map(matches.map(asset=>[asset.tokenContractAddress.toLowerCase(),asset]));
-    if(!unique.size) throw new Error(`No live BSC tokenized-stock market record found for ${query}.`);
+    if(!unique.size) throw new MarketResolutionError("NOT_FOUND",`No live BSC tokenized-stock market record found for ${query}.`);
     return [...unique.values()];
   }
 
@@ -127,7 +141,7 @@ export class HandeloMarketClient {
     const matches=await this.findAll(ticker);
     const exact=matches.filter(x=>x.tokenSymbol.toLowerCase()===ticker.trim().toLowerCase());
     if(exact.length===1) return exact[0];
-    if(matches.length>1) throw new Error(`Multiple BSC tokenized-stock representations found for ${ticker}: ${matches.map(x=>x.tokenSymbol+" ("+x.platformId+")").join(", ")}. Resolve the representation before trading.`);
+    if(matches.length>1) throw new MarketResolutionError("AMBIGUOUS",`Multiple BSC tokenized-stock representations found for ${ticker}: ${matches.map(x=>x.tokenSymbol+" ("+x.platformId+")").join(", ")}. Resolve the representation before trading.`);
     return matches[0];
   }
 }
