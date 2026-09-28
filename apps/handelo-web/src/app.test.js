@@ -47,3 +47,14 @@ test("trade confirmation submits the reviewed transaction with explicit confirma
   assert.match(source, /reviewToken: data\.reviewToken/);
   assert.match(source, /confirmed: true/);
 });
+
+
+test("execution result surfaces terminal status without trusting an invalid transaction hash", () => {
+  assert.match(source, /result\.status === "FINISHED"/);
+  assert.match(source, /result\.status === "PENDING"/);
+  assert.match(source, /EXECUTION FAILED/);
+  assert.match(source, /result\.orderId/);
+  assert.match(source, /result\.toCoinAmount/);
+  assert.match(source, /\/\^0x\[a-fA-F0-9\]\{64\}\$\//);
+  assert.match(source, /Transaction hash unavailable/);
+});
