@@ -23,10 +23,13 @@ HANDELO_API_KEY=
 BINANCE_WEB3_API_KEY=
 BINANCE_WEB3_SECRET_KEY=
 HANDELO_WALLET=
+HANDELO_CORS_ORIGIN=https://your-handelo-frontend.example
 BSC_RPC_URL=
 ```
 
 No private key or wallet password belongs in these variables.
+
+`HANDELO_CORS_ORIGIN` may be set to the exact deployed frontend origin. If omitted, the API keeps `*` for local/demo compatibility.
 
 ## Important architectural boundary
 
