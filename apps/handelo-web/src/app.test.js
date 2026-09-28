@@ -289,3 +289,10 @@ test("disabled execution follow-up actions soften their border", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /border-color:transparent/);
 });
+
+
+test("disabled execution follow-up actions flatten their fill", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /background-color:transparent/);
+});
