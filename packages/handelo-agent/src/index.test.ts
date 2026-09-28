@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { HandeloAgent, normalizeUserMessage, validateUserIntent } from "./index.js";
+import { HandeloAgent, normalizeUserMessage, validateAgentResponse, validateUserIntent } from "./index.js";
 import type { LlmClient } from "@handelo/llm";
 import type { HandeloMarketClient } from "@handelo/market";
 
@@ -69,4 +69,11 @@ test("user message normalization rejects empty and oversized input", () => {
   assert.throws(() => normalizeUserMessage("   "), /message is required/);
   assert.throws(() => normalizeUserMessage("x".repeat(8001)), /message is too long/);
   assert.equal(normalizeUserMessage("  Help me understand NVDA  "), "Help me understand NVDA");
+});
+
+
+test("agent response validation rejects malformed provider output", () => {
+  assert.throws(() => validateAgentResponse({ answer: "   " }), /invalid answer/);
+  assert.throws(() => validateAgentResponse({ answer: "x".repeat(12001) }), /answer that is too long/);
+  assert.deepEqual(validateAgentResponse({ answer: "  Ready.  " }), { answer: "Ready." });
 });
