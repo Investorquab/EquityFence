@@ -243,7 +243,10 @@ function addExecutionResult(data) {
     node.querySelector("[data-refresh-portfolio]").disabled = true;
     showView("portfolio");
   });
-  node.querySelector("[data-view-history]")?.addEventListener("click", () => showView("history"));
+  node.querySelector("[data-view-history]")?.addEventListener("click", () => {
+    node.querySelector("[data-view-history]").disabled = true;
+    showView("history");
+  });
   scrollConversation();
 }
 
