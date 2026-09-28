@@ -303,6 +303,7 @@ button{cursor:pointer}
 .execution-actions button:disabled{opacity:.65}
 .execution-actions button:disabled{cursor:wait}
 .execution-actions button:disabled{filter:grayscale(1)}
+.execution-actions button:disabled{box-shadow:none}
 .tx-hash{display:block;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:9px var(--mono);color:var(--faint)}
 
 @media (max-width:620px){
