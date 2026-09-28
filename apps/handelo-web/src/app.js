@@ -275,7 +275,11 @@ async function ask(message) {
   } finally {
     sendButton.disabled = false;
     input.disabled = false;
-    async function refreshWalletStatus() {
+    input.focus();
+  }
+}
+
+async function refreshWalletStatus() {
   try {
     const response = await fetch(API_BASE + "/api/wallet/status");
     const data = await response.json();
@@ -349,10 +353,7 @@ function closeWalletAuth() {
 connectButton.addEventListener("click", connectWallet);
 refreshWalletStatus();
 input.focus();
-  }
-}
-
-async async function loadPortfolio() {
+async function loadPortfolio() {
   const target = document.querySelector("#portfolioContent");
   target.innerHTML = '<div class="loading-card">Reading wallet positions...</div>';
   try {
@@ -374,7 +375,7 @@ async async function loadPortfolio() {
   }
 }
 
-function loadMarkets() {
+async function loadMarkets() {
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
     const response = await fetch(API_BASE + "/api/markets");
