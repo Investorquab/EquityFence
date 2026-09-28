@@ -8,6 +8,8 @@ const sendButton = document.querySelector("#sendButton");
 const connectButton = document.querySelector("#connectButton");
 const marketGrid = document.querySelector("#marketGrid");
 const walletState = document.querySelector(".wallet-state");
+let walletAuthPoll = null;
+let walletAuthTimeout = null;
 
 function money(value) {
   const n = Number(value);
@@ -440,22 +442,32 @@ async function connectWallet() {
     }
 
     showWalletAuth(data);
-    const poll = setInterval(async () => {
-      const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
-      const auth = await authResponse.json();
+    walletAuthPoll = setInterval(async () => {
+      try {
+        const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
+        const auth = await authResponse.json();
 
-      if (auth.status === "SUCCESS") {
-        clearInterval(poll);
+        if (auth.status === "SUCCESS") {
+          clearWalletAuthPolling();
+          closeWalletAuth();
+          await refreshWalletStatus();
+        } else if (auth.status === "FAILED") {
+          clearWalletAuthPolling();
+          closeWalletAuth();
+          addAgentMessage({ answer: `Wallet connection failed: ${auth.error || "The wallet did not complete authentication."}` });
+        }
+      } catch (error) {
+        clearWalletAuthPolling();
         closeWalletAuth();
-        await refreshWalletStatus();
-      } else if (auth.status === "FAILED") {
-        clearInterval(poll);
-        closeWalletAuth();
-        addAgentMessage({ answer: `Wallet connection failed: ${auth.error || "The wallet did not complete authentication."}` });
+        addAgentMessage({ answer: `Wallet connection status could not be checked. ${error.message}` });
       }
     }, 2500);
 
-    setTimeout(() => clearInterval(poll), 5 * 60 * 1000);
+    walletAuthTimeout = setTimeout(() => {
+      clearWalletAuthPolling();
+      closeWalletAuth();
+      addAgentMessage({ answer: "Wallet connection timed out. Please try connecting again." });
+    }, 5 * 60 * 1000);
   } catch (error) {
     addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
   } finally {
@@ -485,7 +497,19 @@ function showWalletAuth(data) {
   document.body.appendChild(modal);
 }
 
+function clearWalletAuthPolling() {
+  if (walletAuthPoll) {
+    clearInterval(walletAuthPoll);
+    walletAuthPoll = null;
+  }
+  if (walletAuthTimeout) {
+    clearTimeout(walletAuthTimeout);
+    walletAuthTimeout = null;
+  }
+}
+
 function closeWalletAuth() {
+  clearWalletAuthPolling();
   document.querySelector(".wallet-modal")?.remove();
 }
 
