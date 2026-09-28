@@ -198,3 +198,10 @@ test("disabled execution follow-up actions disable transitions", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /transition:none/);
 });
+
+
+test("disabled execution follow-up actions lock position", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /transform:none!important/);
+});
