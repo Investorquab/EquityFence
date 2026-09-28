@@ -76,3 +76,10 @@ test("execution outcomes are announced to assistive technology", () => {
   assert.match(source, /node\.setAttribute\("role", "status"\)/);
   assert.match(source, /node\.setAttribute\("aria-live", "polite"\)/);
 });
+
+
+test("execution follow-up actions have dedicated styles", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions/);
+  assert.match(styles, /\.secondary-button/);
+});
