@@ -358,7 +358,7 @@ const server = createServer(async (req, res) => {
         quote
       });
     } catch (error) {
-      const status = marketErrorStatus(error);
+      const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
@@ -482,7 +482,7 @@ const server = createServer(async (req, res) => {
         result
       });
     } catch (error) {
-      const status = marketErrorStatus(error);
+      const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
@@ -503,7 +503,8 @@ const server = createServer(async (req, res) => {
     const result = await agent.run(body.message.trim());
     return json(res, 200, result);
   } catch (error) {
-    return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+    const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
+    return json(res, status ?? 500, { error: errorMessage(error) });
   }
 });
 
