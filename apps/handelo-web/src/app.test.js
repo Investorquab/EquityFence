@@ -111,3 +111,9 @@ test("history navigation action exposes loading state", () => {
   assert.match(source, /aria-busy/);
   assert.match(source, /showView\("history"\)/);
 });
+
+
+test("portfolio refresh action communicates progress", () => {
+  assert.match(source, /aria-busy/);
+  assert.match(source, /button\.textContent = "Refreshing…"/);
+});
