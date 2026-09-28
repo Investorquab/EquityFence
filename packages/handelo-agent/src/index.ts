@@ -55,6 +55,32 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false
 };
 
+export function validateUserIntent(value: unknown): UserIntent {
+  if (!value || typeof value !== "object") throw new Error("LLM returned an invalid intent.");
+  const intent = value as Record<string, unknown>;
+  const actions = ["research", "buy", "sell", "invest"];
+  const risks = ["low", "medium", "high", "unknown"];
+  if (!actions.includes(String(intent.action)) || !risks.includes(String(intent.riskTolerance))) {
+    throw new Error("LLM returned an invalid investment intent.");
+  }
+  if (intent.ticker !== null && typeof intent.ticker !== "string") {
+    throw new Error("LLM returned an invalid ticker.");
+  }
+  if (intent.amountUsd !== null && (typeof intent.amountUsd !== "number" || !Number.isFinite(intent.amountUsd))) {
+    throw new Error("LLM returned an invalid amount.");
+  }
+  if (intent.horizon !== null && typeof intent.horizon !== "string") {
+    throw new Error("LLM returned an invalid horizon.");
+  }
+  return {
+    action: intent.action as UserIntent["action"],
+    ticker: intent.ticker as string | null,
+    amountUsd: intent.amountUsd as number | null,
+    horizon: intent.horizon as string | null,
+    riskTolerance: intent.riskTolerance as UserIntent["riskTolerance"]
+  };
+}
+
 function pct(token: string, reference: string): number | null {
   const t = Number(token);
   const r = Number(reference);
@@ -96,15 +122,17 @@ export class HandeloAgent {
       user: message
     });
 
+    const parsedIntent = validateUserIntent(intent);
+
     let market: MarketBrief | null = null;
     let candidates: MarketBrief[] = [];
 
     let marketResolutionError: string | null = null;
 
-    if (intent.ticker) {
+    if (parsedIntent.ticker) {
       try {
         const matches = await this.market.findAll(intent.ticker);
-        const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === intent.ticker!.trim().toLowerCase());
+        const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === parsedIntent.ticker!.trim().toLowerCase());
         if (exact.length === 1) {
           market = marketBrief(exact[0]);
         } else if (matches.length === 1) {
@@ -115,7 +143,7 @@ export class HandeloAgent {
       } catch {
         marketResolutionError = "The live market resolver could not find a supported BSC tokenized-stock market for that ticker.";
       }
-    } else if (intent.action === "buy" || intent.action === "sell" || intent.action === "invest") {
+    } else if (parsedIntent.action === "buy" || parsedIntent.action === "sell" || parsedIntent.action === "invest") {
       try {
         candidates = (await this.market.discover(4)).map(marketBrief);
       } catch {
@@ -125,8 +153,8 @@ export class HandeloAgent {
 
     const policy = market
       ? evaluatePolicy({
-          action: intent.action,
-          amountUsd: intent.amountUsd,
+          action: parsedIntent.action,
+          amountUsd: parsedIntent.amountUsd,
           marketOpen: market.marketOpen,
           premiumPct: market.premiumPct
         })
@@ -145,13 +173,13 @@ export class HandeloAgent {
       schema: RESPONSE_SCHEMA,
       system: "You are Handelo, a beginner-friendly tokenized-stock market agent on BNB Chain. Explain market structure in simple language. Never claim a trade happened unless execution evidence is supplied. If the market is closed, explain that the on-chain token may still trade while the latest reference price is stale. Mention the on-chain/reference gap when available. When candidateMarkets are supplied, explain that they are live market-data candidates rather than a personalized recommendation. Do not give personalized certainty; present observations and let the user decide.",
       user: `User request: ${message}
-Parsed intent: ${JSON.stringify(intent)}
+Parsed intent: ${JSON.stringify(parsedIntent)}
 Live market context: ${context}
 Respond naturally and concisely.`
     });
 
     return {
-      intent,
+      intent: parsedIntent,
       market,
       candidates,
       policy,
