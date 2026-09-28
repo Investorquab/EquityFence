@@ -42,7 +42,7 @@ async function requestJson(url: string, key: string, body: unknown, headers: Rec
 
 class OpenAiCompatibleClient implements LlmClient {
   constructor(public readonly provider:"groq"|"openai", private readonly key:string) {}
-  readonly model = MODELS[this.provider];
+  get model(){ return MODELS[this.provider]; }
   async generateJson<T>(request:JsonGenerationRequest):Promise<T>{
     const url=this.provider==="groq" ? "https://api.groq.com/openai/v1/chat/completions" : "https://api.openai.com/v1/chat/completions";
     const payload={
