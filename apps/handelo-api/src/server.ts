@@ -223,6 +223,7 @@ const server = createServer(async (req, res) => {
 
       let quote: unknown = null;
       const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? DEFAULT_BSC_QUOTE_TOKEN).trim();
+      const slippage = typeof body.slippage === "string" && body.slippage.trim() ? body.slippage.trim() : undefined;
       let quoteError: string | null = null;
 
       if (fromToken && policy.decision !== "BLOCK") {
@@ -235,7 +236,7 @@ const server = createServer(async (req, res) => {
             fromToken,
             toToken: asset.tokenContractAddress,
             binanceChainId: "56",
-            slippage: typeof body.slippage === "string" ? body.slippage : undefined
+            slippage
           });
         } catch (error) {
           quoteError = error instanceof Error ? error.message : String(error);
@@ -264,7 +265,8 @@ const server = createServer(async (req, res) => {
           ticker: asset.underlyingTicker,
           amountUsd,
           fromToken,
-          contract: asset.tokenContractAddress
+          contract: asset.tokenContractAddress,
+          slippage
         }) : null
       });
     } catch (error) {
@@ -361,11 +363,14 @@ const server = createServer(async (req, res) => {
       }
 
       const asset = await market.find(ticker);
+      const slippage = typeof body.slippage === "string" && body.slippage.trim() ? body.slippage.trim() : undefined;
+
       if (!verifyReviewToken(reviewToken, {
         ticker: asset.underlyingTicker,
         amountUsd: amount,
         fromToken,
-        contract: asset.tokenContractAddress
+        contract: asset.tokenContractAddress,
+        slippage
       })) {
         return json(res, 409, { error: "This transaction no longer matches the reviewed trade or the review has expired. Start a new review." });
       }
