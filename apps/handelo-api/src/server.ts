@@ -1,14 +1,39 @@
 import { createServer } from "node:http";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { marketClientFromEnv } from "@handelo/market";
 
 const port = Number(process.env.PORT ?? "8787");
+const execFileAsync = promisify(execFile);
+let walletAuth: { status: "IDLE" | "WAITING" | "SUCCESS" | "FAILED"; urlForWeb?: string; pairingCode?: string; error?: string } = { status: "IDLE" };
 const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
+
+async function bawJson<T>(args: string[]): Promise<T> {
+  const { stdout, stderr } = await execFileAsync("baw", [...args, "--json"], { maxBuffer: 1024 * 1024 });
+  const raw = (stdout || stderr).trim();
+  const payload = JSON.parse(raw) as { success: boolean; data: T; message?: string };
+  if (!payload.success) throw new Error(payload.message ?? "Binance Agentic Wallet command failed.");
+  return payload.data;
+}
+
+async function walletStatus() {
+  return bawJson<{ status: "CONNECTED" | "UNCONNECTED" | "CREATING" }>(["wallet", "status"]);
+}
+
+async function verifyWalletAuth(qrCodeId: string) {
+  try {
+    await bawJson(["auth", "verify", "--qrCodeId", qrCodeId]);
+    walletAuth = { status: "SUCCESS" };
+  } catch (error) {
+    walletAuth = { status: "FAILED", error: error instanceof Error ? error.message : String(error) };
+  }
+}
 
 function json(res: import("node:http").ServerResponse, status: number, payload: unknown) {
   const body = JSON.stringify(payload);
@@ -32,6 +57,37 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/health") {
     return json(res, 200, { ok: true, service: "handelo-agent" });
+  }
+
+  if (req.method === "GET" && req.url === "/api/wallet/status") {
+    try {
+      const status = await walletStatus();
+      return json(res, 200, status);
+    } catch (error) {
+      return json(res, 200, { status: "UNAVAILABLE", error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
+  if (req.method === "GET" && req.url === "/api/wallet/auth") {
+    if (walletAuth.status === "WAITING") return json(res, 200, walletAuth);
+
+    try {
+      const signin = await bawJson<{ urlForWeb?: string; qrCodeId?: string; pairingCode?: string; status?: string }>(["auth", "signin"]);
+      if (signin.status === "ALREADY_CONNECTED") {
+        walletAuth = { status: "SUCCESS" };
+        return json(res, 200, walletAuth);
+      }
+      if (!signin.qrCodeId || !signin.urlForWeb || !signin.pairingCode) {
+        return json(res, 502, { error: "Binance Agentic Wallet returned an incomplete sign-in response." });
+      }
+
+      walletAuth = { status: "WAITING", urlForWeb: signin.urlForWeb, pairingCode: signin.pairingCode };
+
+      void verifyWalletAuth(signin.qrCodeId).catch(() => undefined);
+      return json(res, 200, walletAuth);
+    } catch (error) {
+      return json(res, 502, { error: error instanceof Error ? error.message : String(error) });
+    }
   }
 
   if (req.method === "GET" && req.url === "/api/markets") {
