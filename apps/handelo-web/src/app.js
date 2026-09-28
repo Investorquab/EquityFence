@@ -206,7 +206,10 @@ function addExecutionResult(data) {
         ${receivedAmount ? `<div class="execution-meta"><span>RECEIVED</span><strong>${receivedAmount} ${escapeHtml(result.toCoinSymbol || data.asset?.tokenSymbol || "")}</strong></div>` : ""}
         <div class="execution-meta"><span>ORDER</span><strong>${orderId}</strong></div>
         ${txLink}
-        <div class="execution-actions"><button type="button" class="primary-button" data-refresh-portfolio>Refresh portfolio</button></div>
+        <div class="execution-actions">
+          <button type="button" class="primary-button" data-refresh-portfolio>Refresh portfolio</button>
+          <button type="button" class="secondary-button" data-view-history>View history</button>
+        </div>
       </div>`;
   } else if (result.status === "PENDING") {
     node.innerHTML = `
@@ -228,11 +231,8 @@ function addExecutionResult(data) {
       </div>`;
   }
   conversation.appendChild(node);
-  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => {
-    document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === "portfolio"));
-    document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-portfolio"));
-    loadPortfolio();
-  });
+  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => showView("portfolio"));
+  node.querySelector("[data-view-history]")?.addEventListener("click", () => showView("history"));
   scrollConversation();
 }
 
@@ -526,6 +526,14 @@ async function loadHistory() {
   }
 }
 
+function showView(view) {
+  document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
+  if (view === "markets") loadMarkets();
+  if (view === "portfolio") loadPortfolio();
+  if (view === "history") loadHistory();
+}
+
 function renderMarketCard(market) {
   const gap = market.premiumPct;
   const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
@@ -545,14 +553,7 @@ function renderMarketCard(market) {
 }
 
 document.querySelectorAll(".nav-item").forEach((button) => {
-  button.addEventListener("click", () => {
-    const view = button.dataset.view;
-    document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item === button));
-    document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
-    if (view === "markets") loadMarkets();
-    if (view === "portfolio") loadPortfolio();
-    if (view === "history") loadHistory();
-  });
+  button.addEventListener("click", () => showView(button.dataset.view));
 });
 
 document.querySelectorAll("[data-prompt]").forEach((button) => {
