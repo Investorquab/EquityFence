@@ -307,6 +307,7 @@ button{cursor:pointer}
 .execution-actions button:disabled{background-image:none}
 .execution-actions button:disabled{outline:none}
 .execution-actions button:disabled{animation:none}
+.execution-actions button:disabled{pointer-events:none}
 .tx-hash{display:block;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:9px var(--mono);color:var(--faint)}
 
 @media (max-width:620px){
