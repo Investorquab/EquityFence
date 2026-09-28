@@ -250,6 +250,7 @@ function addExecutionResult(data) {
     const button = event.currentTarget;
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
+    button.textContent = "Opening…";
     showView("history");
   });
   scrollConversation();
