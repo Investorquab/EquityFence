@@ -15,6 +15,23 @@ export interface RwaAsset {
 }
 
 interface Envelope<T>{code:number;msg:string;data:T;timestamp:number;success:boolean}
+
+export function normalizeTransactionLimit(limit:number):number{
+  if(!Number.isFinite(limit)) return 20;
+  return Math.min(Math.max(Math.floor(limit),1),100);
+}
+
+export function normalizeTransactions(transactions:WalletTransaction[]):WalletTransaction[]{
+  const seen=new Set<string>();
+  return transactions.filter(tx=>{
+    if(tx.binanceChainId!=="56") return false;
+    const hash=tx.txHash.trim().toLowerCase();
+    if(!hash||seen.has(hash)) return false;
+    seen.add(hash);
+    return true;
+  });
+}
+
 const BASE="https://web3.binance.com/build";
 
 export class HandeloMarketClient {
@@ -67,7 +84,7 @@ export class HandeloMarketClient {
       binanceChainId:string;txHash:string;txTime:string;amount:string;symbol:string;
       txStatus:string;tokenContractAddress:string;from:Array<{address:string}>;to:Array<{address:string}>;
     }>}>>("GET","/api/v1/dex/post-transaction/transactions-by-address",undefined,{
-      address:wallet,chains:"56",limit:String(Math.min(Math.max(limit,1),100))
+      address:wallet,chains:"56",limit:String(normalizeTransactionLimit(limit))
     });
     return data.flatMap(group=>group.transactionList).map(tx=>({
       binanceChainId:tx.binanceChainId,txHash:tx.txHash,txTime:tx.txTime,amount:tx.amount,symbol:tx.symbol,
