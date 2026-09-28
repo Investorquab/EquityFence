@@ -7,18 +7,9 @@ const appPath = fileURLToPath(new URL("./app.js", import.meta.url));
 const source = readFileSync(appPath, "utf8");
 
 test("selected representation is reviewed directly without re-resolving through chat", () => {
-  assert.match(
-    source,
-    /reviewTrade\(market\.tokenSymbol, amount, action, prompt\)/
-  );
-  assert.match(
-    source,
-    /SELECTED REPRESENTATION/
-  );
-  assert.doesNotMatch(
-    source,
-    /prompt\.querySelector\("button"\)\.addEventListener\("click", \(\) => ask\(/
-  );
+  assert.match(source, /reviewTrade\(market\.tokenSymbol, amount, action, prompt\)/);
+  assert.match(source, /SELECTED REPRESENTATION/);
+  assert.doesNotMatch(source, /prompt\.querySelector\("button"\)\.addEventListener\("click", \(\) => ask\(/);
 });
 
 test("selection keeps the user's amount and action in the review prompt", () => {
@@ -38,7 +29,6 @@ test("trade confirmation stays disabled unless a valid review can execute", () =
   assert.match(source, /canConfirm \? "" : "disabled"/);
 });
 
-
 test("trade confirmation submits the reviewed transaction with explicit confirmation", () => {
   assert.match(source, /API_BASE \+ "\/api\/execute"/);
   assert.match(source, /ticker: data\.asset\.ticker/);
@@ -47,7 +37,6 @@ test("trade confirmation submits the reviewed transaction with explicit confirma
   assert.match(source, /reviewToken: data\.reviewToken/);
   assert.match(source, /confirmed: true/);
 });
-
 
 test("execution result surfaces terminal status without trusting an invalid transaction hash", () => {
   assert.match(source, /result\.status === "FINISHED"/);
@@ -59,12 +48,11 @@ test("execution result surfaces terminal status without trusting an invalid tran
   assert.match(source, /Transaction hash unavailable/);
 });
 
-
 test("finished execution offers a direct path to refreshed portfolio state", () => {
   assert.match(source, /data-refresh-portfolio/);
-  assert.match(source, /item\.dataset\.view === "portfolio"/);
-  assert.match(source, /section\.id === "view-portfolio"/);
-  assert.match(source, /loadPortfolio\(\)/);
+  assert.match(source, /showView\("portfolio"\)/);
+  assert.match(source, /function showView\(view\)/);
+  assert.match(source, /if \(view === "portfolio"\) loadPortfolio\(\)/);
 });
 
 test("finished execution exposes both portfolio and history follow-up actions", () => {
