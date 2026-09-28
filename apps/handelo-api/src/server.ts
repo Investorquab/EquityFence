@@ -30,6 +30,14 @@ async function walletStatus() {
 async function verifyWalletAuth(qrCodeId: string) {
   try {
     await bawJson(["auth", "verify", "--qrCodeId", qrCodeId]);
+    const status = await walletStatus();
+    if (status.status !== "CONNECTED") {
+      walletAuth = {
+        status: "FAILED",
+        error: `Wallet authentication completed, but wallet status is ${status.status}.`
+      };
+      return;
+    }
     walletAuth = { status: "SUCCESS" };
   } catch (error) {
     walletAuth = { status: "FAILED", error: error instanceof Error ? error.message : String(error) };
