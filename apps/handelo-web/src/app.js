@@ -256,6 +256,7 @@ function addExecutionResult(data) {
     button.setAttribute("aria-disabled", "true");
     button.textContent = "Opening…";
     button.setAttribute("aria-label", "Opening transaction history");
+    button.setAttribute("data-navigation-disabled", "true");
     button.setAttribute("data-navigation-busy", "true");
     showView("history");
   });
