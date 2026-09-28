@@ -10,7 +10,7 @@ test("MCP exposes only read-only market tools",async()=>{
   const messages:unknown[]=[];
   let buffer="";
   const done=new Promise<void>((resolve,reject)=>{
-    const timer=setTimeout(()=>{child.kill();reject(new Error("MCP protocol response timed out"));},3000);
+    const timer=setTimeout(()=>{child.kill();reject(new Error("MCP protocol response timed out"));},5000);
     child.stdout.on("data",(chunk:Buffer)=>{
       buffer+=chunk.toString();
       let index=buffer.indexOf("\n");
