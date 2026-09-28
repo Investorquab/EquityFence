@@ -6,7 +6,8 @@ const input: ReviewTokenInput = {
   ticker: "NVDA",
   amountUsd: 20,
   fromToken: "0x55d398326f99059fF775485246999027B3197955",
-  contract: "0x0000000000000000000000000000000000000001"
+  contract: "0x0000000000000000000000000000000000000001",
+  slippage: "0.50"
 };
 
 test("review token accepts the exact reviewed trade", () => {
@@ -38,4 +39,11 @@ test("review token compares address casing without weakening the contract bindin
     verifyReviewToken(token, { ...input, fromToken: input.fromToken.toLowerCase(), contract: input.contract.toUpperCase() }, now + 1_000),
     true
   );
+});
+
+
+test("review token rejects a changed slippage", () => {
+  const now = 1_000_000;
+  const token = createReviewToken(input, now);
+  assert.equal(verifyReviewToken(token, { ...input, slippage: "1.00" }, now + 1_000), false);
 });
