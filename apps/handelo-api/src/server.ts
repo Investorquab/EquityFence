@@ -315,12 +315,12 @@ const server = createServer(async (req, res) => {
     try {
       let raw = "";
       for await (const chunk of req) raw += chunk;
-      const body = JSON.parse(raw) as {
+      const body = parseJsonBody<{
         ticker?: unknown;
         fromTokenQty?: unknown;
         fromToken?: unknown;
         slippage?: unknown;
-      };
+      }>(raw);
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const amount = Number(body.fromTokenQty);
@@ -380,7 +380,7 @@ const server = createServer(async (req, res) => {
     try {
       let raw = "";
       for await (const chunk of req) raw += chunk;
-      const body = JSON.parse(raw) as {
+      const body = parseJsonBody<{
         ticker?: unknown;
         amountUsd?: unknown;
         fromToken?: unknown;
