@@ -245,8 +245,10 @@ function addExecutionResult(data) {
     button.setAttribute("aria-busy", "true");
     showView("portfolio");
   });
-  node.querySelector("[data-view-history]")?.addEventListener("click", () => {
-    node.querySelector("[data-view-history]").disabled = true;
+  node.querySelector("[data-view-history]")?.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
     showView("history");
   });
   scrollConversation();
