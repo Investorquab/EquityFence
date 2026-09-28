@@ -1,4 +1,5 @@
 import { createServer } from "node:http";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
@@ -14,6 +15,33 @@ const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
+const REVIEW_TOKEN_TTL_MS = 5 * 60 * 1000;
+const REVIEW_TOKEN_SECRET = process.env.HANDELO_REVIEW_TOKEN_SECRET ?? "handelo-local-review-secret";
+
+function createReviewToken(input: { ticker: string; amountUsd: number; fromToken: string; contract: string }) {
+  const payload = Buffer.from(JSON.stringify({ ...input, exp: Date.now() + REVIEW_TOKEN_TTL_MS })).toString("base64url");
+  const signature = createHmac("sha256", REVIEW_TOKEN_SECRET).update(payload).digest("base64url");
+  return `${payload}.${signature}`;
+}
+
+function verifyReviewToken(token: string, input: { ticker: string; amountUsd: number; fromToken: string; contract: string }) {
+  const [payload, signature] = token.split(".");
+  if (!payload || !signature) return false;
+  const expected = createHmac("sha256", REVIEW_TOKEN_SECRET).update(payload).digest("base64url");
+  const actualBuffer = Buffer.from(signature);
+  const expectedBuffer = Buffer.from(expected);
+  if (actualBuffer.length !== expectedBuffer.length || !timingSafeEqual(actualBuffer, expectedBuffer)) return false;
+  try {
+    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as typeof input & { exp?: number };
+    return parsed.exp !== undefined && parsed.exp > Date.now()
+      && parsed.ticker === input.ticker
+      && parsed.amountUsd === input.amountUsd
+      && parsed.fromToken.toLowerCase() === input.fromToken.toLowerCase()
+      && parsed.contract.toLowerCase() === input.contract.toLowerCase();
+  } catch {
+    return false;
+  }
+}
 
 async function bawJson<T>(args: string[]): Promise<T> {
   const { stdout, stderr } = await execFileAsync("baw", [...args, "--json"], { maxBuffer: 1024 * 1024 });
@@ -259,7 +287,13 @@ const server = createServer(async (req, res) => {
         executionBlocked,
         quote,
         quoteError,
-        quoteToken: fromToken || null
+        quoteToken: fromToken || null,
+        reviewToken: quote ? createReviewToken({
+          ticker: asset.underlyingTicker,
+          amountUsd,
+          fromToken,
+          contract: asset.tokenContractAddress
+        }) : null
       });
     } catch (error) {
       return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
@@ -329,13 +363,19 @@ const server = createServer(async (req, res) => {
         fromToken?: unknown;
         slippage?: unknown;
         confirmed?: unknown;
+        reviewToken?: unknown;
       };
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const fromToken = String(body.fromToken ?? "").trim();
       const amount = Number(body.amountUsd);
+      const reviewToken = String(body.reviewToken ?? "").trim();
 
-      if (!ticker || !Number.isFinite(amount) || amount <= 0 || !fromToken) {
+      if (!ticker || !Number.isFinite(amount) || amount <= 0 || !fromToken || !reviewToken) {
+        return json(res, 400, {
+          error: "ticker, positive amountUsd, fromToken, and reviewToken are required"
+        });
+      }
         return json(res, 400, {
           error: "ticker, positive amountUsd, and fromToken are required"
         });
@@ -346,6 +386,15 @@ const server = createServer(async (req, res) => {
       }
 
       const asset = await market.find(ticker);
+      if (!verifyReviewToken(reviewToken, {
+        ticker: asset.underlyingTicker,
+        amountUsd: amount,
+        fromToken,
+        contract: asset.tokenContractAddress
+      })) {
+        return json(res, 409, { error: "This transaction no longer matches the reviewed trade or the review has expired. Start a new review." });
+      }
+
       const tokenPrice = Number(asset.tokenPrice);
       const referencePrice = Number(asset.referencePrice);
       const premiumPct = Number.isFinite(tokenPrice) && Number.isFinite(referencePrice) && referencePrice !== 0
