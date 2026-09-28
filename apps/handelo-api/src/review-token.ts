@@ -35,7 +35,8 @@ export function verifyReviewToken(token: string, input: ReviewTokenInput, now = 
       && parsed.ticker === input.ticker
       && parsed.amountUsd === input.amountUsd
       && parsed.fromToken.toLowerCase() === input.fromToken.toLowerCase()
-      && parsed.contract.toLowerCase() === input.contract.toLowerCase();
+      && parsed.contract.toLowerCase() === input.contract.toLowerCase()
+      && parsed.slippage === input.slippage;
   } catch {
     return false;
   }
