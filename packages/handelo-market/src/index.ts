@@ -86,9 +86,16 @@ export class HandeloMarketClient {
     const assets=results.flatMap(x=>x.assets).filter(x=>x.binanceChainId==="56");
     if(!assets.length) throw new Error(`No BSC tokenized-stock representation found for ${query}.`);
     const all=await this.tokens();
-    const matches=all.filter(x=>assets.some(a=>a.tokenContractAddress.toLowerCase()===x.tokenContractAddress.toLowerCase()));
-    if(!matches.length) throw new Error(`No live BSC market record found for ${query}.`);
-    return matches;
+    const contracts=new Set(assets.map(asset=>asset.tokenContractAddress.toLowerCase()));
+    const normalizedTicker=query.toLowerCase();
+    const matches=all.filter(
+      asset =>
+        contracts.has(asset.tokenContractAddress.toLowerCase()) &&
+        asset.underlyingTicker.trim().toLowerCase()===normalizedTicker
+    );
+    const unique=new Map(matches.map(asset=>[asset.tokenContractAddress.toLowerCase(),asset]));
+    if(!unique.size) throw new Error(`No live BSC tokenized-stock market record found for ${query}.`);
+    return [...unique.values()];
   }
 
   async find(ticker:string):Promise<RwaAsset>{
