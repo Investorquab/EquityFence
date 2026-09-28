@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, isExecutableMarketAsset, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
+import { HandeloMarketClient, MarketResolutionError, isExecutableMarketAsset, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
@@ -205,4 +205,13 @@ test("executable market validation rejects malformed price or contract", () => {
   assert.equal(isExecutableMarketAsset(asset({ tokenPrice: "0" })), false);
   assert.equal(isExecutableMarketAsset(asset({ tokenContractAddress: "invalid" })), false);
   assert.equal(isExecutableMarketAsset(asset({ binanceChainId: "1" })), false);
+});
+
+
+test("market resolution errors expose actionable categories",async()=>{
+  const market=client([],[]);
+  await assert.rejects(
+    ()=>market.findAll("UNKNOWN"),
+    (error:unknown)=>error instanceof MarketResolutionError && error.kind==="NOT_FOUND"
+  );
 });
