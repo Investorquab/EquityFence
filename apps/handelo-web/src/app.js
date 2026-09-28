@@ -435,8 +435,12 @@ async function loadHistory() {
       const time = Number(tx.txTime);
       const date = Number.isFinite(time) ? new Date(time).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "Unknown time";
       const hash = String(tx.txHash || "");
-      const shortHash = hash ? hash.slice(0, 8) + "…" + hash.slice(-6) : "No hash";
-      return '<article class="history-row"><div><div class="history-main"><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><span class="history-status ' + escapeHtml(String(tx.txStatus || "").toLowerCase()) + '">' + escapeHtml(tx.txStatus || "unknown") + '</span></div><span class="history-meta">' + escapeHtml(date) + ' · ' + escapeHtml(String(tx.amount || "—")) + ' ' + escapeHtml(tx.symbol || "") + '</span></div><a class="history-hash" href="https://bscscan.com/tx/' + encodeURIComponent(hash) + '" target="_blank" rel="noopener">' + escapeHtml(shortHash) + ' ↗</a></article>';
+      const validHash = /^0x[a-fA-F0-9]{64}$/.test(hash);
+      const shortHash = validHash ? hash.slice(0, 8) + "…" + hash.slice(-6) : "No hash";
+      const hashLink = validHash
+        ? '<a class="history-hash" href="https://bscscan.com/tx/' + encodeURIComponent(hash) + '" target="_blank" rel="noopener noreferrer">' + escapeHtml(shortHash) + ' ↗</a>'
+        : '<span class="history-hash">' + escapeHtml(shortHash) + '</span>';
+      return '<article class="history-row"><div><div class="history-main"><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><span class="history-status ' + escapeHtml(String(tx.txStatus || "").toLowerCase()) + '">' + escapeHtml(tx.txStatus || "unknown") + '</span></div><span class="history-meta">' + escapeHtml(date) + ' · ' + escapeHtml(String(tx.amount || "—")) + ' ' + escapeHtml(tx.symbol || "") + '</span></div>' + hashLink + '</article>';
     }).join("") + '</div>';
   } catch (error) {
     target.innerHTML = '<div class="loading-card">History data is unavailable. ' + escapeHtml(error.message) + '</div>';
