@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 import { spawn } from "node:child_process";
 
 test("MCP exposes only read-only market tools",async()=>{
-  const child=spawn("node",["--env-file=../../.env","--import","tsx","src/index.ts"],{
+  const child=spawn("node",["--import","tsx","src/index.ts"],{
     cwd:new URL("..",import.meta.url).pathname,
     env:{...process.env,BINANCE_WEB3_API_KEY:"test-key",BINANCE_WEB3_SECRET_KEY:"test-secret"}
   });
