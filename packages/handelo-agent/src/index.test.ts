@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { HandeloAgent, validateUserIntent } from "./index.js";
+import { HandeloAgent, normalizeUserMessage, validateUserIntent } from "./index.js";
 import type { LlmClient } from "@handelo/llm";
 import type { HandeloMarketClient } from "@handelo/market";
 
@@ -62,4 +62,11 @@ test("structured intent validation rejects malformed LLM output", () => {
     () => validateUserIntent({ action: "unknown", ticker: null, amountUsd: null, horizon: null, riskTolerance: "low" }),
     /invalid investment intent/,
   );
+});
+
+
+test("user message normalization rejects empty and oversized input", () => {
+  assert.throws(() => normalizeUserMessage("   "), /message is required/);
+  assert.throws(() => normalizeUserMessage("x".repeat(8001)), /message is too long/);
+  assert.equal(normalizeUserMessage("  Help me understand NVDA  "), "Help me understand NVDA");
 });
