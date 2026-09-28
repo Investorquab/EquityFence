@@ -40,10 +40,10 @@ test("trade confirmation stays disabled unless a valid review can execute", () =
 
 
 test("trade confirmation submits the reviewed transaction with explicit confirmation", () => {
-  assert.match(source, /API_BASE \\+ "\/api\\/execute"/);
-  assert.match(source, /ticker: data\\.asset\\.ticker/);
+  assert.match(source, /API_BASE \+ "\/api\/execute"/);
+  assert.match(source, /ticker: data\.asset\.ticker/);
   assert.match(source, /amountUsd,/);
-  assert.match(source, /fromToken: data\\.quoteToken/);
-  assert.match(source, /reviewToken: data\\.reviewToken/);
+  assert.match(source, /fromToken: data\.quoteToken/);
+  assert.match(source, /reviewToken: data\.reviewToken/);
   assert.match(source, /confirmed: true/);
 });
