@@ -104,3 +104,10 @@ test("portfolio refresh action exposes loading state", () => {
   assert.match(source, /aria-busy/);
   assert.match(source, /showView\("portfolio"\)/);
 });
+
+
+test("history navigation action exposes loading state", () => {
+  assert.match(source, /event\.currentTarget/);
+  assert.match(source, /aria-busy/);
+  assert.match(source, /showView\("history"\)/);
+});
