@@ -9,12 +9,19 @@ export interface SimulationResult{status:string;failReason:string|null;balanceCh
 export interface ExecutionAdapter{simulate(tx:EvmTransaction):Promise<SimulationResult>;execute(tx:EvmTransaction):Promise<{txHash:string}>;}
 
 export interface WalletSwapRequest{
-  fromTokenQty:string;fromToken:string;toToken:string;binanceChainId:"56";
-  slippage?:string;mev?:boolean;gasLevel?:"LOW"|"MEDIUM"|"HIGH";
+  fromTokenQty:string;
+  fromToken:string;
+  toToken:string;
+  binanceChainId:"56";
+  slippage?:string;
+  mev?:boolean;
+  gasLevel?:"LOW"|"MEDIUM"|"HIGH";
 }
 export interface WalletQuote{fromCoinSymbol:string;fromCoinAmount:string;toCoinSymbol:string;toCoinAmount:string;slippage:number;}
 export interface WalletOrder{orderId:string;status:"PENDING"|"FINISHED"|"FAILED";txHash:string|null;toCoinAmount?:string;}
 interface BawEnvelope<T>{success:boolean;data:T;message?:string;code?:string|number;}
+interface MarketOrderStatus{orderId:string;status:"PENDING"|"FINISHED"|"FAILED";txHash:string|null;toCoinActualQty?:string;}
+interface MarketOrderList{list:MarketOrderStatus[];}
 
 async function baw<T>(args:string[]):Promise<T>{
   try{
@@ -33,33 +40,70 @@ async function baw<T>(args:string[]):Promise<T>{
 
 async function auditToken(chainId:string,contractAddress:string){
   const response=await fetch("https://web3.binance.com/bapi/defi/v1/public/wallet-direct/security/token/audit",{
-    method:"POST",headers:{"content-type":"application/json"},
+    method:"POST",
+    headers:{"content-type":"application/json"},
     body:JSON.stringify({binanceChainId:chainId,contractAddress,requestId:randomUUID()})
   });
-  const payload=await response.json() as {code:string|number;data:{hasResult:boolean;isSupported:boolean;riskLevel?:string;extraInfo?:{buyTax?:string;sellTax?:string};riskItems?:unknown[]};success:boolean;message?:string};
+  const payload=await response.json() as {
+    code:string|number;
+    data:{hasResult:boolean;isSupported:boolean;riskLevel?:string;extraInfo?:{buyTax?:string;sellTax?:string};riskItems?:unknown[]};
+    success:boolean;
+    message?:string;
+  };
   if(!response.ok||!payload.success) throw new Error(payload.message??"Token security audit failed.");
   return payload.data;
 }
 
 export class BinanceAgenticWalletAdapter{
   async quote(request:WalletSwapRequest):Promise<WalletQuote>{
-    return baw<WalletQuote>(["market-order","quote","--fromTokenQty",request.fromTokenQty,"--fromToken",request.fromToken,"--toToken",request.toToken,"--binanceChainId",request.binanceChainId,...(request.slippage?["--slippage",request.slippage]:[])]);
+    return baw<WalletQuote>([
+      "market-order","quote",
+      "--fromTokenQty",request.fromTokenQty,
+      "--fromToken",request.fromToken,
+      "--toToken",request.toToken,
+      "--binanceChainId",request.binanceChainId,
+      ...(request.slippage?["--slippage",request.slippage]:[])
+    ]);
   }
 
   async execute(request:WalletSwapRequest,confirmed:boolean):Promise<WalletOrder>{
     if(!confirmed) throw new Error("Execution requires explicit user confirmation.");
+
     const audit=await auditToken(request.binanceChainId,request.toToken);
-    if(!audit.hasResult||!audit.isSupported) throw new Error("Token security audit data is unavailable for the requested token; execution is blocked.");
+    if(!audit.hasResult||!audit.isSupported){
+      throw new Error("Token security audit data is unavailable for the requested token; execution is blocked.");
+    }
+
     await baw(["wallet","status"]);
-    const order=await baw<{orderId:string}>(["market-order","swap","--fromTokenQty",request.fromTokenQty,"--fromToken",request.fromToken,"--toToken",request.toToken,"--binanceChainId",request.binanceChainId,...(request.slippage?["--slippage",request.slippage]:[]),...(request.mev===undefined?[]:["--mev",String(request.mev)]),...(request.gasLevel?["--gasLevel",request.gasLevel]:[])]);
+
+    const order=await baw<{orderId:string}>([
+      "market-order","swap",
+      "--fromTokenQty",request.fromTokenQty,
+      "--fromToken",request.fromToken,
+      "--toToken",request.toToken,
+      "--binanceChainId",request.binanceChainId,
+      ...(request.slippage?["--slippage",request.slippage]:[]),
+      ...(request.mev===undefined?[]:["--mev",String(request.mev)]),
+      ...(request.gasLevel?["--gasLevel",request.gasLevel]:[])
+    ]);
+
     for(let i=0;i<10;i++){
       await new Promise(resolve=>setTimeout(resolve,3000));
-      const result=await baw<{list:Array<{orderId:string;status:"PENDING"|"FINISHED"|"FAILED";txHash:string|null;toCoinActualQty?:string}>>>(["market-order","list","--orderId",order.orderId,"--binanceChainId",request.binanceChainId]);
+      const result=await baw<MarketOrderList>([
+        "market-order","list",
+        "--orderId",order.orderId,
+        "--binanceChainId",request.binanceChainId
+      ]);
       const current=result.list?.[0];
       if(!current) continue;
-      if(current.status==="FINISHED") return {orderId:current.orderId,status:current.status,txHash:current.txHash,toCoinAmount:current.toCoinActualQty};
-      if(current.status==="FAILED") return {orderId:current.orderId,status:current.status,txHash:current.txHash};
+      if(current.status==="FINISHED"){
+        return {orderId:current.orderId,status:current.status,txHash:current.txHash,toCoinAmount:current.toCoinActualQty};
+      }
+      if(current.status==="FAILED"){
+        return {orderId:current.orderId,status:current.status,txHash:current.txHash};
+      }
     }
+
     return {orderId:order.orderId,status:"PENDING",txHash:null};
   }
 }
@@ -69,5 +113,7 @@ export class BinanceSimulationAdapter implements ExecutionAdapter{
   async simulate(_tx:EvmTransaction):Promise<SimulationResult>{
     throw new Error("Use the Binance Agentic Wallet quote path for execution review; direct transaction simulation remains a separate safety service.");
   }
-  async execute(_tx:EvmTransaction):Promise<{txHash:string}>{throw new Error("Direct execution is disabled; use BinanceAgenticWalletAdapter.");}
+  async execute(_tx:EvmTransaction):Promise<{txHash:string}>{
+    throw new Error("Direct execution is disabled; use BinanceAgenticWalletAdapter.");
+  }
 }
