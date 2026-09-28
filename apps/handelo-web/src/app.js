@@ -222,7 +222,7 @@ function renderMarketContext(container, market) {
   container.innerHTML = `
     <div class="context-head">
       <div class="context-name">${escapeHtml(market.ticker)} <span style="color:#5d5a53">/ ${escapeHtml(market.tokenSymbol)}</span></div>
-      <div class="context-status ${market.marketOpen ? "" : "closed"}">${status} · BSC</div>
+      <div class="context-status ${market.marketOpen ? "" : "closed"}">${status} · ${escapeHtml(market.provider || "BSC")}</div>
     </div>
     <div class="context-body">
       <div class="context-price"><strong>${money(market.tokenPrice)}</strong><span>ON-CHAIN PRICE</span></div>
@@ -230,6 +230,7 @@ function renderMarketContext(container, market) {
         <div class="metric"><div class="metric-label">Reference</div><div class="metric-value">${money(market.referencePrice)}</div></div>
         <div class="metric"><div class="metric-label">Difference</div><div class="metric-value ${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</div></div>
         <div class="metric"><div class="metric-label">Market</div><div class="metric-value">${escapeHtml(market.marketStatus || "—")}</div></div>
+        <div class="metric"><div class="metric-label">Provider</div><div class="metric-value">${escapeHtml(market.provider || "—")}</div></div>
       </div>
       <div class="context-schedule"><span>${market.marketOpen ? "NEXT CLOSE" : "NEXT OPEN"}</span><strong>${escapeHtml(marketSchedule(market))}</strong></div>
       ${market.reason ? `<div class="context-reason">${escapeHtml(market.reason)}</div>` : ""}
@@ -245,8 +246,8 @@ function renderCandidates(container, candidates) {
     <div class="candidate-list">
       ${candidates.map((market) => `
         <div class="candidate">
-          <div><strong>${escapeHtml(market.ticker)}</strong><small>${escapeHtml(market.tokenSymbol)}</small></div>
-          <div class="candidate-price">${money(market.tokenPrice)}</div>
+          <div><strong>${escapeHtml(market.ticker)}</strong><small>${escapeHtml(market.tokenSymbol)} · ${escapeHtml(market.provider || "BSC")}</small></div>
+          <div class="candidate-price"><strong>${money(market.tokenPrice)}</strong><small>${market.marketOpen ? "LIVE" : "CLOSED"}</small></div>
         </div>`).join("")}
     </div>`;
 }
