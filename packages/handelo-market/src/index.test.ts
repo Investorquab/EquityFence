@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
+import { HandeloMarketClient, isExecutableMarketAsset, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
@@ -196,4 +196,13 @@ test("transaction normalization keeps BSC records and removes duplicate or empty
   ]);
 
   assert.deepEqual(result.map(item => item.txHash), ["0xabc", "0xdef"]);
+});
+
+
+test("executable market validation rejects malformed price or contract", () => {
+  assert.equal(isExecutableMarketAsset(asset()), true);
+  assert.equal(isExecutableMarketAsset(asset({ tokenPrice: "not-a-number" })), false);
+  assert.equal(isExecutableMarketAsset(asset({ tokenPrice: "0" })), false);
+  assert.equal(isExecutableMarketAsset(asset({ tokenContractAddress: "invalid" })), false);
+  assert.equal(isExecutableMarketAsset(asset({ binanceChainId: "1" })), false);
 });
