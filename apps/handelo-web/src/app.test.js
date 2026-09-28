@@ -219,3 +219,10 @@ test("disabled execution follow-up actions show a waiting cursor", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /cursor:wait/);
 });
+
+
+test("disabled execution follow-up actions mute visual treatment", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /filter:grayscale\(1\)/);
+});
