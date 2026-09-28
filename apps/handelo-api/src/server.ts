@@ -106,6 +106,7 @@ function json(res: import("node:http").ServerResponse, status: number, payload: 
   const body = JSON.stringify(payload);
   res.writeHead(status, {
     "content-type": "application/json",
+    "cache-control": "no-store",
     "access-control-allow-origin": CORS_ORIGIN,
     "access-control-allow-headers": "content-type"
   });
