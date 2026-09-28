@@ -303,3 +303,10 @@ test("disabled execution follow-up actions mute text", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /color:var\(--faint\)/);
 });
+
+
+test("disabled execution follow-up actions mute their text", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /color:var\(--faint\)/);
+});
