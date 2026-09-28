@@ -297,6 +297,7 @@ button{cursor:pointer}
 .secondary-button:disabled{cursor:wait;opacity:.65;transform:none}
 .primary-button:disabled{cursor:wait;opacity:.65;transform:none}
 .execution-actions button:disabled{pointer-events:none}
+.execution-actions button:disabled{cursor:not-allowed}
 .execution-actions button:disabled{user-select:none}
 .execution-actions button:disabled{transition:none}
 .execution-actions button:disabled{transform:none!important}
