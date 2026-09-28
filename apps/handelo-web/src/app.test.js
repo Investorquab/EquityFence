@@ -275,3 +275,10 @@ test("disabled execution follow-up actions prevent text selection", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /user-select:none/);
 });
+
+
+test("disabled execution follow-up actions strengthen dimming", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /opacity:\.55/);
+});
