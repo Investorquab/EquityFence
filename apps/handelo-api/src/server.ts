@@ -298,6 +298,32 @@ const server = createServer(async (req, res) => {
       }
 
       const asset = await market.find(ticker);
+      const tokenPrice = Number(asset.tokenPrice);
+      const referencePrice = Number(asset.referencePrice);
+      const premiumPct = Number.isFinite(tokenPrice) && Number.isFinite(referencePrice) && referencePrice !== 0
+        ? ((tokenPrice - referencePrice) / referencePrice) * 100
+        : null;
+      const policy = (await import("@handelo/policy")).evaluatePolicy({
+        action: "buy",
+        amountUsd: amount,
+        marketOpen: asset.statusInfo.openState,
+        premiumPct
+      });
+
+      if (policy.decision === "BLOCK") {
+        return json(res, 409, {
+          error: "Execution blocked by Handelo safety policy.",
+          policy
+        });
+      }
+
+      if (policy.decision === "CONFIRM" && body.confirmed !== true) {
+        return json(res, 409, {
+          error: "Additional confirmation is required by Handelo safety policy.",
+          policy
+        });
+      }
+
       const reviewedQuote = await wallet.quote({
         fromTokenQty: String(amount),
         fromToken,
@@ -324,6 +350,7 @@ const server = createServer(async (req, res) => {
           contract: asset.tokenContractAddress,
           provider: asset.platformId
         },
+        policy,
         result
       });
     } catch (error) {
