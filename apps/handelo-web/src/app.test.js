@@ -90,3 +90,10 @@ test("portfolio refresh action disables itself before navigation", () => {
   assert.match(source, /\.disabled = true/);
   assert.match(source, /showView\("portfolio"\)/);
 });
+
+
+test("history follow-up action disables itself before navigation", () => {
+  assert.match(source, /data-view-history/);
+  assert.match(source, /\.disabled = true/);
+  assert.match(source, /showView\("history"\)/);
+});
