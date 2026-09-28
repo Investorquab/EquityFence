@@ -32,6 +32,14 @@ export function normalizeTransactions(transactions:WalletTransaction[]):WalletTr
   });
 }
 
+export function isExecutableMarketAsset(asset:RwaAsset):boolean{
+  const tokenPrice=Number(asset.tokenPrice);
+  return asset.binanceChainId==="56"
+    && /^0x[a-fA-F0-9]{40}$/.test(asset.tokenContractAddress)
+    && Number.isFinite(tokenPrice)
+    && tokenPrice>0;
+}
+
 const BASE="https://web3.binance.com/build";
 
 export class HandeloMarketClient {
