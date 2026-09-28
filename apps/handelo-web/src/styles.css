@@ -299,6 +299,7 @@ button{cursor:pointer}
 .execution-actions button:disabled{pointer-events:none}
 .execution-actions button:disabled{user-select:none}
 .execution-actions button:disabled{transition:none}
+.execution-actions button:disabled{transform:none!important}
 .tx-hash{display:block;max-width:520px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:9px var(--mono);color:var(--faint)}
 
 @media (max-width:620px){
