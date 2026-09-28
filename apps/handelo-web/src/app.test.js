@@ -70,3 +70,9 @@ test("non-finished execution results retain a history follow-up", () => {
   assert.match(source, /data-view-history/);
   assert.match(source, /showView\("history"\)/);
 });
+
+
+test("execution outcomes are announced to assistive technology", () => {
+  assert.match(source, /node\.setAttribute\("role", "status"\)/);
+  assert.match(source, /node\.setAttribute\("aria-live", "polite"\)/);
+});
