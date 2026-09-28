@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, type RwaAsset } from "./index.ts";
+import { HandeloMarketClient, type RwaAsset } from "./index";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
