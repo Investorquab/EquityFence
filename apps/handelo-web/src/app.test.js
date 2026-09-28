@@ -24,6 +24,15 @@ test("trade review renders explicit cancel and confirmation actions", () => {
   assert.match(source, /Confirm purchase/);
 });
 
+test("wallet authentication prevents duplicate sessions while active", () => {
+  assert.match(source, /let walletAuthActive = false/);
+  assert.match(source, /if \(walletAuthActive\) return/);
+  assert.match(source, /walletAuthActive = true/);
+  assert.match(source, /connectButton\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(source, /walletAuthActive = false/);
+  assert.match(source, /connectButton\.removeAttribute\("aria-busy"\)/);
+});
+
 test("wallet authentication cleans up polling on completion, failure, timeout, and close", () => {
   assert.match(source, /let walletAuthPoll = null/);
   assert.match(source, /let walletAuthTimeout = null/);
