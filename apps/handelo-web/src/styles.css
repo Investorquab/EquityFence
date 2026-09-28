@@ -288,3 +288,30 @@ button{cursor:pointer}
   .review-actions{display:grid;grid-template-columns:1fr 1fr}
   .secondary-action,.primary-action{width:100%}
 }
+
+.connect.connected{border-color:rgba(87,211,155,.28);background:rgba(87,211,155,.05)}
+.wallet-modal{position:fixed;inset:0;z-index:100;display:grid;place-items:center;padding:20px}
+.wallet-modal-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.62);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.wallet-dialog{
+  position:relative;width:min(440px,100%);padding:28px;border:1px solid var(--line);
+  border-radius:18px;background:#11100d;box-shadow:0 30px 100px rgba(0,0,0,.55);
+  animation:review-in 260ms ease-out both;
+}
+.wallet-close{
+  position:absolute;right:14px;top:12px;width:30px;height:30px;border:0;background:transparent;
+  color:var(--muted);font-size:20px;
+}
+.wallet-dialog h2{margin:16px 0 10px;font:400 38px/1 var(--serif)}
+.wallet-dialog p{margin:0;color:var(--muted);font-size:12px;line-height:1.7}
+.pairing-code{
+  margin:22px 0 12px;padding:18px;border:1px solid rgba(240,185,11,.22);
+  border-radius:12px;background:rgba(240,185,11,.035);text-align:center;
+  font:500 28px var(--mono);letter-spacing:.18em;color:var(--gold);
+}
+.wallet-link{
+  display:block;padding:12px;border-radius:10px;text-align:center;text-decoration:none;
+  border:1px solid rgba(240,185,11,.3);background:var(--gold);color:#17130a;
+  font-size:11px;transition:transform 180ms ease-out,box-shadow 180ms ease-out;
+}
+.wallet-link:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(240,185,11,.12)}
+.wallet-wait{padding-top:13px;text-align:center;font:9px var(--mono);color:var(--faint)}
