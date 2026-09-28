@@ -57,6 +57,22 @@ async function verifyWalletAuth(qrCodeId: string) {
   }
 }
 
+const MAX_REQUEST_BODY_BYTES = 64 * 1024;
+
+async function readRequestBody(req: import("node:http").IncomingMessage): Promise<string> {
+  let raw = "";
+  let size = 0;
+  for await (const chunk of req) {
+    const text = typeof chunk === "string" ? chunk : Buffer.from(chunk).toString("utf8");
+    size += Buffer.byteLength(text);
+    if (size > MAX_REQUEST_BODY_BYTES) {
+      throw new RangeError("Request body is too large.");
+    }
+    raw += text;
+  }
+  return raw;
+}
+
 function parseJsonBody<T>(raw: string): T {
   try {
     return JSON.parse(raw) as T;
@@ -200,8 +216,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "POST" && req.url === "/api/review") {
     try {
-      let raw = "";
-      for await (const chunk of req) raw += chunk;
+      const raw = await readRequestBody(req);
       const body = parseJsonBody<{
         ticker?: unknown;
         amountUsd?: unknown;
@@ -497,8 +512,7 @@ const server = createServer(async (req, res) => {
   }
 
   try {
-    let raw = "";
-    for await (const chunk of req) raw += chunk;
+    const raw = await readRequestBody(req);
     const body = parseJsonBody<{ message?: unknown }>(raw);
 
     if (typeof body.message !== "string" || !body.message.trim()) {
