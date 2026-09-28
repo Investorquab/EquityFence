@@ -44,6 +44,21 @@ export class HandeloMarketClient {
     const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());
     return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};
   }
+  async transactions(wallet:string,limit=20):Promise<WalletTransaction[]>{
+    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
+    const data=await this.request<Array<{transactionList:Array<{
+      binanceChainId:string;txHash:string;txTime:string;amount:string;symbol:string;
+      txStatus:string;tokenContractAddress:string;from:Array<{address:string}>;to:Array<{address:string}>;
+    }>}>>("GET","/api/v1/dex/post-transaction/transactions-by-address",undefined,{
+      address:wallet,chains:"56",limit:String(Math.min(Math.max(limit,1),100))
+    });
+    return data.flatMap(group=>group.transactionList).map(tx=>({
+      binanceChainId:tx.binanceChainId,txHash:tx.txHash,txTime:tx.txTime,amount:tx.amount,symbol:tx.symbol,
+      txStatus:tx.txStatus,tokenContractAddress:tx.tokenContractAddress,
+      from:tx.from.map(item=>item.address),to:tx.to.map(item=>item.address)
+    }));
+  }
+
   async discover(limit=8):Promise<RwaAsset[]>{
     const all=await this.tokens();
     return all.filter(x=>x.binanceChainId==="56"&&x.underlyingTicker).sort((a,b)=>Number(b.volume24H)-Number(a.volume24H)).slice(0,limit);
