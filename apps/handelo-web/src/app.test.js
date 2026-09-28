@@ -117,3 +117,9 @@ test("portfolio refresh action communicates progress", () => {
   assert.match(source, /aria-busy/);
   assert.match(source, /button\.textContent = "Refreshing…"/);
 });
+
+
+test("history navigation action communicates progress", () => {
+  assert.match(source, /aria-busy/);
+  assert.match(source, /button\.textContent = "Opening…"/);
+});
