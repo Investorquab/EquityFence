@@ -29,3 +29,21 @@ test("Handelo resolves live market context before generating its explanation",as
   assert.equal(result.market?.premiumPct,-4);
   assert.match(result.answer,/reference price/);
 });
+
+
+test("Handelo contains unresolved market errors without inventing market context",async()=>{
+  const llm:LlmClient={
+    provider:"groq",model:"test",
+    async generateJson<T>(request:{system:string;user:string;schemaName:string;schema:Record<string,unknown>}):Promise<T>{
+      if(request.schemaName==="handelo_intent") return {action:"research",ticker:"UNKNOWN",amountUsd:null,horizon:null,riskTolerance:"unknown"} as T;
+      assert.match(request.user,/could not find a supported BSC tokenized-stock market/i);
+      return {answer:"I couldn't resolve a supported tokenized-stock market for that ticker."} as T;
+    }
+  };
+  const market={findAll:async()=>{throw new Error("upstream unavailable");}} as unknown as HandeloMarketClient;
+  const result=await new HandeloAgent({llmClient:llm,marketClient:market}).run("What is UNKNOWN doing?");
+  assert.equal(result.market,null);
+  assert.equal(result.candidates.length,0);
+  assert.equal(result.policy,null);
+  assert.match(result.answer,/couldn't resolve/i);
+});
