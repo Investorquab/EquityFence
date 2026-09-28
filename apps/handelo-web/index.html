@@ -111,14 +111,18 @@
       <section class="view" id="view-history">
         <div class="section-heading">
           <div>
-            <div class="eyebrow">LOCAL SESSION</div>
+            <div class="eyebrow">ON-CHAIN / BSC</div>
             <h2>History</h2>
           </div>
+          <span class="section-meta">CONNECTED WALLET</span>
         </div>
-        <div class="empty-state">
-          <div class="empty-number">04</div>
-          <h3>Your conversations will appear here.</h3>
-          <p>Nothing is stored remotely by this first web surface.</p>
+        <div id="historyContent">
+          <div class="empty-state">
+            <div class="empty-number">04</div>
+            <h3>Connect a wallet to see transaction history.</h3>
+            <p>Handelo reads recent BSC transactions from the connected wallet.</p>
+            <button class="primary-button" id="historyConnect" type="button">Connect wallet</button>
+          </div>
         </div>
       </section>
     </main>
