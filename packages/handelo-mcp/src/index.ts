@@ -11,6 +11,21 @@ const tools=[
 function reply(id:number|string|undefined,result:unknown){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,result})+"\n");}
 function error(id:number|string|undefined,code:number,message:string){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,error:{code,message}})+"\n");}
 
+function validateJsonRpc(value: unknown): JsonRpc {
+  if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid JSON-RPC message");
+  const message=value as Record<string,unknown>;
+  if (message.jsonrpc !== "2.0" || typeof message.method !== "string" || !message.method.trim()) {
+    throw new Error("Invalid JSON-RPC message");
+  }
+  if (message.id !== undefined && typeof message.id !== "string" && typeof message.id !== "number") {
+    throw new Error("Invalid JSON-RPC message");
+  }
+  if (message.params !== undefined && (!message.params || typeof message.params !== "object" || Array.isArray(message.params))) {
+    throw new Error("Invalid JSON-RPC params");
+  }
+  return value as JsonRpc;
+}
+
 function readTicker(args: unknown): string {
   if (!args || typeof args !== "object" || Array.isArray(args)) throw new Error("arguments must be an object");
   const ticker=(args as Record<string,unknown>).ticker;
@@ -46,4 +61,4 @@ async function handle(message:JsonRpc){
 
 let buffer="";
 process.stdin.setEncoding("utf8");
-process.stdin.on("data",async(chunk)=>{buffer+=chunk;let index=buffer.indexOf("\n");while(index>=0){const line=buffer.slice(0,index).trim();buffer=buffer.slice(index+1);index=buffer.indexOf("\n");if(!line)continue;try{await handle(JSON.parse(line) as JsonRpc);}catch(e){error(undefined,-32700,e instanceof Error?e.message:"Invalid JSON-RPC message");}}});
+process.stdin.on("data",async(chunk)=>{buffer+=chunk;let index=buffer.indexOf("\n");while(index>=0){const line=buffer.slice(0,index).trim();buffer=buffer.slice(index+1);index=buffer.indexOf("\n");if(!line)continue;try{await handle(validateJsonRpc(JSON.parse(line)));}catch(e){error(undefined,-32700,e instanceof Error?e.message:"Invalid JSON-RPC message");}}});
