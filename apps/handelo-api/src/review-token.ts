@@ -5,6 +5,7 @@ export interface ReviewTokenInput {
   amountUsd: number;
   fromToken: string;
   contract: string;
+  slippage?: string;
 }
 
 const REVIEW_TOKEN_TTL_MS = 5 * 60 * 1000;
