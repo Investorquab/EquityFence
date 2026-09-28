@@ -353,3 +353,6 @@ button{cursor:pointer}
 
 
 .review-actions{display:flex;justify-content:flex-end;gap:8px;padding-top:14px}.review-actions button{min-height:38px;padding:0 14px;border-radius:8px;border:1px solid var(--line);font:10px var(--mono);cursor:pointer;transition:transform .18s ease,opacity .18s ease,background .18s ease}.review-actions button:hover:not(:disabled){transform:translateY(-1px)}.review-actions button:disabled{cursor:not-allowed;opacity:.45}.review-actions .secondary-button{background:transparent;color:var(--muted)}.review-actions .primary-button{background:var(--gold);color:#11110f;border-color:var(--gold)}
+
+.execution-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.execution-actions .primary-button,.execution-actions .secondary-button{width:auto}
