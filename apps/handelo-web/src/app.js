@@ -243,6 +243,7 @@ function addExecutionResult(data) {
     const button = event.currentTarget;
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
+    button.textContent = "Refreshing…";
     showView("portfolio");
   });
   node.querySelector("[data-view-history]")?.addEventListener("click", (event) => {
