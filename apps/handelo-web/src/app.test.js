@@ -58,3 +58,11 @@ test("execution result surfaces terminal status without trusting an invalid tran
   assert.match(source, /\/\^0x\[a-fA-F0-9\]\{64\}\$\//);
   assert.match(source, /Transaction hash unavailable/);
 });
+
+
+test("finished execution offers a direct path to refreshed portfolio state", () => {
+  assert.match(source, /data-refresh-portfolio/);
+  assert.match(source, /item\.dataset\.view === "portfolio"/);
+  assert.match(source, /section\.id === "view-portfolio"/);
+  assert.match(source, /loadPortfolio\(\)/);
+});
