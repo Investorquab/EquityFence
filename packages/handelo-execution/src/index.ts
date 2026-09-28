@@ -38,15 +38,24 @@ async function baw<T>(args:string[]):Promise<T>{
   }
 }
 
-async function auditToken(chainId:string,contractAddress:string){
+export interface TokenAudit {
+  hasResult:boolean;
+  isSupported:boolean;
+  riskLevel?:number;
+  riskLevelEnum?:"LOW"|"MEDIUM"|"HIGH";
+  extraInfo?:{buyTax?:string;sellTax?:string;isVerified?:boolean};
+  riskItems?:unknown[];
+}
+
+export async function auditToken(chainId:string,contractAddress:string):Promise<TokenAudit>{
   const response=await fetch("https://web3.binance.com/bapi/defi/v1/public/wallet-direct/security/token/audit",{
     method:"POST",
-    headers:{"content-type":"application/json"},
+    headers:{"content-type":"application/json","user-agent":"binance-web3/1.4 (Skill)"},
     body:JSON.stringify({binanceChainId:chainId,contractAddress,requestId:randomUUID()})
   });
   const payload=await response.json() as {
     code:string|number;
-    data:{hasResult:boolean;isSupported:boolean;riskLevel?:string;extraInfo?:{buyTax?:string;sellTax?:string};riskItems?:unknown[]};
+    data:TokenAudit;
     success:boolean;
     message?:string;
   };
@@ -72,6 +81,10 @@ export class BinanceAgenticWalletAdapter{
     const audit=await auditToken(request.binanceChainId,request.toToken);
     if(!audit.hasResult||!audit.isSupported){
       throw new Error("Token security audit data is unavailable for the requested token; execution is blocked.");
+    }
+
+    if(typeof audit.riskLevel === "number" && audit.riskLevel >= 4){
+      throw new Error(`Token security audit returned ${audit.riskLevelEnum ?? "HIGH"} risk (level ${audit.riskLevel}); execution is blocked.`);
     }
 
     const wallet = await baw<{status:"CONNECTED"|"UNCONNECTED"|"CREATING"}>(["wallet","status"]);
