@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { createReviewToken, verifyReviewToken, type ReviewTokenInput } from "./review-token.js";
+import { consumeReviewToken, createReviewToken, verifyReviewToken, type ReviewTokenInput } from "./review-token.js";
 
 const input: ReviewTokenInput = {
   ticker: "NVDA",
@@ -53,4 +53,12 @@ test("review token rejects a changed slippage", () => {
   const now = 1_000_000;
   const token = createReviewToken(input, now);
   assert.equal(verifyReviewToken(token, { ...input, slippage: "1.00" }, now + 1_000), false);
+});
+
+
+test("review token can only be consumed once during its lifetime", () => {
+  const now = 2_000_000;
+  const token = createReviewToken(input, now);
+  assert.equal(consumeReviewToken(token, now + 1), true);
+  assert.equal(consumeReviewToken(token, now + 2), false);
 });
