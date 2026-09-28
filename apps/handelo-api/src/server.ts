@@ -384,7 +384,9 @@ const server = createServer(async (req, res) => {
       if (!isExecutableMarketAsset(asset)) {
         return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so execution is blocked." });
       }
-      const slippage = typeof body.slippage === "string" && body.slippage.trim() ? body.slippage.trim() : undefined;
+      const slippageResult = normalizeSlippage(body.slippage);
+      if (slippageResult.error) return json(res, 400, { error: slippageResult.error });
+      const slippage = slippageResult.value;
 
       if (!verifyReviewToken(reviewToken, {
         ticker: asset.underlyingTicker,
