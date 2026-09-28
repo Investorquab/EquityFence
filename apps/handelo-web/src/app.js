@@ -99,6 +99,9 @@ function addReviewCard(data, amountUsd) {
   const policy = data.policy || {};
   const market = data.asset || {};
   const quote = data.quote;
+  const security = data.securityAudit || null;
+  const securityBlocked = data.executionBlocked === true;
+  const securityLabel = securityBlocked ? "EXECUTION BLOCKED" : security?.riskLevelEnum ? `SECURITY ${security.riskLevelEnum}` : "SECURITY CHECKED";
   const decision = policy.decision || "BLOCK";
   const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
   const quoteLine = quote
@@ -126,11 +129,13 @@ function addReviewCard(data, amountUsd) {
     </div>
     <div class="review-reasons">
       ${(policy.reasons || []).map(reason => `<div>• ${escapeHtml(reason)}</div>`).join("")}
+      ${data.securityAuditError ? `<div class="review-warning">• ${escapeHtml(data.securityAuditError)}</div>` : ""}
+      ${security?.riskLevel !== undefined && security.riskLevel >= 4 ? `<div class="review-warning">• Binance security audit reports high risk. Execution is blocked.</div>` : ""}
       ${data.quoteError ? `<div class="review-warning">• ${escapeHtml(data.quoteError)}</div>` : ""}
     </div>
     <div class="review-actions">
       <button type="button" class="secondary-action" data-cancel>Cancel</button>
-      <button type="button" class="primary-action" data-confirm ${decision === "BLOCK" || !quote ? "disabled" : ""}>Confirm purchase</button>
+      <button type="button" class="primary-action" data-confirm ${decision === "BLOCK" || !quote || securityBlocked ? "disabled" : ""}>Confirm purchase</button>
     </div>`;
 
   card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
