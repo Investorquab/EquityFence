@@ -99,18 +99,28 @@ export class HandeloAgent {
     let market: MarketBrief | null = null;
     let candidates: MarketBrief[] = [];
 
+    let marketResolutionError: string | null = null;
+
     if (intent.ticker) {
-      const matches = await this.market.findAll(intent.ticker);
-      const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === intent.ticker!.trim().toLowerCase());
-      if (exact.length === 1) {
-        market = marketBrief(exact[0]);
-      } else if (matches.length === 1) {
-        market = marketBrief(matches[0]);
-      } else {
-        candidates = matches.map(marketBrief);
+      try {
+        const matches = await this.market.findAll(intent.ticker);
+        const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === intent.ticker!.trim().toLowerCase());
+        if (exact.length === 1) {
+          market = marketBrief(exact[0]);
+        } else if (matches.length === 1) {
+          market = marketBrief(matches[0]);
+        } else {
+          candidates = matches.map(marketBrief);
+        }
+      } catch {
+        marketResolutionError = "The live market resolver could not find a supported BSC tokenized-stock market for that ticker.";
       }
     } else if (intent.action === "buy" || intent.action === "sell" || intent.action === "invest") {
-      candidates = (await this.market.discover(4)).map(marketBrief);
+      try {
+        candidates = (await this.market.discover(4)).map(marketBrief);
+      } catch {
+        marketResolutionError = "The live market discovery service is unavailable right now.";
+      }
     }
 
     const policy = market
@@ -126,7 +136,9 @@ export class HandeloAgent {
       ? JSON.stringify({ market, policy }, null, 2)
       : candidates.length
         ? JSON.stringify({ candidateMarkets: candidates }, null, 2)
-        : "No specific stock market record was resolved.";
+        : marketResolutionError
+          ? marketResolutionError
+          : "No specific stock market record was resolved.";
 
     const response = await this.llm.generateJson<{ answer: string }>({
       schemaName: "handelo_response",
