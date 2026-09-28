@@ -15,6 +15,19 @@ const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
+function normalizeSlippage(value: unknown): string | undefined {
+  if (value === undefined || value === null || value === "") return undefined;
+  if (typeof value !== "string" || !/^\d+(?:\.\d+)?$/.test(value.trim())) {
+    throw new Error("slippage must be a non-negative numeric percentage.");
+  }
+  const normalized = value.trim();
+  const numeric = Number(normalized);
+  if (!Number.isFinite(numeric) || numeric > 100) {
+    throw new Error("slippage must be between 0 and 100.");
+  }
+  return normalized;
+}
+
 async function bawJson<T>(args: string[]): Promise<T> {
   const { stdout, stderr } = await execFileAsync("baw", [...args, "--json"], { maxBuffer: 1024 * 1024 });
   const raw = (stdout || stderr).trim();
@@ -226,7 +239,7 @@ const server = createServer(async (req, res) => {
 
       let quote: unknown = null;
       const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? DEFAULT_BSC_QUOTE_TOKEN).trim();
-      const slippage = typeof body.slippage === "string" && body.slippage.trim() ? body.slippage.trim() : undefined;
+      const slippage = normalizeSlippage(body.slippage);
       let quoteError: string | null = null;
 
       if (fromToken && policy.decision !== "BLOCK") {
@@ -304,7 +317,7 @@ const server = createServer(async (req, res) => {
         fromToken,
         toToken: asset.tokenContractAddress,
         binanceChainId: "56",
-        slippage: typeof body.slippage === "string" ? body.slippage : undefined
+        slippage
       });
 
       return json(res, 200, {
