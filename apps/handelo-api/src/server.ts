@@ -5,6 +5,7 @@ import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { marketClientFromEnv } from "@handelo/market";
+import { auditToken } from "@handelo/execution";
 
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
@@ -176,6 +177,23 @@ const server = createServer(async (req, res) => {
         premiumPct
       });
 
+      let securityAudit: Awaited<ReturnType<typeof auditToken>> | null = null;
+      let securityAuditError: string | null = null;
+      let executionBlocked = false;
+      try {
+        securityAudit = await auditToken("56", asset.tokenContractAddress);
+        executionBlocked =
+          !securityAudit.hasResult ||
+          !securityAudit.isSupported ||
+          (typeof securityAudit.riskLevel === "number" && securityAudit.riskLevel >= 4);
+        if (!securityAudit.hasResult || !securityAudit.isSupported) {
+          securityAuditError = "Token security audit data is unavailable for this token.";
+        }
+      } catch (error) {
+        executionBlocked = true;
+        securityAuditError = error instanceof Error ? error.message : String(error);
+      }
+
       let quote: unknown = null;
       const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? DEFAULT_BSC_QUOTE_TOKEN).trim();
       let quoteError: string | null = null;
@@ -209,6 +227,9 @@ const server = createServer(async (req, res) => {
           market: asset.statusInfo
         },
         policy,
+        securityAudit,
+        securityAuditError,
+        executionBlocked,
         quote,
         quoteError,
         quoteToken: fromToken || null
