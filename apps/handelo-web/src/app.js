@@ -474,6 +474,7 @@ async function connectWallet() {
       addAgentMessage({ answer: "Wallet connection timed out. Please try connecting again." });
     }, 5 * 60 * 1000);
   } catch (error) {
+    walletAuthActive = false;
     addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
   } finally {
     if (!walletAuthActive) {
