@@ -10,6 +10,7 @@ const marketGrid = document.querySelector("#marketGrid");
 const walletState = document.querySelector(".wallet-state");
 let walletAuthPoll = null;
 let walletAuthTimeout = null;
+let walletAuthActive = false;
 
 function money(value) {
   const n = Number(value);
@@ -429,7 +430,10 @@ async function refreshWalletStatus() {
 }
 
 async function connectWallet() {
+  if (walletAuthActive) return;
+  walletAuthActive = true;
   connectButton.disabled = true;
+  connectButton.setAttribute("aria-busy", "true");
   connectButton.innerHTML = "Starting <span>…</span>";
   try {
     const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
@@ -437,6 +441,7 @@ async function connectWallet() {
     if (!response.ok) throw new Error(data.error || "Could not start wallet connection.");
 
     if (data.status === "SUCCESS") {
+      walletAuthActive = false;
       await refreshWalletStatus();
       return;
     }
@@ -471,8 +476,11 @@ async function connectWallet() {
   } catch (error) {
     addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
   } finally {
-    connectButton.disabled = false;
-    if (!connectButton.classList.contains("connected")) connectButton.innerHTML = 'Connect wallet <span>↗</span>';
+    if (!walletAuthActive) {
+      connectButton.disabled = false;
+      connectButton.removeAttribute("aria-busy");
+      if (!connectButton.classList.contains("connected")) connectButton.innerHTML = 'Connect wallet <span>↗</span>';
+    }
   }
 }
 
@@ -510,6 +518,10 @@ function clearWalletAuthPolling() {
 
 function closeWalletAuth() {
   clearWalletAuthPolling();
+  walletAuthActive = false;
+  connectButton.disabled = false;
+  connectButton.removeAttribute("aria-busy");
+  if (!connectButton.classList.contains("connected")) connectButton.innerHTML = 'Connect wallet <span>↗</span>';
   document.querySelector(".wallet-modal")?.remove();
 }
 
