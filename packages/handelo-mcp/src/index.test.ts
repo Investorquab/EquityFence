@@ -40,3 +40,13 @@ test("MCP source strictly validates ticker arguments", async () => {
   assert.match(source, /typeof ticker !== "string"/);
   assert.match(source, /ticker is too long/);
 });
+
+
+test("MCP validates JSON-RPC envelopes before handling", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("./index.ts", import.meta.url), "utf8");
+  assert.match(source, /function validateJsonRpc\(value: unknown\)/);
+  assert.match(source, /message\.jsonrpc !== "2\.0"/);
+  assert.match(source, /message\.method !== "string"/);
+  assert.match(source, /Invalid JSON-RPC params/);
+});
