@@ -1,6 +1,10 @@
 import { createHmac, randomUUID } from "node:crypto";
 
 export interface TokenBalance { assetId:string; wallet:string; rawBalance:string; decimals:number; }
+export interface WalletTransaction {
+  binanceChainId:string; txHash:string; txTime:string; amount:string; symbol:string;
+  txStatus:string; tokenContractAddress:string; from:string[]; to:string[];
+}
 
 export interface RwaAsset {
   binanceChainId:string; tokenContractAddress:string; platformId:string;
