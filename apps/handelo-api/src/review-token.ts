@@ -9,6 +9,7 @@ export interface ReviewTokenInput {
 }
 
 const REVIEW_TOKEN_TTL_MS = 5 * 60 * 1000;
+const consumedReviewTokens = new Map<string, number>();
 
 function secret() {
   return process.env.HANDELO_REVIEW_TOKEN_SECRET ?? "handelo-local-review-secret";
@@ -40,4 +41,15 @@ export function verifyReviewToken(token: string, input: ReviewTokenInput, now = 
   } catch {
     return false;
   }
+}
+
+export function consumeReviewToken(token: string, now = Date.now()) {
+  const consumedUntil = consumedReviewTokens.get(token);
+  if (consumedUntil !== undefined && consumedUntil > now) return false;
+  if (consumedUntil !== undefined) consumedReviewTokens.delete(token);
+  consumedReviewTokens.set(token, now + REVIEW_TOKEN_TTL_MS);
+  for (const [key, expiresAt] of consumedReviewTokens) {
+    if (expiresAt <= now) consumedReviewTokens.delete(key);
+  }
+  return true;
 }
