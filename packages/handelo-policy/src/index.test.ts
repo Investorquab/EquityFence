@@ -24,3 +24,10 @@ test("execution action normalizes invest to buy and rejects sell",()=>{
   assert.equal(executionAction("sell"),null);
   assert.equal(executionAction("research"),null);
 });
+
+
+test("unknown reference gap requires confirmation",()=>{
+  const result=evaluatePolicy({action:"buy",amountUsd:20,marketOpen:true,premiumPct:null});
+  assert.equal(result.decision,"CONFIRM");
+  assert.match(result.reasons[0],/reference price is unavailable/i);
+});
