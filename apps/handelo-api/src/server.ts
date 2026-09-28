@@ -1,5 +1,4 @@
 import { createServer } from "node:http";
-import { createHmac, timingSafeEqual } from "node:crypto";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
@@ -7,6 +6,7 @@ import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { marketClientFromEnv } from "@handelo/market";
 import { auditToken } from "@handelo/execution";
+import { createReviewToken, verifyReviewToken } from "./review-token.js";
 
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
@@ -15,34 +15,6 @@ const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
-const REVIEW_TOKEN_TTL_MS = 5 * 60 * 1000;
-const REVIEW_TOKEN_SECRET = process.env.HANDELO_REVIEW_TOKEN_SECRET ?? "handelo-local-review-secret";
-
-function createReviewToken(input: { ticker: string; amountUsd: number; fromToken: string; contract: string }) {
-  const payload = Buffer.from(JSON.stringify({ ...input, exp: Date.now() + REVIEW_TOKEN_TTL_MS })).toString("base64url");
-  const signature = createHmac("sha256", REVIEW_TOKEN_SECRET).update(payload).digest("base64url");
-  return `${payload}.${signature}`;
-}
-
-function verifyReviewToken(token: string, input: { ticker: string; amountUsd: number; fromToken: string; contract: string }) {
-  const [payload, signature] = token.split(".");
-  if (!payload || !signature) return false;
-  const expected = createHmac("sha256", REVIEW_TOKEN_SECRET).update(payload).digest("base64url");
-  const actualBuffer = Buffer.from(signature);
-  const expectedBuffer = Buffer.from(expected);
-  if (actualBuffer.length !== expectedBuffer.length || !timingSafeEqual(actualBuffer, expectedBuffer)) return false;
-  try {
-    const parsed = JSON.parse(Buffer.from(payload, "base64url").toString("utf8")) as typeof input & { exp?: number };
-    return parsed.exp !== undefined && parsed.exp > Date.now()
-      && parsed.ticker === input.ticker
-      && parsed.amountUsd === input.amountUsd
-      && parsed.fromToken.toLowerCase() === input.fromToken.toLowerCase()
-      && parsed.contract.toLowerCase() === input.contract.toLowerCase();
-  } catch {
-    return false;
-  }
-}
-
 async function bawJson<T>(args: string[]): Promise<T> {
   const { stdout, stderr } = await execFileAsync("baw", [...args, "--json"], { maxBuffer: 1024 * 1024 });
   const raw = (stdout || stderr).trim();
