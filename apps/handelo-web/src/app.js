@@ -244,6 +244,7 @@ function addExecutionResult(data) {
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     button.textContent = "Refreshing…";
+    button.setAttribute("aria-label", "Refreshing portfolio");
     showView("portfolio");
   });
   node.querySelector("[data-view-history]")?.addEventListener("click", (event) => {
