@@ -1,23 +1,37 @@
-# EquityFence Build Notes
+# Handelo Build Plan
 
-## First engineering milestone
+## Product thesis
 
-Prove this path with real infrastructure:
+**The agent that understands the market for the user, rather than simply trading for the user.**
 
-**BNB/tokenized-equity data → economic state → state transition → affected exposure → deterministic decision → transaction simulation.**
+Handelo is being built around the 24/7 nature of tokenized equities on BNB Smart Chain. The agent translates ordinary language into market context, portfolio context, deterministic checks, and—when explicitly approved—secured execution.
 
-The safety decision must remain deterministic. AI is not required for the core decision engine.
+## Build order
 
-## Decisions
+1. Live tokenized-stock market intelligence.
+2. Natural-language intent and market discovery.
+3. Portfolio understanding.
+4. Deterministic transaction policy.
+5. Transaction simulation.
+6. Secured agent-wallet execution.
+7. Verification and evidence.
+8. Read-only MCP + SDK.
+9. Telegram interface.
+10. Premium web application and storytelling landing page.
+11. Demo, testing, and Developer Experience Report.
 
-- Work directly on `main`.
-- Keep the first implementation narrow.
-- Prefer real integrations over fake demo data.
-- Use replay fixtures only where a live state transition cannot be safely reproduced.
-- Test each stage before moving to the next.
+## Engineering rule
 
-## Demo target
+AI may interpret intent and explain observations. It must not be the source of truth for transaction safety, signing, or verification.
 
-A normal transaction should produce **ALLOW**.
+The execution boundary must re-check deterministic policy before any broadcast.
 
-After a relevant economic-state transition, the same affected action should produce **BLOCK**, with a human-readable reason and evidence.
+## Demo principle
+
+The final demo should show a normal person saying something like:
+
+> "I have $20. Help me invest."
+
+Handelo should expose the relevant market state in understandable language, surface the conditions that matter, present the transaction for review, and only then execute through the secured wallet path.
+
+No fake transaction should be presented as live execution.
