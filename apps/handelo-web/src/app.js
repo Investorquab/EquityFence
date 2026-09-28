@@ -239,7 +239,10 @@ function addExecutionResult(data) {
       </div>`;
   }
   conversation.appendChild(node);
-  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => showView("portfolio"));
+  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => {
+    node.querySelector("[data-refresh-portfolio]").disabled = true;
+    showView("portfolio");
+  });
   node.querySelector("[data-view-history]")?.addEventListener("click", () => showView("history"));
   scrollConversation();
 }
