@@ -77,3 +77,8 @@ The legacy EquityFence modules are being audited and replaced selectively rather
 ## Security principle
 
 The language model does not receive private keys. AI decides *what the user is asking* and *what market context means*; deterministic application code and the wallet/execution layer remain responsible for transaction construction, policy checks, signing, and verification.
+
+
+## Representation safety
+
+A stock ticker can have multiple tokenized representations on BSC. Handelo does not silently choose a venue when the request is ambiguous. It exposes the live representations and their market context first; an exact token symbol such as a provider-qualified symbol can be resolved directly.
