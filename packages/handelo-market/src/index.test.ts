@@ -165,6 +165,33 @@ test("find refuses to silently choose between multiple live representations", as
 });
 
 
+
+
+test("transactions applies live normalization to upstream history", async () => {
+  const market = new HandeloMarketClient("test-key", "test-secret");
+  (market as unknown as { request: () => Promise<unknown> }).request = async () => [{
+    transactionList: [
+      {
+        binanceChainId: "56", txHash: "0xabc", txTime: "1", amount: "20", symbol: "NVDAon", txStatus: "FINISHED",
+        tokenContractAddress: "0x0000000000000000000000000000000000000001",
+        from: [{ address: "0x0000000000000000000000000000000000000002" }],
+        to: [{ address: "0x0000000000000000000000000000000000000003" }],
+      },
+      {
+        binanceChainId: "56", txHash: "0xABC", txTime: "2", amount: "20", symbol: "NVDAon", txStatus: "FINISHED",
+        tokenContractAddress: "0x0000000000000000000000000000000000000001", from: [], to: [],
+      },
+      {
+        binanceChainId: "1", txHash: "0xeth", txTime: "3", amount: "20", symbol: "ETH", txStatus: "FINISHED",
+        tokenContractAddress: "0x0000000000000000000000000000000000000004", from: [], to: [],
+      },
+    ],
+  }];
+
+  const result = await market.transactions("0x0000000000000000000000000000000000000002");
+  assert.deepEqual(result.map(item => item.txHash), ["0xabc"]);
+});
+
 test("transaction limits normalize invalid and out-of-range values", () => {
   assert.equal(normalizeTransactionLimit(Number.NaN), 20);
   assert.equal(normalizeTransactionLimit(Number.POSITIVE_INFINITY), 20);
