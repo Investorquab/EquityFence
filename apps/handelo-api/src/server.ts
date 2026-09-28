@@ -26,7 +26,7 @@ const server=createServer(async(req,res)=>{
   if(req.method==="POST"&&req.url==="/api/quote"){
     try{
       let raw="";for await(const chunk of req) raw+=chunk;
-      const body=JSON.parse(raw) as {ticker?:unknown;amountUsd?:unknown;fromToken?:unknown;slippage?:unknown};
+      const body=JSON.parse(raw) as {ticker?:unknown;fromTokenQty?:unknown;fromToken?:unknown;slippage?:unknown};
       const ticker=String(body.ticker??"").trim().toUpperCase();
       const amount=Number(body.fromTokenQty);
       const fromToken=String(body.fromToken??"").trim();
