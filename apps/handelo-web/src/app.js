@@ -41,6 +41,161 @@ function addAgentMessage(data) {
   }
 
   conversation.appendChild(node);
+
+  const action = data.intent?.action;
+  const amount = Number(data.intent?.amountUsd);
+  if (
+    data.market &&
+    (action === "buy" || action === "invest") &&
+    Number.isFinite(amount) &&
+    amount > 0 &&
+    data.policy?.decision !== "BLOCK"
+  ) {
+    addReviewPrompt(data.market, amount, action);
+  }
+
+  scrollConversation();
+}
+
+function addReviewPrompt(market, amountUsd, action) {
+  const node = document.createElement("article");
+  node.className = "review-prompt";
+  node.innerHTML = `
+    <div class="review-copy">
+      <div class="message-label">NEXT STEP</div>
+      <strong>Review a ${action === "invest" ? "purchase" : "buy"} of ${escapeHtml(market.ticker)}.</strong>
+      <span>${money(amountUsd)} · policy checks will run before any transaction.</span>
+    </div>
+    <button type="button">Review</button>`;
+  node.querySelector("button").addEventListener("click", () => reviewTrade(market.ticker, amountUsd, action, node));
+  conversation.appendChild(node);
+}
+
+async function reviewTrade(ticker, amountUsd, action, promptNode) {
+  promptNode.querySelector("button").disabled = true;
+  promptNode.querySelector("button").textContent = "Checking";
+
+  try {
+    const response = await fetch(API_BASE + "/api/review", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({ ticker, amountUsd, action })
+    });
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Review failed.");
+    promptNode.remove();
+    addReviewCard(data, amountUsd);
+  } catch (error) {
+    promptNode.querySelector("button").disabled = false;
+    promptNode.querySelector("button").textContent = "Review";
+    addAgentMessage({ answer: `I could not complete the transaction review. ${error.message}` });
+  }
+}
+
+function addReviewCard(data, amountUsd) {
+  const card = document.createElement("article");
+  card.className = "trade-review";
+  const policy = data.policy || {};
+  const market = data.asset || {};
+  const quote = data.quote;
+  const decision = policy.decision || "BLOCK";
+  const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
+  const quoteLine = quote
+    ? `${escapeHtml(quote.fromCoinSymbol)} ${escapeHtml(quote.fromCoinAmount)} → ${escapeHtml(quote.toCoinAmount)} ${escapeHtml(quote.toCoinSymbol)}`
+    : "Live quote unavailable until the Agentic Wallet is connected.";
+
+  card.innerHTML = `
+    <div class="review-head">
+      <div>
+        <div class="message-label">TRANSACTION REVIEW</div>
+        <h3>Buy ${escapeHtml(market.ticker || "asset")}</h3>
+      </div>
+      <span class="review-status ${decision.toLowerCase()}">${decisionLabel}</span>
+    </div>
+    <div class="review-amount">${money(amountUsd)}<span>requested</span></div>
+    <div class="review-grid">
+      <div><small>ON-CHAIN</small><strong>${money(market.tokenPrice)}</strong></div>
+      <div><small>REFERENCE</small><strong>${money(market.referencePrice)}</strong></div>
+      <div><small>DIFFERENCE</small><strong>${market.premiumPct === null ? "—" : (market.premiumPct >= 0 ? "+" : "") + market.premiumPct.toFixed(2) + "%"}</strong></div>
+      <div><small>MARKET</small><strong>${market.market?.openState ? "LIVE" : "CLOSED"}</strong></div>
+    </div>
+    <div class="review-quote">
+      <span>EXPECTED ROUTE</span>
+      <strong>${quoteLine}</strong>
+    </div>
+    <div class="review-reasons">
+      ${(policy.reasons || []).map(reason => `<div>• ${escapeHtml(reason)}</div>`).join("")}
+      ${data.quoteError ? `<div class="review-warning">• ${escapeHtml(data.quoteError)}</div>` : ""}
+    </div>
+    <div class="review-actions">
+      <button type="button" class="secondary-action" data-cancel>Cancel</button>
+      <button type="button" class="primary-action" data-confirm ${decision === "BLOCK" || !quote ? "disabled" : ""}>Confirm purchase</button>
+    </div>`;
+
+  card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
+  card.querySelector("[data-confirm]").addEventListener("click", () => confirmTrade(data, amountUsd, card));
+  conversation.appendChild(card);
+  scrollConversation();
+}
+
+async function confirmTrade(data, amountUsd, card) {
+  const button = card.querySelector("[data-confirm]");
+  button.disabled = true;
+  button.textContent = "Executing";
+
+  try {
+    const response = await fetch(API_BASE + "/api/execute", {
+      method: "POST",
+      headers: { "content-type": "application/json" },
+      body: JSON.stringify({
+        ticker: data.asset.ticker,
+        amountUsd,
+        fromToken: data.quoteToken,
+        confirmed: true
+      })
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || "Execution failed.");
+    card.remove();
+    addExecutionResult(result);
+  } catch (error) {
+    button.disabled = false;
+    button.textContent = "Confirm purchase";
+    addAgentMessage({ answer: `The transaction was not completed. ${error.message}` });
+  }
+}
+
+function addExecutionResult(data) {
+  const result = data.result || {};
+  const node = document.createElement("article");
+  node.className = "execution-result";
+  if (result.status === "FINISHED") {
+    node.innerHTML = `
+      <div class="execution-icon">✓</div>
+      <div>
+        <div class="message-label">EXECUTION CONFIRMED</div>
+        <h3>Purchase complete.</h3>
+        <p>${escapeHtml(data.asset?.ticker || "Asset")} was purchased through the Agentic Wallet.</p>
+        <span class="tx-hash">${escapeHtml(result.txHash || "Transaction hash unavailable")}</span>
+      </div>`;
+  } else if (result.status === "PENDING") {
+    node.innerHTML = `
+      <div class="execution-icon pending">·</div>
+      <div>
+        <div class="message-label">EXECUTION PENDING</div>
+        <h3>Still processing.</h3>
+        <p>The order was submitted, but Handelo has not received a terminal result yet.</p>
+      </div>`;
+  } else {
+    node.innerHTML = `
+      <div class="execution-icon failed">!</div>
+      <div>
+        <div class="message-label">EXECUTION FAILED</div>
+        <h3>The purchase did not complete.</h3>
+        <p>Handelo received a terminal failure from the execution layer.</p>
+      </div>`;
+  }
+  conversation.appendChild(node);
   scrollConversation();
 }
 
