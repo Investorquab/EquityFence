@@ -73,7 +73,7 @@ const server = createServer(async (req, res) => {
       const status = await walletStatus();
       return json(res, 200, status);
     } catch (error) {
-      return json(res, 200, { status: "UNAVAILABLE", error: error instanceof Error ? error.message : String(error) });
+      return json(res, 503, { status: "UNAVAILABLE", error: error instanceof Error ? error.message : String(error) });
     }
   }
 
@@ -128,7 +128,7 @@ const server = createServer(async (req, res) => {
       }
       return json(res, 200, { connected: true, address });
     } catch (error) {
-      return json(res, 200, { connected: false, address: null, error: error instanceof Error ? error.message : String(error) });
+      return json(res, 503, { connected: false, address: null, error: error instanceof Error ? error.message : String(error) });
     }
   }
 
