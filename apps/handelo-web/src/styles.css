@@ -156,7 +156,7 @@ button{cursor:pointer}
 .context-price{display:flex;align-items:end;gap:12px;margin-bottom:18px}
 .context-price strong{font:400 38px var(--serif)}
 .context-price span{font:10px var(--mono);color:var(--muted);padding-bottom:7px}
-.context-grid{display:grid;grid-template-columns:repeat(3,1fr);border-top:1px solid var(--line)}
+.context-grid{display:grid;grid-template-columns:repeat(4,1fr);border-top:1px solid var(--line)}
 .metric{padding:13px 12px 2px 0}
 .metric+.metric{padding-left:14px;border-left:1px solid var(--line)}
 .metric-label{font:9px var(--mono);color:var(--faint);text-transform:uppercase}
@@ -169,7 +169,7 @@ button{cursor:pointer}
 .candidate-list{display:grid;gap:8px;padding:12px}
 .candidate{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
 .candidate strong{font:12px var(--mono);color:#e7e1d7}.candidate small{font:10px var(--mono);color:var(--faint)}
-.candidate-price{text-align:right;font:12px var(--mono)}
+.candidate-price{text-align:right;font:12px var(--mono)}.candidate-price strong{display:block;font:12px var(--mono);color:#ddd7cd}.candidate-price small{display:block;margin-top:4px;font:9px var(--mono);color:var(--faint)}
 
 .section-heading{display:flex;align-items:end;justify-content:space-between;max-width:1080px;margin:0 auto 36px;padding-bottom:20px;border-bottom:1px solid var(--line)}
 .section-heading h2{margin:10px 0 0;font:400 clamp(46px,6vw,72px)/.9 var(--serif)}
