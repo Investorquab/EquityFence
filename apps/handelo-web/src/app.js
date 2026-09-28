@@ -7,6 +7,7 @@ const input = document.querySelector("#messageInput");
 const sendButton = document.querySelector("#sendButton");
 const connectButton = document.querySelector("#connectButton");
 const marketGrid = document.querySelector("#marketGrid");
+const walletState = document.querySelector(".wallet-state");
 
 function money(value) {
   const n = Number(value);
@@ -274,7 +275,80 @@ async function ask(message) {
   } finally {
     sendButton.disabled = false;
     input.disabled = false;
-    input.focus();
+    async function refreshWalletStatus() {
+  try {
+    const response = await fetch(API_BASE + "/api/wallet/status");
+    const data = await response.json();
+    const connected = data.status === "CONNECTED";
+    walletState.textContent = connected ? "WALLET CONNECTED" : "WALLET NOT CONNECTED";
+    connectButton.innerHTML = connected ? "Wallet connected <span>✓</span>" : 'Connect wallet <span>↗</span>';
+    connectButton.classList.toggle("connected", connected);
+  } catch {
+    walletState.textContent = "WALLET STATUS UNAVAILABLE";
+  }
+}
+
+async function connectWallet() {
+  connectButton.disabled = true;
+  connectButton.innerHTML = "Starting <span>…</span>";
+  try {
+    const response = await fetch(API_BASE + "/api/wallet/auth");
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Could not start wallet connection.");
+
+    if (data.status === "SUCCESS") {
+      await refreshWalletStatus();
+      return;
+    }
+
+    showWalletAuth(data);
+    const poll = setInterval(async () => {
+      const statusResponse = await fetch(API_BASE + "/api/wallet/status");
+      const status = await statusResponse.json();
+      if (status.status === "CONNECTED") {
+        clearInterval(poll);
+        closeWalletAuth();
+        await refreshWalletStatus();
+      }
+    }, 2500);
+
+    setTimeout(() => clearInterval(poll), 5 * 60 * 1000);
+  } catch (error) {
+    addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
+  } finally {
+    connectButton.disabled = false;
+    if (!connectButton.classList.contains("connected")) connectButton.innerHTML = 'Connect wallet <span>↗</span>';
+  }
+}
+
+function showWalletAuth(data) {
+  let modal = document.querySelector(".wallet-modal");
+  if (modal) modal.remove();
+  modal = document.createElement("div");
+  modal.className = "wallet-modal";
+  modal.innerHTML = `
+    <div class="wallet-modal-backdrop"></div>
+    <div class="wallet-dialog" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
+      <button class="wallet-close" type="button" aria-label="Close">×</button>
+      <div class="eyebrow">BINANCE AGENTIC WALLET</div>
+      <h2 id="wallet-title">Connect your wallet.</h2>
+      <p>Open the Binance sign-in page, then confirm the matching code in your Binance Wallet App.</p>
+      <div class="pairing-code">${escapeHtml(data.pairingCode || "—")}</div>
+      <a class="wallet-link" href="${escapeHtml(data.urlForWeb || "#")}" target="_blank" rel="noopener">Open Binance sign-in ↗</a>
+      <div class="wallet-wait">Waiting for confirmation…</div>
+    </div>`;
+  modal.querySelector(".wallet-close").addEventListener("click", closeWalletAuth);
+  modal.querySelector(".wallet-modal-backdrop").addEventListener("click", closeWalletAuth);
+  document.body.appendChild(modal);
+}
+
+function closeWalletAuth() {
+  document.querySelector(".wallet-modal")?.remove();
+}
+
+connectButton.addEventListener("click", connectWallet);
+refreshWalletStatus();
+input.focus();
   }
 }
 
@@ -325,10 +399,6 @@ document.querySelectorAll("[data-prompt]").forEach((button) => {
 composer.addEventListener("submit", (event) => {
   event.preventDefault();
   ask(input.value);
-});
-
-connectButton.addEventListener("click", () => {
-  alert("Wallet connection is the next execution-layer step. Handelo does not ask for private keys.");
 });
 
 document.querySelector("#portfolioConnect")?.addEventListener("click", () => connectButton.click());
