@@ -163,3 +163,10 @@ test("history navigation marks itself disabled while opening", () => {
   assert.match(source, /data-navigation-disabled/);
   assert.match(source, /aria-disabled/);
 });
+
+
+test("disabled follow-up actions have a waiting state", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.secondary-button:disabled/);
+  assert.match(styles, /cursor:wait/);
+});
