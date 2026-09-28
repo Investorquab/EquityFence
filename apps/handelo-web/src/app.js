@@ -245,7 +245,7 @@ function renderCandidates(container, candidates) {
     </div>`;
 }
 
-function escapeHtml(value) {
+function safeExternalUrl(value) {\n  try {\n    const url = new URL(String(value || ""));\n    return url.protocol === "https:" || url.protocol === "http:" ? url.href : "#";\n  } catch {\n    return "#";\n  }\n}\n\nfunction escapeHtml(value) {
   return String(value).replace(/[&<>"']/g, (char) => ({
     "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
   }[char]));
@@ -353,7 +353,7 @@ function showWalletAuth(data) {
       <h2 id="wallet-title">Connect your wallet.</h2>
       <p>Open the Binance sign-in page, then confirm the matching code in your Binance Wallet App.</p>
       <div class="pairing-code">${escapeHtml(data.pairingCode || "—")}</div>
-      <a class="wallet-link" href="${escapeHtml(data.urlForWeb || "#")}" target="_blank" rel="noopener">Open Binance sign-in ↗</a>
+      <a class="wallet-link" href="${escapeHtml(safeExternalUrl(data.urlForWeb))}" target="_blank" rel="noopener">Open Binance sign-in ↗</a>
       <div class="wallet-wait">Waiting for confirmation…</div>
     </div>`;
   modal.querySelector(".wallet-close").addEventListener("click", closeWalletAuth);
