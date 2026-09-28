@@ -352,7 +352,29 @@ input.focus();
   }
 }
 
-async function loadMarkets() {
+async async function loadPortfolio() {
+  const target = document.querySelector("#portfolioContent");
+  target.innerHTML = '<div class="loading-card">Reading wallet positions...</div>';
+  try {
+    const addressResponse = await fetch(API_BASE + "/api/wallet/address");
+    const address = await addressResponse.json();
+    if (!address.connected || !address.address) {
+      target.innerHTML = '<div class="empty-state"><div class="empty-number">03</div><h3>Connect a wallet to see your portfolio.</h3><p>Handelo reads the connected wallet. It never asks for a private key.</p><button class="primary-button" id="portfolioConnect" type="button">Connect wallet</button></div>';
+      target.querySelector("#portfolioConnect").addEventListener("click", connectWallet);
+      return;
+    }
+    const response = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address));
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "Portfolio request failed.");
+    target.innerHTML = `
+      <div class="portfolio-summary"><div><span>ESTIMATED VALUE</span><strong>${data.totalEstimatedValueUsd === null ? "—" : money(data.totalEstimatedValueUsd)}</strong></div><div><span>POSITIONS</span><strong>${data.positions.length}</strong></div></div>
+      <div class="portfolio-list">${data.positions.length ? data.positions.map(p => `<article class="portfolio-row"><div><strong>${escapeHtml(p.ticker)}</strong><span>${escapeHtml(p.tokenSymbol)} · ${escapeHtml(p.provider)}</span></div><div class="portfolio-value">${p.estimatedValueUsd === null ? "—" : money(p.estimatedValueUsd)}</div></article>`).join("") : '<div class="empty-row">No supported tokenized-stock positions found in this wallet.</div>'}</div>`;
+  } catch (error) {
+    target.innerHTML = `<div class="loading-card">Portfolio data is unavailable. ${escapeHtml(error.message)}</div>`;
+  }
+}
+
+function loadMarkets() {
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
     const response = await fetch(API_BASE + "/api/markets");
@@ -389,6 +411,7 @@ document.querySelectorAll(".nav-item").forEach((button) => {
     document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item === button));
     document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
     if (view === "markets") loadMarkets();
+    if (view === "portfolio") loadPortfolio();
   });
 });
 
