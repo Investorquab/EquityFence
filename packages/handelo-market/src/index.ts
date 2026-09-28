@@ -46,13 +46,20 @@ export class HandeloMarketClient {
   }
 
   async tokenBalances(wallet:string,assetIds:string[]):Promise<Map<string,string>>{
-    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||assetIds.length>20) throw new Error("Invalid wallet or token list.");
-    const addresses=assetIds.map(assetId=>{
-      if(!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid token contract address.");
-      return {binanceChainId:"56",tokenContractAddress:assetId};
-    });
-    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:addresses});
-    return new Map(data.flatMap(group=>group.tokenAssets).map(asset=>[asset.tokenContractAddress.toLowerCase(),asset.rawBalance||"0"]));
+    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
+    const balances=new Map<string,string>();
+    for(let start=0;start<assetIds.length;start+=20){
+      const chunk=assetIds.slice(start,start+20);
+      const addresses=chunk.map(assetId=>{
+        if(!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid token contract address.");
+        return {binanceChainId:"56",tokenContractAddress:assetId};
+      });
+      const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:addresses});
+      for(const asset of data.flatMap(group=>group.tokenAssets)){
+        balances.set(asset.tokenContractAddress.toLowerCase(),asset.rawBalance||"0");
+      }
+    }
+    return balances;
   }
   async transactions(wallet:string,limit=20):Promise<WalletTransaction[]>{
     if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
