@@ -28,3 +28,8 @@ export function evaluatePolicy(input:PolicyInput):PolicyResult{
   } else checks.push({name:"reference_gap",passed:false,detail:"Reference gap could not be calculated."});
   return {decision:"READY",reasons:["Policy checks passed for a reviewable transaction."],checks};
 }
+
+
+export function executionAction(action:PolicyInput["action"]):"buy"|null{
+  return action==="buy"||action==="invest" ? "buy" : null;
+}
