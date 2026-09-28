@@ -244,6 +244,7 @@ function addExecutionResult(data) {
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     button.setAttribute("data-navigation-busy", "true");
+    button.setAttribute("aria-disabled", "true");
     button.textContent = "Refreshing…";
     button.setAttribute("aria-label", "Refreshing portfolio");
     showView("portfolio");
