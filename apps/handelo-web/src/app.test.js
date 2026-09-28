@@ -177,3 +177,10 @@ test("disabled primary actions have a waiting state", () => {
   assert.match(styles, /\.primary-button:disabled/);
   assert.match(styles, /cursor:wait/);
 });
+
+
+test("disabled execution follow-up actions block pointer clicks", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /pointer-events:none/);
+});
