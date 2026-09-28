@@ -66,3 +66,11 @@ test("finished execution offers a direct path to refreshed portfolio state", () 
   assert.match(source, /section\.id === "view-portfolio"/);
   assert.match(source, /loadPortfolio\(\)/);
 });
+
+test("finished execution exposes both portfolio and history follow-up actions", () => {
+  assert.match(source, /data-refresh-portfolio/);
+  assert.match(source, /data-view-history/);
+  assert.match(source, /showView\("portfolio"\)/);
+  assert.match(source, /showView\("history"\)/);
+  assert.match(source, /function showView\(view\)/);
+});
