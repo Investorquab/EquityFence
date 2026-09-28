@@ -142,7 +142,7 @@ function addReviewCard(data, amountUsd) {
       ${data.securityAuditError ? `<div class="review-warning">• ${escapeHtml(data.securityAuditError)}</div>` : ""}
       ${security?.riskLevel !== undefined && security.riskLevel >= 4 ? `<div class="review-warning">• Binance security audit reports high risk. Execution is blocked.</div>` : ""}
       ${data.quoteError ? `<div class="review-warning">• ${escapeHtml(data.quoteError)}</div>` : ""}
-    </div>;
+    </div>`;
 
   card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
   card.querySelector("[data-confirm]").addEventListener("click", () => confirmTrade(data, amountUsd, card));
