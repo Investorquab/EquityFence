@@ -300,6 +300,7 @@ button{cursor:pointer}
 .execution-actions button:disabled{cursor:not-allowed}
 .execution-actions button:disabled{user-select:none}
 .execution-actions button:disabled{opacity:.55}
+.execution-actions button:disabled{border-color:transparent}
 .execution-actions button:disabled{user-select:none}
 .execution-actions button:disabled{transition:none}
 .execution-actions button:disabled{transform:none!important}
