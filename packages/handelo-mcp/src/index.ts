@@ -11,6 +11,15 @@ const tools=[
 function reply(id:number|string|undefined,result:unknown){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,result})+"\n");}
 function error(id:number|string|undefined,code:number,message:string){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,error:{code,message}})+"\n");}
 
+function readTicker(args: unknown): string {
+  if (!args || typeof args !== "object" || Array.isArray(args)) throw new Error("arguments must be an object");
+  const ticker=(args as Record<string,unknown>).ticker;
+  if (typeof ticker !== "string" || !ticker.trim()) throw new Error("ticker is required");
+  const normalized=ticker.trim().toUpperCase();
+  if (normalized.length > 20) throw new Error("ticker is too long");
+  return normalized;
+}
+
 async function handle(message:JsonRpc){
   if(message.method==="initialize"){
     return reply(message.id,{protocolVersion:"2025-06-18",capabilities:{tools:{}},serverInfo:{name:"handelo-mcp",version:"0.1.0"}});
