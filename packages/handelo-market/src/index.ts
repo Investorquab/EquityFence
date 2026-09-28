@@ -108,11 +108,11 @@ export class HandeloMarketClient {
     }>}>>("GET","/api/v1/dex/post-transaction/transactions-by-address",undefined,{
       address:wallet,chains:"56",limit:String(normalizeTransactionLimit(limit))
     });
-    return data.flatMap(group=>group.transactionList).map(tx=>({
+    return normalizeTransactions(data.flatMap(group=>group.transactionList).map(tx=>({
       binanceChainId:tx.binanceChainId,txHash:tx.txHash,txTime:tx.txTime,amount:tx.amount,symbol:tx.symbol,
       txStatus:tx.txStatus,tokenContractAddress:tx.tokenContractAddress,
       from:tx.from.map(item=>item.address),to:tx.to.map(item=>item.address)
-    }));
+    })));
   }
 
   async discover(limit=8):Promise<RwaAsset[]>{
