@@ -163,7 +163,9 @@ button{cursor:pointer}
 .metric-value{margin-top:7px;font:12px var(--mono);color:#ddd7cd}
 .metric-value.positive{color:var(--green)}
 .metric-value.negative{color:var(--red)}
-.context-reason{margin-top:18px;padding-top:15px;border-top:1px solid var(--line);font-size:11px;line-height:1.7;color:var(--muted)}
+.context-schedule{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-top:16px;padding:12px 0;border-top:1px solid var(--line);font:9px var(--mono)}
+.context-schedule span{color:var(--faint);letter-spacing:.06em}.context-schedule strong{font-weight:400;color:#d4cfc5;text-align:right}
+.context-reason{margin-top:0;padding-top:15px;border-top:1px solid var(--line);font-size:11px;line-height:1.7;color:var(--muted)}
 .candidate-list{display:grid;gap:8px;padding:12px}
 .candidate{display:grid;grid-template-columns:1fr auto;gap:12px;padding:12px;border:1px solid var(--line);border-radius:10px;background:rgba(255,255,255,.02)}
 .candidate strong{font:12px var(--mono);color:#e7e1d7}.candidate small{font:10px var(--mono);color:var(--faint)}
@@ -187,6 +189,8 @@ button{cursor:pointer}
 .market-card-stats{display:grid;grid-template-columns:1fr 1fr;border-top:1px solid var(--line)}
 .market-card-stats div{padding-top:12px}.market-card-stats div+div{padding-left:14px;border-left:1px solid var(--line)}
 .market-card-stats small{display:block;font:9px var(--mono);color:var(--faint);margin-bottom:6px}.market-card-stats b{font:11px var(--mono);font-weight:400}
+.market-card-schedule{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:14px;padding-top:12px;border-top:1px solid var(--line);font:9px var(--mono)}
+.market-card-schedule span{color:var(--faint);letter-spacing:.06em}.market-card-schedule b{font-weight:400;color:#d4cfc5;text-align:right}
 .empty-state{max-width:720px;margin:12vh auto 0;padding:38px 0;border-top:1px solid var(--line)}
 .empty-number{font:10px var(--mono);color:var(--gold)}
 .empty-state h3{max-width:560px;margin:20px 0 12px;font:400 40px/1 var(--serif)}
