@@ -98,6 +98,17 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === "GET" && req.url === "/api/wallet/address") {
+    try {
+      const status = await walletStatus();
+      if (status.status !== "CONNECTED") return json(res, 200, { connected: false, address: null });
+      const wallet = await bawJson<{ address?: string }>(["wallet", "address"]);
+      return json(res, 200, { connected: true, address: wallet.address ?? null });
+    } catch (error) {
+      return json(res, 200, { connected: false, address: null, error: error instanceof Error ? error.message : String(error) });
+    }
+  }
+
   if (req.method === "GET" && req.url?.startsWith("/api/portfolio")) {
     const walletAddress =
       new URL(req.url, "http://localhost").searchParams.get("wallet") ??
