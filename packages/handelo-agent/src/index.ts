@@ -55,6 +55,13 @@ const RESPONSE_SCHEMA = {
   additionalProperties: false
 };
 
+export function normalizeUserMessage(message: string): string {
+  const normalized = message.trim();
+  if (!normalized) throw new Error("message is required");
+  if (normalized.length > 8000) throw new Error("message is too long");
+  return normalized;
+}
+
 export function validateUserIntent(value: unknown): UserIntent {
   if (!value || typeof value !== "object") throw new Error("LLM returned an invalid intent.");
   const intent = value as Record<string, unknown>;
@@ -115,11 +122,12 @@ export class HandeloAgent {
   }
 
   async run(message: string): Promise<AgentResult> {
+    const normalizedMessage = normalizeUserMessage(message);
     const intent = await this.llm.generateJson<UserIntent>({
       schemaName: "handelo_intent",
       schema: INTENT_SCHEMA,
       system: "You are Handelo's intent parser. Extract the user's investment intent without inventing a ticker or amount. If they did not name a stock, ticker is null. Amount is USD when explicitly stated.",
-      user: message
+      user: normalizedMessage
     });
 
     const parsedIntent = validateUserIntent(intent);
@@ -172,7 +180,7 @@ export class HandeloAgent {
       schemaName: "handelo_response",
       schema: RESPONSE_SCHEMA,
       system: "You are Handelo, a beginner-friendly tokenized-stock market agent on BNB Chain. Explain market structure in simple language. Never claim a trade happened unless execution evidence is supplied. If the market is closed, explain that the on-chain token may still trade while the latest reference price is stale. Mention the on-chain/reference gap when available. When candidateMarkets are supplied, explain that they are live market-data candidates rather than a personalized recommendation. Do not give personalized certainty; present observations and let the user decide.",
-      user: `User request: ${message}
+      user: `User request: ${normalizedMessage}
 Parsed intent: ${JSON.stringify(parsedIntent)}
 Live market context: ${context}
 Respond naturally and concisely.`
