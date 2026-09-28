@@ -62,3 +62,11 @@ test("finished execution exposes both portfolio and history follow-up actions", 
   assert.match(source, /showView\("history"\)/);
   assert.match(source, /function showView\(view\)/);
 });
+
+
+test("non-finished execution results retain a history follow-up", () => {
+  assert.match(source, /EXECUTION PENDING/);
+  assert.match(source, /EXECUTION FAILED/);
+  assert.match(source, /data-view-history/);
+  assert.match(source, /showView\("history"\)/);
+});
