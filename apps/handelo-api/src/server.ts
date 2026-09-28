@@ -6,7 +6,7 @@ import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { marketClientFromEnv } from "@handelo/market";
 import { auditToken } from "@handelo/execution";
-import { createReviewToken, verifyReviewToken } from "./review-token.js";
+import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
@@ -373,6 +373,10 @@ const server = createServer(async (req, res) => {
         slippage
       })) {
         return json(res, 409, { error: "This transaction no longer matches the reviewed trade or the review has expired. Start a new review." });
+      }
+
+      if (!consumeReviewToken(reviewToken)) {
+        return json(res, 409, { error: "This reviewed transaction has already been used. Start a new review before executing again." });
       }
 
       const tokenPrice = Number(asset.tokenPrice);
