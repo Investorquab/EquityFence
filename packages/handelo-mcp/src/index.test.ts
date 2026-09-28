@@ -31,3 +31,12 @@ test("MCP exposes only read-only market tools",async()=>{
   assert.deepEqual(init.result.capabilities.tools,{});
   assert.deepEqual(list.result.tools.map(tool=>tool.name),["handelo_market_lookup","handelo_market_search"]);
 });
+
+
+test("MCP source strictly validates ticker arguments", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("./index.ts", import.meta.url), "utf8");
+  assert.match(source, /function readTicker\(args: unknown\)/);
+  assert.match(source, /typeof ticker !== "string"/);
+  assert.match(source, /ticker is too long/);
+});
