@@ -6,7 +6,7 @@ export interface PortfolioPosition{
 export interface PortfolioSnapshot{wallet:string;positions:PortfolioPosition[];totalEstimatedValueUsd:number|null;}
 
 function position(asset:RwaAsset,balance:string):PortfolioPosition{
-  const units=Number(balance)/10**18;
+  const units=Number(balance)/10**Number(asset.decimals);
   const price=Number(asset.tokenPrice);
   return {ticker:asset.underlyingTicker,tokenSymbol:asset.tokenSymbol,contract:asset.tokenContractAddress,balance,estimatedValueUsd:Number.isFinite(units*price)?units*price:null,tokenPrice:asset.tokenPrice,provider:asset.platformId};
 }
