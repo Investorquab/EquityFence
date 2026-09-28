@@ -1,6 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { HandeloAgent } from "./index.js";
+import { HandeloAgent, validateUserIntent } from "./index.js";
 import type { LlmClient } from "@handelo/llm";
 import type { HandeloMarketClient } from "@handelo/market";
 
@@ -46,4 +46,20 @@ test("Handelo contains unresolved market errors without inventing market context
   assert.equal(result.candidates.length,0);
   assert.equal(result.policy,null);
   assert.match(result.answer,/couldn't resolve/i);
+});
+
+
+test("structured intent validation rejects malformed LLM output", () => {
+  assert.throws(
+    () => validateUserIntent({ action: "buy", ticker: 123, amountUsd: 20, horizon: null, riskTolerance: "low" }),
+    /invalid ticker/,
+  );
+  assert.throws(
+    () => validateUserIntent({ action: "buy", ticker: "NVDA", amountUsd: Number.NaN, horizon: null, riskTolerance: "low" }),
+    /invalid amount/,
+  );
+  assert.throws(
+    () => validateUserIntent({ action: "unknown", ticker: null, amountUsd: null, horizon: null, riskTolerance: "low" }),
+    /invalid investment intent/,
+  );
 });
