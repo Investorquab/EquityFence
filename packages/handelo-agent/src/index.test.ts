@@ -21,7 +21,7 @@ test("Handelo resolves live market context before generating its explanation",as
       return {answer:"NVDA's latest tokenized price is below the latest reference price, and the traditional market is closed."} as T;
     }
   };
-  const market={find:async()=>asset} as unknown as HandeloMarketClient;
+  const market={findAll:async()=>[asset]} as unknown as HandeloMarketClient;
   const result=await new HandeloAgent({llmClient:llm,marketClient:market}).run("What is happening with NVIDIA?");
   assert.equal(calls,2);
   assert.equal(result.intent.ticker,"NVDA");
