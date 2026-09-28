@@ -239,8 +239,10 @@ function addExecutionResult(data) {
       </div>`;
   }
   conversation.appendChild(node);
-  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", () => {
-    node.querySelector("[data-refresh-portfolio]").disabled = true;
+  node.querySelector("[data-refresh-portfolio]")?.addEventListener("click", (event) => {
+    const button = event.currentTarget;
+    button.disabled = true;
+    button.setAttribute("aria-busy", "true");
     showView("portfolio");
   });
   node.querySelector("[data-view-history]")?.addEventListener("click", () => {
