@@ -78,7 +78,7 @@ const server = createServer(async (req, res) => {
   }
 
   if (req.method === "GET" && req.url === "/api/wallet/auth") {
-    if (walletAuth.status === "WAITING") return json(res, 200, walletAuth);
+    if (walletAuth.status === "WAITING" || walletAuth.status === "SUCCESS" || walletAuth.status === "FAILED") return json(res, 200, walletAuth);
 
     try {
       const signin = await bawJson<{ urlForWeb?: string; qrCodeId?: string; pairingCode?: string; status?: string }>(["auth", "signin"]);
