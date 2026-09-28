@@ -42,6 +42,13 @@ test("review token compares address casing without weakening the contract bindin
 });
 
 
+test("review token rejects a missing or changed reviewed slippage", () => {
+  const now = 1_000_000;
+  const token = createReviewToken(input, now);
+  assert.equal(verifyReviewToken(token, { ...input, slippage: undefined }, now + 1_000), false);
+  assert.equal(verifyReviewToken(token, { ...input, slippage: "1.00" }, now + 1_000), false);
+});
+
 test("review token rejects a changed slippage", () => {
   const now = 1_000_000;
   const token = createReviewToken(input, now);
