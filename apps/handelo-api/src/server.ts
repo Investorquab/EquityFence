@@ -28,9 +28,9 @@ const server=createServer(async(req,res)=>{
       let raw="";for await(const chunk of req) raw+=chunk;
       const body=JSON.parse(raw) as {ticker?:unknown;amountUsd?:unknown;fromToken?:unknown;slippage?:unknown};
       const ticker=String(body.ticker??"").trim().toUpperCase();
-      const amount=Number(body.amountUsd);
+      const amount=Number(body.fromTokenQty);
       const fromToken=String(body.fromToken??"").trim();
-      if(!ticker||!Number.isFinite(amount)||amount<=0||!fromToken) return json(res,400,{error:"ticker, positive amountUsd, and fromToken are required"});
+      if(!ticker||!Number.isFinite(amount)||amount<=0||!fromToken) return json(res,400,{error:"ticker, positive fromTokenQty, and fromToken are required"});
       const asset=await market.find(ticker);
       const quote=await wallet.quote({fromTokenQty:String(amount),fromToken,toToken:asset.tokenContractAddress,binanceChainId:"56",slippage:typeof body.slippage==="string"?body.slippage:undefined});
       return json(res,200,{asset:{ticker:asset.underlyingTicker,tokenSymbol:asset.tokenSymbol,contract:asset.tokenContractAddress,provider:asset.platformId,tokenPrice:asset.tokenPrice,referencePrice:asset.referencePrice,market:asset.statusInfo},quote});
