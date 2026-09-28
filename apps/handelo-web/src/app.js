@@ -259,12 +259,24 @@ function renderCandidates(container, candidates, intent) {
       button.addEventListener("click", () => {
         const market = candidates[Number(button.dataset.candidate)];
         if (!market) return;
-        const request = action === "research"
-          ? `research ${market.tokenSymbol}`
-          : Number.isFinite(amount) && amount > 0
-            ? `${action} ${money(amount)} of ${market.tokenSymbol}`
-            : `${action} ${market.tokenSymbol}`;
-        ask(request);
+        if (action === "buy" || action === "invest") {
+          if (Number.isFinite(amount) && amount > 0) {
+            const prompt = document.createElement("article");
+            prompt.className = "review-prompt";
+            prompt.innerHTML = `
+              <div class="review-copy">
+                <div class="message-label">SELECTED REPRESENTATION</div>
+                <strong>Review a ${action === "invest" ? "purchase" : "buy"} of ${escapeHtml(market.tokenSymbol)}.</strong>
+                <span>${money(amount)} · ${escapeHtml(market.provider || "BSC")} · policy checks will run before any transaction.</span>
+              </div>
+              <button type="button">Review</button>`;
+            prompt.querySelector("button").addEventListener("click", () => reviewTrade(market.tokenSymbol, amount, action, prompt));
+            container.closest(".message")?.after(prompt);
+            scrollConversation();
+            return;
+          }
+        }
+        ask(action === "research" ? `research ${market.tokenSymbol}` : `${action} ${market.tokenSymbol}`);
       });
     });
   }
