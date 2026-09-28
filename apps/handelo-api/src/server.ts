@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
-import { isExecutableMarketAsset, marketClientFromEnv } from "@handelo/market";
+import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError } from "@handelo/market";
 import { auditToken } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 
@@ -55,6 +55,16 @@ async function verifyWalletAuth(qrCodeId: string) {
   } catch (error) {
     walletAuth = { status: "FAILED", error: error instanceof Error ? error.message : String(error) };
   }
+}
+
+function marketErrorStatus(error: unknown): 404 | 409 | 503 | null {
+  if (error instanceof MarketResolutionError) return error.kind === "NOT_FOUND" ? 404 : 409;
+  if (error instanceof MarketUpstreamError) return 503;
+  return null;
+}
+
+function errorMessage(error: unknown): string {
+  return error instanceof Error ? error.message : String(error);
 }
 
 function json(res: import("node:http").ServerResponse, status: number, payload: unknown) {
@@ -288,7 +298,8 @@ const server = createServer(async (req, res) => {
         }) : null
       });
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
@@ -339,7 +350,8 @@ const server = createServer(async (req, res) => {
         quote
       });
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
