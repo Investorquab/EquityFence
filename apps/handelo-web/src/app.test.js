@@ -83,3 +83,10 @@ test("execution follow-up actions have dedicated styles", () => {
   assert.match(styles, /\.execution-actions/);
   assert.match(styles, /\.secondary-button/);
 });
+
+
+test("portfolio refresh action disables itself before navigation", () => {
+  assert.match(source, /data-refresh-portfolio/);
+  assert.match(source, /\.disabled = true/);
+  assert.match(source, /showView\("portfolio"\)/);
+});
