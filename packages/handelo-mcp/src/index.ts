@@ -1,0 +1,42 @@
+import { marketClientFromEnv } from "@handelo/market";
+
+type JsonRpc={jsonrpc:"2.0";id?:number|string;method:string;params?:Record<string,unknown>};
+const market=marketClientFromEnv();
+
+const tools=[
+  {name:"handelo_market_lookup",description:"Resolve a tokenized stock on BSC and return live token/reference price and market status.",inputSchema:{type:"object",properties:{ticker:{type:"string"}},required:["ticker"]}},
+  {name:"handelo_market_search",description:"Search BSC tokenized-stock representations.",inputSchema:{type:"object",properties:{ticker:{type:"string"}},required:["ticker"]}}
+];
+
+function reply(id:number|string|undefined,result:unknown){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,result})+"\n");}
+function error(id:number|string|undefined,code:number,message:string){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,error:{code,message}})+"\n");}
+
+async function handle(message:JsonRpc){
+  if(message.method==="initialize"){
+    return reply(message.id,{protocolVersion:"2025-06-18",capabilities:{tools:{}},serverInfo:{name:"handelo-mcp",version:"0.1.0"}});
+  }
+  if(message.method==="notifications/initialized") return;
+  if(message.method==="tools/list") return reply(message.id,{tools});
+  if(message.method!=="tools/call") return error(message.id,-32601,"Method not found");
+  const name=String(message.params?.name??"");
+  const args=(message.params?.arguments??{}) as Record<string,unknown>;
+  try{
+    if(name==="handelo_market_lookup"){
+      const ticker=String(args.ticker??"").trim();
+      if(!ticker) throw new Error("ticker is required");
+      const asset=await market.find(ticker);
+      return reply(message.id,{content:[{type:"text",text:JSON.stringify({ticker:asset.underlyingTicker,tokenSymbol:asset.tokenSymbol,provider:asset.platformId,tokenPrice:asset.tokenPrice,referencePrice:asset.referencePrice,market:asset.statusInfo,contract:asset.tokenContractAddress},null,2)}]});
+    }
+    if(name==="handelo_market_search"){
+      const ticker=String(args.ticker??"").trim();
+      if(!ticker) throw new Error("ticker is required");
+      const results=await market.search(ticker);
+      return reply(message.id,{content:[{type:"text",text:JSON.stringify(results,null,2)}]});
+    }
+    return error(message.id,-32602,"Unknown tool: "+name);
+  }catch(e){return error(message.id,-32000,e instanceof Error?e.message:String(e));}
+}
+
+let buffer="";
+process.stdin.setEncoding("utf8");
+process.stdin.on("data",async(chunk)=>{buffer+=chunk;let index=buffer.indexOf("\n");while(index>=0){const line=buffer.slice(0,index).trim();buffer=buffer.slice(index+1);index=buffer.indexOf("\n");if(!line)continue;try{await handle(JSON.parse(line) as JsonRpc);}catch(e){error(undefined,-32700,e instanceof Error?e.message:"Invalid JSON-RPC message");}}});
