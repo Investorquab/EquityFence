@@ -315,3 +315,13 @@ button{cursor:pointer}
 }
 .wallet-link:hover{transform:translateY(-1px);box-shadow:0 8px 24px rgba(240,185,11,.12)}
 .wallet-wait{padding-top:13px;text-align:center;font:9px var(--mono);color:var(--faint)}
+
+.portfolio-summary{max-width:1080px;margin:0 auto 12px;display:grid;grid-template-columns:1fr 1fr;border:1px solid var(--line);border-radius:14px;background:rgba(255,255,255,.025)}
+.portfolio-summary div{padding:20px}.portfolio-summary div+div{border-left:1px solid var(--line)}
+.portfolio-summary span{display:block;font:9px var(--mono);color:var(--faint);letter-spacing:.06em}.portfolio-summary strong{display:block;margin-top:8px;font:400 28px var(--serif);color:var(--text)}
+.portfolio-list{max-width:1080px;margin:0 auto;display:grid;gap:6px}
+.portfolio-row{display:grid;grid-template-columns:1fr auto;align-items:center;gap:20px;padding:17px 18px;border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.018);transition:border-color 180ms ease-out,transform 180ms ease-out}
+.portfolio-row:hover{border-color:rgba(240,185,11,.22);transform:translateY(-1px)}
+.portfolio-row strong{display:block;font:12px var(--mono)}.portfolio-row span{display:block;margin-top:5px;font:9px var(--mono);color:var(--faint)}
+.portfolio-value{font:12px var(--mono);color:#ddd7cd}.empty-row{padding:30px 18px;border-top:1px solid var(--line);color:var(--muted);font-size:12px}
+@media(max-width:620px){.portfolio-summary{grid-template-columns:1fr}.portfolio-summary div+div{border-left:0;border-top:1px solid var(--line)}}
