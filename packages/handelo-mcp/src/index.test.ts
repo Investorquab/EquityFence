@@ -50,3 +50,11 @@ test("MCP validates JSON-RPC envelopes before handling", async () => {
   assert.match(source, /message\.method !== "string"/);
   assert.match(source, /Invalid JSON-RPC params/);
 });
+
+
+test("MCP classifies invalid tool arguments as invalid params", async () => {
+  const { readFile } = await import("node:fs/promises");
+  const source = await readFile(new URL("./index.ts", import.meta.url), "utf8");
+  assert.match(source, /class InvalidToolArgumentsError extends Error/);
+  assert.match(source, /error\(message\.id,-32602,e\.message\)/);
+});
