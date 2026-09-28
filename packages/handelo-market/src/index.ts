@@ -32,13 +32,22 @@ export class HandeloMarketClient {
   async tokens():Promise<RwaAsset[]>{
     return this.request("GET","/api/v1/dex/market/rwa/tokens",undefined,{binanceChainId:"56"}) as Promise<RwaAsset[]>;
   }
-  async tokenBalance(wallet:string,assetId:string):Promise<TokenBalance>{\n    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid EVM wallet or token contract address.");\n    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:[{binanceChainId:"56",tokenContractAddress:assetId}]});\n    const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());\n    return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};\n  }\n  async discover(limit=8):Promise<RwaAsset[]>{\n    const all=await this.tokens();\n    return all.filter(x=>x.binanceChainId==="56"&&x.underlyingTicker).sort((a,b)=>Number(b.volume24H)-Number(a.volume24H)).slice(0,limit);\n  }\n  async find(ticker:string):Promise<RwaAsset>{
-    const results=await this.search(ticker);
+  async tokenBalance(wallet:string,assetId:string):Promise<TokenBalance>{\n    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid EVM wallet or token contract address.");\n    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:[{binanceChainId:"56",tokenContractAddress:assetId}]});\n    const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());\n    return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};\n  }\n  async discover(limit=8):Promise<RwaAsset[]>{\n    const all=await this.tokens();\n    return all.filter(x=>x.binanceChainId==="56"&&x.underlyingTicker).sort((a,b)=>Number(b.volume24H)-Number(a.volume24H)).slice(0,limit);\n  }\n  async findAll(ticker:string):Promise<RwaAsset[]>{
+    const query=ticker.trim();
+    const results=await this.search(query);
     const assets=results.flatMap(x=>x.assets).filter(x=>x.binanceChainId==="56");
-    if(!assets.length) throw new Error(`No BSC tokenized-stock representation found for ${ticker}.`);
+    if(!assets.length) throw new Error(`No BSC tokenized-stock representation found for ${query}.`);
     const all=await this.tokens();
     const matches=all.filter(x=>assets.some(a=>a.tokenContractAddress.toLowerCase()===x.tokenContractAddress.toLowerCase()));
-    if(!matches.length) throw new Error(`No live BSC market record found for ${ticker}.`);
+    if(!matches.length) throw new Error(`No live BSC market record found for ${query}.`);
+    return matches;
+  }
+
+  async find(ticker:string):Promise<RwaAsset>{
+    const matches=await this.findAll(ticker);
+    const exact=matches.filter(x=>x.tokenSymbol.toLowerCase()===ticker.trim().toLowerCase());
+    if(exact.length===1) return exact[0];
+    if(matches.length>1) throw new Error(`Multiple BSC tokenized-stock representations found for ${ticker}: ${matches.map(x=>x.tokenSymbol+" ("+x.platformId+")").join(", ")}. Resolve the representation before trading.`);
     return matches[0];
   }
 }
