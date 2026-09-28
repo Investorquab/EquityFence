@@ -5,6 +5,27 @@ export interface PortfolioPosition{
 }
 export interface PortfolioSnapshot{wallet:string;positions:PortfolioPosition[];totalEstimatedValueUsd:number|null;}
 
+function normalizeAssets(assets:RwaAsset[]):RwaAsset[]{
+  const seen=new Set<string>();
+  return assets.filter(asset=>{
+    const contract=asset.tokenContractAddress.trim().toLowerCase();
+    const decimals=Number(asset.decimals);
+    const price=Number(asset.tokenPrice);
+    if(asset.binanceChainId!=="56"||!asset.underlyingTicker.trim()||!/^[0-9]+$/.test(asset.decimals)||!Number.isInteger(decimals)||decimals<0||decimals>255||!/^0x[0-9a-fA-F]{40}$/.test(asset.tokenContractAddress)||!Number.isFinite(price)||price<0||seen.has(contract)) return false;
+    seen.add(contract);
+    return true;
+  });
+}
+
+function normalizeRawBalance(rawBalance:string):string{
+  if(!/^\\d+$/.test(rawBalance)) throw new Error("Binance returned an invalid token balance.");
+  return rawBalance;
+}
+
+export function portfolioAssets(assets:RwaAsset[]):RwaAsset[]{
+  return normalizeAssets(assets);
+}
+
 function position(asset:RwaAsset,balance:string):PortfolioPosition{
   const units=Number(balance)/10**Number(asset.decimals);
   const price=Number(asset.tokenPrice);
@@ -15,11 +36,11 @@ export class HandeloPortfolio{
   constructor(private readonly market:HandeloMarketClient=marketClientFromEnv()){}
   async snapshot(wallet:string):Promise<PortfolioSnapshot>{
     if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
-    const assets=(await this.market.tokens()).filter(asset=>asset.binanceChainId==="56"&&asset.underlyingTicker);
+    const assets=normalizeAssets(await this.market.tokens());
     const positions:PortfolioPosition[]=[];
     const balances=await this.market.tokenBalances(wallet,assets.map(asset=>asset.tokenContractAddress));
     for(const asset of assets){
-      const rawBalance=balances.get(asset.tokenContractAddress.toLowerCase())??"0";
+      const rawBalance=normalizeRawBalance(balances.get(asset.tokenContractAddress.toLowerCase())??"0");
       if(BigInt(rawBalance)>0n) positions.push(position(asset,rawBalance));
     }
     const values=positions.map(p=>p.estimatedValueUsd).filter((v):v is number=>v!==null);
