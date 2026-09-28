@@ -15,6 +15,7 @@ const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
+const CORS_ORIGIN = process.env.HANDELO_CORS_ORIGIN?.trim() || "*";
 function isEvmAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value.trim());
 }
@@ -105,7 +106,7 @@ function json(res: import("node:http").ServerResponse, status: number, payload: 
   const body = JSON.stringify(payload);
   res.writeHead(status, {
     "content-type": "application/json",
-    "access-control-allow-origin": "*",
+    "access-control-allow-origin": CORS_ORIGIN,
     "access-control-allow-headers": "content-type"
   });
   res.end(body);
@@ -114,7 +115,7 @@ function json(res: import("node:http").ServerResponse, status: number, payload: 
 const server = createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
-      "access-control-allow-origin": "*",
+      "access-control-allow-origin": CORS_ORIGIN,
       "access-control-allow-headers": "content-type",
       "access-control-allow-methods": "POST,GET,OPTIONS"
     });
