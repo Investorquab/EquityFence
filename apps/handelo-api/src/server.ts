@@ -140,7 +140,8 @@ const server = createServer(async (req, res) => {
     try {
       return json(res, 200, await market.discover(8));
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
@@ -175,7 +176,8 @@ const server = createServer(async (req, res) => {
     try {
       return json(res, 200, { wallet: walletAddress, transactions: await market.transactions(walletAddress, 20) });
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
@@ -191,7 +193,8 @@ const server = createServer(async (req, res) => {
     try {
       return json(res, 200, await portfolioSnapshot(walletAddress));
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
