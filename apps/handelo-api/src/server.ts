@@ -474,7 +474,8 @@ const server = createServer(async (req, res) => {
         result
       });
     } catch (error) {
-      return json(res, 500, { error: error instanceof Error ? error.message : String(error) });
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
 
