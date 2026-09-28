@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, type RwaAsset } from "./index";
+import { HandeloMarketClient, type RwaAsset } from "./index.js";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
@@ -66,7 +66,7 @@ test("findAll only returns exact underlying ticker matches", async () => {
   );
 
   const matches = await market.findAll(" nvda ");
-  assert.deepEqual(matches.map(item => item.tokenContractAddress), [nvda.tokenContractAddress]);
+  assert.deepEqual(matches.map((item: RwaAsset) => item.tokenContractAddress), [nvda.tokenContractAddress]);
 });
 
 test("findAll deduplicates the same contract returned by search", async () => {
