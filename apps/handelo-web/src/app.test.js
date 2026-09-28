@@ -24,6 +24,18 @@ test("trade review renders explicit cancel and confirmation actions", () => {
   assert.match(source, /Confirm purchase/);
 });
 
+test("transaction review communicates async progress accessibly", () => {
+  assert.match(source, /button\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(source, /button\.setAttribute\("aria-label", "Checking transaction review"\)/);
+  assert.match(source, /button\.removeAttribute\("aria-busy"\)/);
+  assert.match(source, /button\.removeAttribute\("aria-label"\)/);
+});
+
+test("transaction confirmation communicates execution progress accessibly", () => {
+  assert.match(source, /button\.setAttribute\("aria-label", "Executing purchase"\)/);
+  assert.match(source, /button\.textContent = "Executing"/);
+});
+
 test("trade confirmation stays disabled unless a valid review can execute", () => {
   assert.match(source, /decision !== "BLOCK" && !securityBlocked && Boolean\(data\.reviewToken && quote\)/);
   assert.match(source, /canConfirm \? "" : "disabled"/);
