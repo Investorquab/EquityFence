@@ -313,6 +313,10 @@ const server = createServer(async (req, res) => {
         });
       }
 
+      const slippageResult = normalizeSlippage(body.slippage);
+      if (slippageResult.error) return json(res, 400, { error: slippageResult.error });
+      const slippage = slippageResult.value;
+
       const asset = await market.find(ticker);
       const quote = await wallet.quote({
         fromTokenQty: String(amount),
