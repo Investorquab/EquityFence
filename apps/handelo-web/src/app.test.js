@@ -184,3 +184,10 @@ test("disabled execution follow-up actions block pointer clicks", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /pointer-events:none/);
 });
+
+
+test("disabled execution follow-up actions prevent selection", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /user-select:none/);
+});
