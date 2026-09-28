@@ -8,6 +8,7 @@ const port = Number(process.env.PORT ?? "8787");
 const agent = new HandeloAgent();
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
+const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
 
 function json(res: import("node:http").ServerResponse, status: number, payload: unknown) {
   const body = JSON.stringify(payload);
@@ -93,16 +94,21 @@ const server = createServer(async (req, res) => {
       });
 
       let quote: unknown = null;
-      const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? "").trim();
+      const fromToken = String(body.fromToken ?? process.env.HANDELO_QUOTE_TOKEN ?? DEFAULT_BSC_QUOTE_TOKEN).trim();
+      let quoteError: string | null = null;
 
       if (fromToken && policy.decision !== "BLOCK") {
-        quote = await wallet.quote({
-          fromTokenQty: String(amountUsd),
-          fromToken,
-          toToken: asset.tokenContractAddress,
-          binanceChainId: "56",
-          slippage: typeof body.slippage === "string" ? body.slippage : undefined
-        });
+        try {
+          quote = await wallet.quote({
+            fromTokenQty: String(amountUsd),
+            fromToken,
+            toToken: asset.tokenContractAddress,
+            binanceChainId: "56",
+            slippage: typeof body.slippage === "string" ? body.slippage : undefined
+          });
+        } catch (error) {
+          quoteError = error instanceof Error ? error.message : String(error);
+        }
       }
 
       return json(res, 200, {
@@ -118,6 +124,7 @@ const server = createServer(async (req, res) => {
         },
         policy,
         quote,
+        quoteError,
         quoteToken: fromToken || null
       });
     } catch (error) {
