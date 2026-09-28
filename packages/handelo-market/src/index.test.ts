@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, type RwaAsset } from "./index.js";
+import { HandeloMarketClient, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
@@ -162,4 +162,38 @@ test("find refuses to silently choose between multiple live representations", as
     () => market.find("NVDA"),
     /Multiple BSC tokenized-stock representations found for NVDA/,
   );
+});
+
+
+test("transaction limits normalize invalid and out-of-range values", () => {
+  assert.equal(normalizeTransactionLimit(Number.NaN), 20);
+  assert.equal(normalizeTransactionLimit(Number.POSITIVE_INFINITY), 20);
+  assert.equal(normalizeTransactionLimit(0), 1);
+  assert.equal(normalizeTransactionLimit(25.9), 25);
+  assert.equal(normalizeTransactionLimit(500), 100);
+});
+
+test("transaction normalization keeps BSC records and removes duplicate or empty hashes", () => {
+  const tx = (overrides: Partial<WalletTransaction> = {}): WalletTransaction => ({
+    binanceChainId: "56",
+    txHash: "0xabc",
+    txTime: "1",
+    amount: "20",
+    symbol: "NVDAon",
+    txStatus: "FINISHED",
+    tokenContractAddress: "0x0000000000000000000000000000000000000001",
+    from: [],
+    to: [],
+    ...overrides,
+  });
+
+  const result = normalizeTransactions([
+    tx(),
+    tx({ txHash: "0xABC" }),
+    tx({ txHash: "0xdef" }),
+    tx({ binanceChainId: "1", txHash: "0xeth" }),
+    tx({ txHash: "   " }),
+  ]);
+
+  assert.deepEqual(result.map(item => item.txHash), ["0xabc", "0xdef"]);
 });
