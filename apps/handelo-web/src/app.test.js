@@ -145,3 +145,9 @@ test("portfolio refresh marks itself busy while opening", () => {
   assert.match(source, /data-navigation-busy/);
   assert.match(source, /aria-busy/);
 });
+
+
+test("portfolio refresh exposes its disabled state", () => {
+  assert.match(source, /aria-disabled/);
+  assert.match(source, /\.disabled = true/);
+});
