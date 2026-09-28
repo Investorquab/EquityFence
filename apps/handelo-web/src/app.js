@@ -305,7 +305,7 @@ async function ask(message) {
 
 async function refreshWalletStatus() {
   try {
-    const response = await fetch(API_BASE + "/api/wallet/status", { cache: "no-store" };
+    const response = await fetch(API_BASE + "/api/wallet/status", { cache: "no-store" });
     const data = await response.json();
     const connected = data.status === "CONNECTED";
     walletState.textContent = connected ? "WALLET CONNECTED" : "WALLET NOT CONNECTED";
@@ -320,7 +320,7 @@ async function connectWallet() {
   connectButton.disabled = true;
   connectButton.innerHTML = "Starting <span>…</span>";
   try {
-    const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" };
+    const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Could not start wallet connection.");
 
@@ -331,7 +331,7 @@ async function connectWallet() {
 
     showWalletAuth(data);
     const poll = setInterval(async () => {
-      const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" };
+      const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
       const auth = await authResponse.json();
 
       if (auth.status === "SUCCESS") {
@@ -386,14 +386,14 @@ async function loadPortfolio() {
   const target = document.querySelector("#portfolioContent");
   target.innerHTML = '<div class="loading-card">Reading wallet positions...</div>';
   try {
-    const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" };
+    const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
     const address = await addressResponse.json();
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">03</div><h3>Connect a wallet to see your portfolio.</h3><p>Handelo reads the connected wallet. It never asks for a private key.</p><button class="primary-button" id="portfolioConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#portfolioConnect").addEventListener("click", connectWallet);
       return;
     }
-    const response = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), { cache: "no-store" };
+    const response = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "Portfolio request failed.");
     target.innerHTML = `
@@ -407,7 +407,7 @@ async function loadPortfolio() {
 async function loadMarkets() {
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
-    const response = await fetch(API_BASE + "/api/markets", { cache: "no-store" };
+    const response = await fetch(API_BASE + "/api/markets", { cache: "no-store" });
     const markets = await response.json();
     if (!response.ok || !Array.isArray(markets) || !markets.length) {
       throw new Error(markets.error || "No market records returned.");
@@ -422,14 +422,14 @@ async function loadHistory() {
   const target = document.querySelector("#historyContent");
   target.innerHTML = '<div class="loading-card">Reading on-chain history...</div>';
   try {
-    const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" };
+    const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
     const address = await addressResponse.json();
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>Connect a wallet to see transaction history.</h3><p>Handelo reads recent BSC transactions from the connected wallet.</p><button class="primary-button" id="historyConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#historyConnect").addEventListener("click", connectWallet);
       return;
     }
-    const response = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), { cache: "no-store" };
+    const response = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error(data.error || "History request failed.");
     if (!data.transactions.length) {
