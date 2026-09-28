@@ -17,9 +17,10 @@ export class HandeloPortfolio{
     if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
     const assets=await this.market.discover(20);
     const positions:PortfolioPosition[]=[];
+    const balances=await this.market.tokenBalances(wallet,assets.map(asset=>asset.tokenContractAddress));
     for(const asset of assets){
-      const balance=await this.market.tokenBalance(wallet,asset.tokenContractAddress);
-      if(BigInt(balance.rawBalance)>0n) positions.push(position(asset,balance.rawBalance));
+      const rawBalance=balances.get(asset.tokenContractAddress.toLowerCase())??"0";
+      if(BigInt(rawBalance)>0n) positions.push(position(asset,rawBalance));
     }
     const values=positions.map(p=>p.estimatedValueUsd).filter((v):v is number=>v!==null);
     return {wallet,positions,totalEstimatedValueUsd:values.length===positions.length?values.reduce((a,b)=>a+b,0):null};
