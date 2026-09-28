@@ -282,3 +282,10 @@ test("disabled execution follow-up actions strengthen dimming", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /opacity:\.55/);
 });
+
+
+test("disabled execution follow-up actions soften their border", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /border-color:transparent/);
+});
