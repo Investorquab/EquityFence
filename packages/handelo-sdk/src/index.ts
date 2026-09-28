@@ -6,18 +6,28 @@ export interface HandeloClient {
   chat(request:ChatRequest):Promise<AgentResult>;
 }
 
+export function normalizeChatMessage(message:string):string{
+  const normalized=message.trim();
+  if(!normalized) throw new Error("message is required");
+  return normalized;
+}
+
 export function createHandeloClient(options:HandeloClientOptions={}):HandeloClient{
   if(options.baseUrl){
     const base=options.baseUrl.replace(/\/$/,"");
     return {
       async chat(request){
-        const response=await fetch(base+"/api/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify(request)});
-        const payload=await response.json() as AgentResult & {error?:string};
+        const message=normalizeChatMessage(request.message);
+        const response=await fetch(base+"/api/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({message})});
+        const raw=await response.text();
+        let payload:AgentResult & {error?:string};
+        try{ payload=JSON.parse(raw) as AgentResult & {error?:string}; }
+        catch{ throw new Error(`Handelo API returned invalid JSON (HTTP ${response.status}).`); }
         if(!response.ok) throw new Error(payload.error??`Handelo API request failed with ${response.status}`);
         return payload;
       }
     };
   }
   const agent=new HandeloAgent({llmApiKey:options.apiKey});
-  return {chat:({message})=>agent.run(message)};
+  return {chat:({message})=>agent.run(normalizeChatMessage(message))};
 }
