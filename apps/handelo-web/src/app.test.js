@@ -26,3 +26,14 @@ test("selection keeps the user's amount and action in the review prompt", () => 
   assert.match(source, /money\(amount\)/);
   assert.match(source, /action === "invest" \? "purchase" : "buy"/);
 });
+
+test("trade review renders explicit cancel and confirmation actions", () => {
+  assert.match(source, /data-cancel/);
+  assert.match(source, /data-confirm/);
+  assert.match(source, /Confirm purchase/);
+});
+
+test("trade confirmation stays disabled unless a valid review can execute", () => {
+  assert.match(source, /decision !== "BLOCK" && !securityBlocked && Boolean\(data\.reviewToken && quote\)/);
+  assert.match(source, /canConfirm \? "" : "disabled"/);
+});
