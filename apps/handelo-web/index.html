@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#080807">
+  <meta name="description" content="Handelo understands the market for you.">
+  <title>Handelo — Market intelligence for tokenized stocks</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="./src/styles.css">
+</head>
+<body>
+  <div class="ambient ambient-one"></div>
+  <div class="ambient ambient-two"></div>
+
+  <div class="shell">
+    <aside class="sidebar" aria-label="Handelo navigation">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <span>HANDELO</span>
+      </div>
+
+      <nav class="nav">
+        <button class="nav-item active" data-view="chat">
+          <span>01</span>
+          <strong>New chat</strong>
+        </button>
+        <button class="nav-item" data-view="markets">
+          <span>02</span>
+          <strong>Markets</strong>
+        </button>
+        <button class="nav-item" data-view="portfolio">
+          <span>03</span>
+          <strong>Portfolio</strong>
+        </button>
+        <button class="nav-item" data-view="history">
+          <span>04</span>
+          <strong>History</strong>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <div class="network"><span class="status-dot"></span><span>BSC MAINNET</span></div>
+        <div class="wallet-state">WALLET NOT CONNECTED</div>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-label">MARKET INTELLIGENCE</div>
+        <button class="connect" id="connectButton" type="button">Connect wallet <span>↗</span></button>
+      </header>
+
+      <section class="view active" id="view-chat">
+        <div class="chat-layout">
+          <div class="conversation" id="conversation" aria-live="polite">
+            <div class="welcome" id="welcome">
+              <div class="eyebrow">HANDELO / BSC</div>
+              <h1>What can I help you <em>understand?</em></h1>
+              <p>Ask about a tokenized stock, a market difference, or an opportunity. Handelo turns the moving pieces into a clear picture.</p>
+
+              <div class="suggestions">
+                <button data-prompt="What's happening with NVIDIA?">What's happening with NVIDIA?</button>
+                <button data-prompt="Why is a tokenized stock price different?">Why is the price different?</button>
+                <button data-prompt="I have $20. What should I look at?">I have $20. What should I look at?</button>
+              </div>
+            </div>
+          </div>
+
+          <form class="composer" id="composer">
+            <div class="composer-inner">
+              <span class="composer-mark">↳</span>
+              <input id="messageInput" autocomplete="off" placeholder="Ask Handelo anything..." aria-label="Message Handelo">
+              <button id="sendButton" type="submit" aria-label="Send message">↑</button>
+            </div>
+            <div class="composer-note">Handelo explains the market before it asks you to act.</div>
+          </form>
+        </div>
+      </section>
+
+      <section class="view" id="view-markets">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">LIVE / BSC</div>
+            <h2>Markets</h2>
+          </div>
+          <span class="section-meta">REFERENCE + ON-CHAIN</span>
+        </div>
+        <div class="market-grid" id="marketGrid">
+          <div class="loading-card">Loading market context...</div>
+        </div>
+      </section>
+
+      <section class="view" id="view-portfolio">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">YOUR POSITION</div>
+            <h2>Portfolio</h2>
+          </div>
+        </div>
+        <div class="empty-state">
+          <div class="empty-number">03</div>
+          <h3>Connect a wallet to see your portfolio.</h3>
+          <p>Handelo will keep the portfolio surface quiet until there is a wallet to read.</p>
+          <button class="primary-button" id="portfolioConnect" type="button">Connect wallet</button>
+        </div>
+      </section>
+
+      <section class="view" id="view-history">
+        <div class="section-heading">
+          <div>
+            <div class="eyebrow">LOCAL SESSION</div>
+            <h2>History</h2>
+          </div>
+        </div>
+        <div class="empty-state">
+          <div class="empty-number">04</div>
+          <h3>Your conversations will appear here.</h3>
+          <p>Nothing is stored remotely by this first web surface.</p>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <template id="userMessageTemplate">
+    <article class="message user-message">
+      <div class="message-label">YOU</div>
+      <div class="message-text"></div>
+    </article>
+  </template>
+
+  <template id="agentMessageTemplate">
+    <article class="message agent-message">
+      <div class="message-label">HANDELO</div>
+      <div class="message-text"></div>
+      <div class="market-context"></div>
+    </article>
+  </template>
+
+  <script type="module" src="./src/app.js"></script>
+</body>
+</html>
