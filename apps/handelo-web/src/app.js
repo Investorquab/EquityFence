@@ -224,7 +224,7 @@ function renderMarketContext(container, market) {
       <div class="context-grid">
         <div class="metric"><div class="metric-label">Reference</div><div class="metric-value">${money(market.referencePrice)}</div></div>
         <div class="metric"><div class="metric-label">Difference</div><div class="metric-value ${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</div></div>
-        <div class="metric"><div class="metric-label">Market</div><div class="metric-value">${market.marketStatus || "—"}</div></div>
+        <div class="metric"><div class="metric-label">Market</div><div class="metric-value">${escapeHtml(market.marketStatus || "—")}</div></div>
       </div>
       ${market.reason ? `<div class="context-reason">${escapeHtml(market.reason)}</div>` : ""}
     </div>`;
