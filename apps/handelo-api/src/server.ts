@@ -182,6 +182,9 @@ const server = createServer(async (req, res) => {
 
       if (fromToken && policy.decision !== "BLOCK") {
         try {
+          if (fromToken.toLowerCase() !== DEFAULT_BSC_QUOTE_TOKEN.toLowerCase()) {
+            throw new Error("Handelo's USD-notional execution path currently requires the BSC USDT quote token.");
+          }
           quote = await wallet.quote({
             fromTokenQty: String(amountUsd),
             fromToken,
@@ -290,10 +293,22 @@ const server = createServer(async (req, res) => {
         });
       }
 
+      if (fromToken.toLowerCase() !== DEFAULT_BSC_QUOTE_TOKEN.toLowerCase()) {
+        return json(res, 400, { error: "Handelo's USD-notional execution path currently requires the BSC USDT quote token." });
+      }
+
       const asset = await market.find(ticker);
+      const reviewedQuote = await wallet.quote({
+        fromTokenQty: String(amount),
+        fromToken,
+        toToken: asset.tokenContractAddress,
+        binanceChainId: "56",
+        slippage: typeof body.slippage === "string" ? body.slippage : undefined
+      });
+
       const result = await wallet.execute(
         {
-          fromTokenQty: String(amount),
+          fromTokenQty: reviewedQuote.fromCoinAmount,
           fromToken,
           toToken: asset.tokenContractAddress,
           binanceChainId: "56",
