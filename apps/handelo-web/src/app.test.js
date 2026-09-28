@@ -261,3 +261,10 @@ test("disabled execution follow-up actions retain pointer lock", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /pointer-events:none/);
 });
+
+
+test("disabled execution follow-up actions signal disabled state", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /cursor:not-allowed/);
+});
