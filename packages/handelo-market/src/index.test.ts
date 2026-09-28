@@ -126,6 +126,21 @@ test("findAll rejects search results that have no matching live market record", 
   );
 });
 
+test("find resolves an exact token symbol before underlying ticker lookup", async () => {
+  const bstock = asset({
+    platformId: "bstock",
+    tokenSymbol: "NVDAB",
+    tokenContractAddress: "0x0000000000000000000000000000000000000003",
+  });
+  const market = client([], [bstock]);
+
+  const result = await market.find(" nvdab ");
+
+  assert.equal(result.tokenSymbol, "NVDAB");
+  assert.equal(result.platformId, "bstock");
+  assert.equal(result.tokenContractAddress, bstock.tokenContractAddress);
+});
+
 test("find refuses to silently choose between multiple live representations", async () => {
   const first = asset();
   const second = asset({
