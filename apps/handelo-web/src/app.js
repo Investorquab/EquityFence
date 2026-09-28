@@ -127,6 +127,10 @@ function addReviewCard(data, amountUsd) {
       <span>EXPECTED ROUTE</span>
       <strong>${quoteLine}</strong>
     </div>
+    <div class="review-quote">
+      <span>SECURITY</span>
+      <strong>${escapeHtml(securityLabel)}${security?.riskLevel !== undefined ? ` · LEVEL ${escapeHtml(security.riskLevel)}` : ""}</strong>
+    </div>
     <div class="review-reasons">
       ${(policy.reasons || []).map(reason => `<div>• ${escapeHtml(reason)}</div>`).join("")}
       ${data.securityAuditError ? `<div class="review-warning">• ${escapeHtml(data.securityAuditError)}</div>` : ""}
