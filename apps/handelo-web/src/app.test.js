@@ -240,3 +240,10 @@ test("disabled execution follow-up actions flatten background imagery", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /background-image:none/);
 });
+
+
+test("disabled execution follow-up actions simplify outline", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.execution-actions button:disabled/);
+  assert.match(styles, /outline:none/);
+});
