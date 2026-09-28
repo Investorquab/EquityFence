@@ -252,6 +252,7 @@ function addExecutionResult(data) {
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
     button.textContent = "Opening…";
+    button.setAttribute("aria-label", "Opening transaction history");
     showView("history");
   });
   scrollConversation();
