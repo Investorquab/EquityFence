@@ -389,6 +389,36 @@ async function loadMarkets() {
   }
 }
 
+async function loadHistory() {
+  const target = document.querySelector("#historyContent");
+  target.innerHTML = '<div class="loading-card">Reading on-chain history...</div>';
+  try {
+    const addressResponse = await fetch(API_BASE + "/api/wallet/address");
+    const address = await addressResponse.json();
+    if (!address.connected || !address.address) {
+      target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>Connect a wallet to see transaction history.</h3><p>Handelo reads recent BSC transactions from the connected wallet.</p><button class="primary-button" id="historyConnect" type="button">Connect wallet</button></div>';
+      target.querySelector("#historyConnect").addEventListener("click", connectWallet);
+      return;
+    }
+    const response = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address));
+    const data = await response.json();
+    if (!response.ok) throw new Error(data.error || "History request failed.");
+    if (!data.transactions.length) {
+      target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p></div>';
+      return;
+    }
+    target.innerHTML = '<div class="history-list">' + data.transactions.map(tx => {
+      const time = Number(tx.txTime);
+      const date = Number.isFinite(time) ? new Date(time).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "Unknown time";
+      const hash = String(tx.txHash || "");
+      const shortHash = hash ? hash.slice(0, 8) + "…" + hash.slice(-6) : "No hash";
+      return '<article class="history-row"><div><div class="history-main"><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><span class="history-status ' + escapeHtml(String(tx.txStatus || "").toLowerCase()) + '">' + escapeHtml(tx.txStatus || "unknown") + '</span></div><span class="history-meta">' + escapeHtml(date) + ' · ' + escapeHtml(String(tx.amount || "—")) + ' ' + escapeHtml(tx.symbol || "") + '</span></div><a class="history-hash" href="https://bscscan.com/tx/' + encodeURIComponent(hash) + '" target="_blank" rel="noopener">' + escapeHtml(shortHash) + ' ↗</a></article>';
+    }).join("") + '</div>';
+  } catch (error) {
+    target.innerHTML = '<div class="loading-card">History data is unavailable. ' + escapeHtml(error.message) + '</div>';
+  }
+}
+
 function renderMarketCard(market) {
   const gap = market.premiumPct;
   const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
@@ -413,6 +443,7 @@ document.querySelectorAll(".nav-item").forEach((button) => {
     document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
     if (view === "markets") loadMarkets();
     if (view === "portfolio") loadPortfolio();
+    if (view === "history") loadHistory();
   });
 });
 
@@ -426,5 +457,6 @@ composer.addEventListener("submit", (event) => {
 });
 
 document.querySelector("#portfolioConnect")?.addEventListener("click", () => connectButton.click());
+document.querySelector("#historyConnect")?.addEventListener("click", () => connectButton.click());
 
 input.focus();
