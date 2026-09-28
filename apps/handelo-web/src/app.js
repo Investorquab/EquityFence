@@ -231,6 +231,7 @@ function renderMarketContext(container, market) {
         <div class="metric"><div class="metric-label">Difference</div><div class="metric-value ${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</div></div>
         <div class="metric"><div class="metric-label">Market</div><div class="metric-value">${escapeHtml(market.marketStatus || "—")}</div></div>
       </div>
+      <div class="context-schedule"><span>${market.marketOpen ? "NEXT CLOSE" : "NEXT OPEN"}</span><strong>${escapeHtml(marketSchedule(market))}</strong></div>
       ${market.reason ? `<div class="context-reason">${escapeHtml(market.reason)}</div>` : ""}
     </div>`;
 }
@@ -248,6 +249,27 @@ function renderCandidates(container, candidates) {
           <div class="candidate-price">${money(market.tokenPrice)}</div>
         </div>`).join("")}
     </div>`;
+}
+
+function formatMarketTime(value) {
+  const timestamp = Number(value);
+  if (!Number.isFinite(timestamp) || timestamp <= 0) return "—";
+  const date = new Date(timestamp);
+  if (Number.isNaN(date.getTime())) return "—";
+  return date.toLocaleString(undefined, {
+    weekday: "short",
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "2-digit"
+  });
+}
+
+function marketSchedule(market) {
+  const nextOpen = formatMarketTime(market.nextOpenTime);
+  const nextClose = formatMarketTime(market.nextCloseTime);
+  if (market.marketOpen) return nextClose !== "—" ? "Closes " + nextClose : "Market currently open";
+  return nextOpen !== "—" ? "Next open " + nextOpen : "Market currently closed";
 }
 
 function safeExternalUrl(value) {
@@ -466,6 +488,7 @@ function renderMarketCard(market) {
         <div><small>REFERENCE</small><b>${money(market.referencePrice)}</b></div>
         <div><small>DIFFERENCE</small><b class="${gap >= 0 ? "positive" : "negative"}">${gapText}</b></div>
       </div>
+      <div class="market-card-schedule"><span>${market.marketOpen ? "NEXT CLOSE" : "NEXT OPEN"}</span><b>${escapeHtml(marketSchedule(market))}</b></div>
     </article>`;
 }
 
