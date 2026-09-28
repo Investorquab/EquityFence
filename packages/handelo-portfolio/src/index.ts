@@ -15,7 +15,7 @@ export class HandeloPortfolio{
   constructor(private readonly market:HandeloMarketClient=marketClientFromEnv()){}
   async snapshot(wallet:string):Promise<PortfolioSnapshot>{
     if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)) throw new Error("Invalid EVM wallet address.");
-    const assets=await this.market.discover(20);
+    const assets=(await this.market.tokens()).filter(asset=>asset.binanceChainId==="56"&&asset.underlyingTicker);
     const positions:PortfolioPosition[]=[];
     const balances=await this.market.tokenBalances(wallet,assets.map(asset=>asset.tokenContractAddress));
     for(const asset of assets){
