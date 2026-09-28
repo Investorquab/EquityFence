@@ -243,6 +243,7 @@ function addExecutionResult(data) {
     const button = event.currentTarget;
     button.disabled = true;
     button.setAttribute("aria-busy", "true");
+    button.setAttribute("data-navigation-busy", "true");
     button.textContent = "Refreshing…";
     button.setAttribute("aria-label", "Refreshing portfolio");
     showView("portfolio");
