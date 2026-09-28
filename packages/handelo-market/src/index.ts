@@ -1,6 +1,8 @@
 import { createHmac, randomUUID } from "node:crypto";
 
-export interface TokenBalance { assetId:string; wallet:string; rawBalance:string; decimals:number; }\n\nexport interface RwaAsset {
+export interface TokenBalance { assetId:string; wallet:string; rawBalance:string; decimals:number; }
+
+export interface RwaAsset {
   binanceChainId:string; tokenContractAddress:string; platformId:string;
   tokenSymbol:string; decimals:string; underlyingTicker:string; underlyingName:string;
   tokenToShareRatio:string; tokenPrice:string; referencePrice:string;
@@ -32,7 +34,17 @@ export class HandeloMarketClient {
   async tokens():Promise<RwaAsset[]>{
     return this.request("GET","/api/v1/dex/market/rwa/tokens",undefined,{binanceChainId:"56"}) as Promise<RwaAsset[]>;
   }
-  async tokenBalance(wallet:string,assetId:string):Promise<TokenBalance>{\n    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid EVM wallet or token contract address.");\n    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:[{binanceChainId:"56",tokenContractAddress:assetId}]});\n    const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());\n    return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};\n  }\n  async discover(limit=8):Promise<RwaAsset[]>{\n    const all=await this.tokens();\n    return all.filter(x=>x.binanceChainId==="56"&&x.underlyingTicker).sort((a,b)=>Number(b.volume24H)-Number(a.volume24H)).slice(0,limit);\n  }\n  async findAll(ticker:string):Promise<RwaAsset[]>{
+  async tokenBalance(wallet:string,assetId:string):Promise<TokenBalance>{
+    if(!/^0x[0-9a-fA-F]{40}$/.test(wallet)||!/^0x[0-9a-fA-F]{40}$/.test(assetId)) throw new Error("Invalid EVM wallet or token contract address.");
+    const data=await this.request<Array<{tokenAssets:Array<{binanceChainId:string;tokenContractAddress:string;address:string;rawBalance:string}>}>>("POST","/api/v1/dex/balance/token-balances-by-address",{address:wallet,tokenContractAddresses:[{binanceChainId:"56",tokenContractAddress:assetId}]});
+    const asset=data.flatMap(group=>group.tokenAssets).find(x=>x.binanceChainId==="56"&&x.tokenContractAddress.toLowerCase()===assetId.toLowerCase()&&x.address.toLowerCase()===wallet.toLowerCase());
+    return {assetId,wallet,rawBalance:asset?.rawBalance??"0",decimals:18};
+  }
+  async discover(limit=8):Promise<RwaAsset[]>{
+    const all=await this.tokens();
+    return all.filter(x=>x.binanceChainId==="56"&&x.underlyingTicker).sort((a,b)=>Number(b.volume24H)-Number(a.volume24H)).slice(0,limit);
+  }
+  async findAll(ticker:string):Promise<RwaAsset[]>{
     const query=ticker.trim();
     const results=await this.search(query);
     const assets=results.flatMap(x=>x.assets).filter(x=>x.binanceChainId==="56");
