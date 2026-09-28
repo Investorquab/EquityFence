@@ -74,7 +74,10 @@ export class BinanceAgenticWalletAdapter{
       throw new Error("Token security audit data is unavailable for the requested token; execution is blocked.");
     }
 
-    await baw(["wallet","status"]);
+    const wallet = await baw<{status:"CONNECTED"|"UNCONNECTED"|"CREATING"}>(["wallet","status"]);
+    if(wallet.status !== "CONNECTED"){
+      throw new Error(`Binance Agentic Wallet is not connected (status: ${wallet.status}). Execution is blocked.`);
+    }
 
     const order=await baw<{orderId:string}>([
       "market-order","swap",
