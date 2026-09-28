@@ -151,3 +151,9 @@ test("portfolio refresh exposes its disabled state", () => {
   assert.match(source, /aria-disabled/);
   assert.match(source, /\.disabled = true/);
 });
+
+
+test("history navigation exposes its disabled state", () => {
+  assert.match(source, /aria-disabled/);
+  assert.match(source, /\.disabled = true/);
+});
