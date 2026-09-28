@@ -441,9 +441,11 @@ const server = createServer(async (req, res) => {
         });
       }
 
-      if (policy.decision === "CONFIRM" && body.confirmed !== true) {
+      if (body.confirmed !== true) {
         return json(res, 409, {
-          error: "Additional confirmation is required by Handelo safety policy.",
+          error: policy.decision === "CONFIRM"
+            ? "Additional confirmation is required by Handelo safety policy."
+            : "Explicit confirmation is required before execution.",
           policy
         });
       }
