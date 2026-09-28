@@ -8,8 +8,10 @@ const tools=[
   {name:"handelo_market_search",description:"Search BSC tokenized-stock representations.",inputSchema:{type:"object",properties:{ticker:{type:"string"}},required:["ticker"]}}
 ];
 
-function reply(id:number|string|undefined,result:unknown){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,result})+"\n");}
-function error(id:number|string|undefined,code:number,message:string){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,error:{code,message}})+"\n");}
+function reply(id:number|string|undefined,result:unknown){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,result})+"
+");}
+function error(id:number|string|undefined,code:number,message:string){process.stdout.write(JSON.stringify({jsonrpc:"2.0",id,error:{code,message}})+"
+");}
 
 function validateJsonRpc(value: unknown): JsonRpc {
   if (!value || typeof value !== "object" || Array.isArray(value)) throw new Error("Invalid JSON-RPC message");
@@ -26,7 +28,8 @@ function validateJsonRpc(value: unknown): JsonRpc {
   return value as JsonRpc;
 }
 
-class InvalidToolArgumentsError extends Error {}\n\nfunction readTicker(args: unknown): string {
+class InvalidToolArgumentsError extends Error {}
+\nfunction readTicker(args: unknown): string {
   if (!args || typeof args !== "object" || Array.isArray(args)) throw new InvalidToolArgumentsError("arguments must be an object");
   const ticker=(args as Record<string,unknown>).ticker;
   if (typeof ticker !== "string" || !ticker.trim()) throw new InvalidToolArgumentsError("ticker is required");
