@@ -422,13 +422,19 @@ async function ask(message) {
       body: JSON.stringify({ message: clean })
     });
     const data = await response.json();
-    if (requestId !== chatRequestId) return;
+    if (requestId !== chatRequestId) {
+      thinking.remove();
+      return;
+    }
     thinking.remove();
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Handelo API request failed.");
     if (!data || typeof data !== "object" || typeof data.answer !== "string") throw new Error("Handelo response was invalid.");
     addAgentMessage(data);
   } catch (error) {
-    if (requestId !== chatRequestId) return;
+    if (requestId !== chatRequestId) {
+      thinking.remove();
+      return;
+    }
     thinking.remove();
     addAgentMessage({ answer: `I could not reach the Handelo agent. ${error.message}` });
   } finally {
