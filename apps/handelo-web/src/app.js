@@ -390,10 +390,12 @@ async function ask(message) {
   addUserMessage(clean);
   input.value = "";
   sendButton.disabled = true;
+  sendButton.setAttribute("aria-busy", "true");
   input.disabled = true;
 
   const thinking = document.createElement("article");
   thinking.className = "message agent-message";
+  thinking.setAttribute("aria-live", "polite");
   thinking.innerHTML = '<div class="message-label">HANDELO</div><div class="message-text">Reading the market<span class="thinking-dots"> ···</span></div>';
   conversation.appendChild(thinking);
   scrollConversation();
@@ -413,6 +415,7 @@ async function ask(message) {
     addAgentMessage({ answer: `I could not reach the Handelo agent. ${error.message}` });
   } finally {
     sendButton.disabled = false;
+    sendButton.setAttribute("aria-busy", "false");
     input.disabled = false;
     input.focus();
   }
