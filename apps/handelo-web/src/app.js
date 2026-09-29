@@ -605,6 +605,7 @@ async function loadPortfolio() {
     const data = await response.json();
     if (requestId !== dataViewRequestId) return;
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Portfolio request failed.");
+    if (!data || !Array.isArray(data.positions)) throw new Error("Portfolio response was invalid.");
     target.innerHTML = `
       <div class="portfolio-summary"><div><span>ESTIMATED VALUE</span><strong>${data.totalEstimatedValueUsd === null ? "—" : money(data.totalEstimatedValueUsd)}</strong></div><div><span>POSITIONS</span><strong>${data.positions.length}</strong></div></div>
       <div class="portfolio-list">${data.positions.length ? data.positions.map(p => `<article class="portfolio-row"><div><strong>${escapeHtml(p.ticker)}</strong><span>${escapeHtml(p.tokenSymbol)} · ${escapeHtml(p.provider)}</span></div><div class="portfolio-value">${p.estimatedValueUsd === null ? "—" : money(p.estimatedValueUsd)}</div></article>`).join("") : '<div class="empty-row">No supported tokenized-stock positions found in this wallet.</div>'}</div>`;
@@ -657,6 +658,7 @@ async function loadHistory() {
     const data = await response.json();
     if (requestId !== dataViewRequestId) return;
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "History request failed.");
+    if (!Array.isArray(data.transactions)) throw new Error("History response was invalid.");
     if (!data.transactions.length) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p></div>';
       target.setAttribute("aria-busy", "false");
