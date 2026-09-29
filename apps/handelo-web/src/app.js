@@ -676,7 +676,8 @@ async function loadHistory() {
     target.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
-    target.innerHTML = '<div class="loading-card">History data is unavailable. ' + escapeHtml(error.message) + '</div>';
+    target.innerHTML = '<div class="loading-card">History data is unavailable. ' + escapeHtml(error.message) + '<br><button class="primary-button" id="historyRetry" type="button">Retry</button></div>';
+    target.querySelector("#historyRetry").addEventListener("click", loadHistory);
     target.setAttribute("aria-busy", "false");
   }
 }
