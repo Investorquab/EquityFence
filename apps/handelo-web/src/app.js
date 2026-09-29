@@ -514,7 +514,7 @@ function showWalletAuth(data) {
       return;
     }
     if (event.key !== "Tab") return;
-    const focusable = [...dialog.querySelectorAll("button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])")]
+    const focusable = [...dialog.querySelectorAll('button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])')]
       .filter((element) => !element.hasAttribute("disabled"));
     if (!focusable.length) return;
     const first = focusable[0];
