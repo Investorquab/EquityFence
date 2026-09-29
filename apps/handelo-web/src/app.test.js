@@ -872,3 +872,6 @@ test("review security label explains unavailable audits", () => {
   assert.match(source, /SECURITY CHECK UNAVAILABLE — EXECUTION BLOCKED/);
   assert.match(source, /securityBlocked && data\.securityAuditError/);
 });
+
+
+test("portfolio rows expose current market context", () => { assert.match(source, /LIVE MARKET/); assert.match(source, /MARKET CLOSED/); assert.match(source, /p\.tokenPrice/); });
