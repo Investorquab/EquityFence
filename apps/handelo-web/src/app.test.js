@@ -803,3 +803,10 @@ test("wallet polling ignores stale sessions after close or replacement", () => {
   assert.match(source, /if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
   assert.match(source, /walletAuthSessionId \+= 1;/);
 });
+
+
+test("wallet authentication ignores stale startup responses after close or replacement", () => {
+  assert.match(source, /if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
+  assert.match(source, /const data = await response\.json\(\);\r?\n    if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
+  assert.match(source, /catch \(error\) \{\r?\n    if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
+});
