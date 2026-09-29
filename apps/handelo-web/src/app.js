@@ -11,6 +11,7 @@ const walletState = document.querySelector(".wallet-state");
 let walletAuthPoll = null;
 let walletAuthTimeout = null;
 let walletAuthActive = false;
+let walletAuthSessionId = 0;
 let walletAuthReturnFocus = null;
 let walletAuthKeydown = null;
 let dataViewRequestId = 0;
@@ -460,6 +461,7 @@ async function refreshWalletStatus() {
 async function connectWallet() {
   if (walletAuthActive) return;
   walletAuthActive = true;
+  const sessionId = ++walletAuthSessionId;
   connectButton.disabled = true;
   connectButton.setAttribute("aria-busy", "true");
   connectButton.innerHTML = "Starting <span>…</span>";
@@ -477,9 +479,11 @@ async function connectWallet() {
 
     showWalletAuth(data);
     walletAuthPoll = setInterval(async () => {
+      if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
       try {
         const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
         const auth = await authResponse.json();
+        if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
         if (!auth || typeof auth !== "object" || typeof auth.status !== "string") {
           throw new Error("Wallet authentication status response was invalid.");
         }
@@ -574,6 +578,7 @@ function clearWalletAuthPolling() {
 }
 
 function closeWalletAuth() {
+  walletAuthSessionId += 1;
   clearWalletAuthPolling();
   walletAuthActive = false;
   connectButton.disabled = false;
@@ -738,3 +743,9 @@ document.querySelector("#portfolioConnect")?.addEventListener("click", () => con
 document.querySelector("#historyConnect")?.addEventListener("click", () => connectButton.click());
 
 input.focus();
+\ntest("wallet polling ignores stale sessions after close or replacement", () => {
+  assert.match(source, /let walletAuthSessionId = 0/);
+  assert.match(source, /const sessionId = \\+\\+walletAuthSessionId/);
+  assert.match(source, /if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
+  assert.match(source, /walletAuthSessionId \\+= 1;/);
+});
