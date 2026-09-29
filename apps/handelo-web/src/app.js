@@ -7,6 +7,9 @@ const input = document.querySelector("#messageInput");
 const sendButton = document.querySelector("#sendButton");
 const connectButton = document.querySelector("#connectButton");
 const marketGrid = document.querySelector("#marketGrid");
+const marketSearch = document.querySelector("#marketSearch");
+const marketCount = document.querySelector("#marketCount");
+let marketRecords = [];
 const walletState = document.querySelector(".wallet-state");
 let walletAuthPoll = null;
 let walletAuthTimeout = null;
@@ -649,7 +652,8 @@ async function loadMarkets() {
     if (!response.ok || !Array.isArray(markets) || !markets.length) {
       throw new Error((markets && typeof markets === "object" && markets.error) || "No market records returned.");
     }
-    marketGrid.innerHTML = markets.map(renderMarketCard).join("");
+    marketRecords = markets;
+    renderMarketResults();
     marketGrid.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
@@ -717,6 +721,25 @@ function showView(view) {
   if (view === "history") loadHistory();
 }
 
+function renderMarketResults() {
+  const query = String(marketSearch?.value || "").trim().toLowerCase();
+  const filtered = marketRecords.filter((market) => {
+    if (!query) return true;
+    return [market.ticker, market.tokenSymbol, market.provider]
+      .some((value) => String(value || "").toLowerCase().includes(query));
+  });
+
+  if (marketCount) {
+    marketCount.textContent = query
+      ? `${filtered.length} of ${marketRecords.length} markets`
+      : `${marketRecords.length} markets`;
+  }
+
+  marketGrid.innerHTML = filtered.length
+    ? filtered.map(renderMarketCard).join("")
+    : '<div class="loading-card market-empty">No markets match that search.</div>';
+}
+
 function renderMarketCard(market) {
   const gap = market.premiumPct;
   const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
@@ -738,6 +761,8 @@ function renderMarketCard(market) {
 document.querySelectorAll(".nav-item").forEach((button) => {
   button.addEventListener("click", () => showView(button.dataset.view));
 });
+
+marketSearch?.addEventListener("input", renderMarketResults);
 
 document.querySelectorAll("[data-prompt]").forEach((button) => {
   button.addEventListener("click", () => ask(button.dataset.prompt || ""));
