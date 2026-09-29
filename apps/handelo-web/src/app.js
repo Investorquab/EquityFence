@@ -747,6 +747,17 @@ function openMarketDetail(index) {
       </div>
       <button class="primary-button market-detail-chat" type="button">Ask Handelo about this</button>
     </div>`;
+  const related = marketRecords.filter((candidate) => candidate.ticker === market.ticker);
+  const section = document.createElement('section');
+  section.className = 'market-detail-representations';
+  section.innerHTML = '<div class="eyebrow">AVAILABLE REPRESENTATIONS</div>' + related.map((candidate) => '<button class="market-representation" type="button" data-market-representation="' + escapeHtml(candidate.tokenSymbol) + '"><span><strong>' + escapeHtml(candidate.tokenSymbol) + '</strong><small>' + escapeHtml(candidate.provider || 'BSC') + ' · ' + (candidate.marketOpen ? 'LIVE' : 'CLOSED') + '</small></span><b>' + money(candidate.tokenPrice) + '</b></button>').join('');
+  panel.querySelector('.market-detail-panel').insertBefore(section, panel.querySelector('.market-detail-chat'));
+  section.querySelectorAll('[data-market-representation]').forEach((button) => {
+    button.addEventListener('click', () => {
+      const selected = related.find((candidate) => candidate.tokenSymbol === button.dataset.marketRepresentation);
+      if (selected) openMarketDetail(marketRecords.indexOf(selected));
+    });
+  });
   document.body.appendChild(panel);
   const close = () => panel.remove();
   panel.querySelector('.market-detail-close').addEventListener('click', close);
