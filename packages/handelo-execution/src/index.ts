@@ -52,7 +52,12 @@ export interface TokenAudit {
 export async function auditToken(chainId:string,contractAddress:string):Promise<TokenAudit>{
   const response=await fetch("https://web3.binance.com/bapi/defi/v1/public/wallet-direct/security/token/audit",{
     method:"POST",
-    headers:{"content-type":"application/json","user-agent":"binance-web3/1.4 (Skill)"},
+    headers:{
+      "content-type":"application/json",
+      "source":"agent",
+      "accept-encoding":"identity",
+      "user-agent":"binance-web3/1.4 (Skill)"
+    },
     body:JSON.stringify({binanceChainId:chainId,contractAddress,requestId:randomUUID()})
   });
   const payload=await response.json() as {
