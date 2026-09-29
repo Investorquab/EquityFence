@@ -468,6 +468,7 @@ async function connectWallet() {
   try {
     const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
     const data = await response.json();
+    if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Could not start wallet connection.");
     if (!data || typeof data !== "object" || typeof data.status !== "string") throw new Error("Wallet authentication response was invalid.");
 
@@ -510,6 +511,7 @@ async function connectWallet() {
       addAgentMessage({ answer: "Wallet connection timed out. Please try connecting again." });
     }, 5 * 60 * 1000);
   } catch (error) {
+    if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
     walletAuthActive = false;
     addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
   } finally {
