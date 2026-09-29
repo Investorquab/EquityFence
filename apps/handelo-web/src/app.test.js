@@ -866,3 +866,9 @@ test("wallet state is announced accessibly", () => {
   assert.match(source, /WALLET CONNECTED/);
   assert.match(source, /WALLET NOT CONNECTED/);
 });
+
+
+test("review security label explains unavailable audits", () => {
+  assert.match(source, /SECURITY CHECK UNAVAILABLE — EXECUTION BLOCKED/);
+  assert.match(source, /securityBlocked && data\.securityAuditError/);
+});
