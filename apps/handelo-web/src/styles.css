@@ -381,3 +381,7 @@ button{cursor:pointer}
 
 .execution-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .execution-actions .primary-button,.execution-actions .secondary-button{width:auto}
+
+
+:where(button, a, input):focus-visible{outline:2px solid var(--gold);outline-offset:3px}
+:where(.nav-item, .connect, .suggestions button, .candidate-select, .primary-button, .secondary-button, .wallet-link, .wallet-close):focus-visible{outline:2px solid var(--gold);outline-offset:3px}
