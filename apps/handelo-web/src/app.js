@@ -499,6 +499,7 @@ async function connectWallet() {
           addAgentMessage({ answer: `Wallet connection failed: ${auth.error || "The wallet did not complete authentication."}` });
         }
       } catch (error) {
+        if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
         clearWalletAuthPolling();
         closeWalletAuth();
         addAgentMessage({ answer: `Wallet connection status could not be checked. ${error.message}` });
