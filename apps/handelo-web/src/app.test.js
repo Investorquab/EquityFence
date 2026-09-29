@@ -791,3 +791,8 @@ test("chat and wallet flows validate response shapes before using them", () => {
   assert.match(source, /if \(!data \|\| typeof data !== "object" \|\| typeof data\.status !== "string"\) throw new Error\("Wallet status response was invalid\."\);/);
   assert.match(source, /if \(!data \|\| typeof data !== "object" \|\| typeof data\.status !== "string"\) throw new Error\("Wallet authentication response was invalid\."\);/);
 });
+
+test("wallet polling validates status response shapes", () => {
+  assert.match(source, /if \(!auth \|\| typeof auth !== "object" \|\| typeof auth\.status !== "string"\)/);
+  assert.match(source, /Wallet authentication status response was invalid/);
+});
