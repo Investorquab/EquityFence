@@ -772,3 +772,11 @@ test("data view errors ignore stale requests", () => {
   const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
   assert.equal((views.match(/if \(requestId !== dataViewRequestId\) return;/g) || []).length, 8);
 });
+
+test("data view failures are announced as alerts", () => {
+  const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
+  assert.equal((views.match(/role="alert"/g) || []).length, 3);
+  assert.match(views, /Portfolio data is unavailable/);
+  assert.match(views, /Market data is unavailable/);
+  assert.match(views, /History data is unavailable/);
+});
