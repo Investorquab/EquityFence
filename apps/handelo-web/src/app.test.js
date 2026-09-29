@@ -721,3 +721,10 @@ test("history address loading ignores stale responses", () => {
   assert.match(history, /const address = await addressResponse\.json\(\);\s+if \(requestId !== dataViewRequestId\) return;/);
   assert.match(history, /const data = await response\.json\(\);\s+if \(requestId !== dataViewRequestId\) return;/);
 });
+
+
+test("transaction reviews guard against stale responses", () => {
+  assert.match(source, /const tradeReviewRequestIds = new WeakMap\(\)/);
+  assert.match(source, /tradeReviewRequestIds\.set\(promptNode, requestId\)/);
+  assert.match(source, /tradeReviewRequestIds\.get\(promptNode\) !== requestId/);
+});
