@@ -650,3 +650,29 @@ test("disabled execution follow-up actions mute their text", () => {
   assert.match(styles, /\.execution-actions button:disabled/);
   assert.match(styles, /color:var\(--faint\)/);
 });
+
+
+test("primary navigation exposes the active page semantically", () => {
+  const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+  assert.match(html, /<nav class="nav" aria-label="Primary">/);
+  assert.match(html, /data-view="chat" aria-current="page"/);
+  assert.match(source, /item\.setAttribute\("aria-current", "page"\)/);
+  assert.match(source, /item\.removeAttribute\("aria-current"\)/);
+});
+
+test("frontend views expose labelled sections and live loading state", () => {
+  const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+  assert.match(html, /id="view-chat" aria-labelledby="chat-title"/);
+  assert.match(html, /id="view-markets" aria-labelledby="markets-title"/);
+  assert.match(html, /id="view-portfolio" aria-labelledby="portfolio-title"/);
+  assert.match(html, /id="view-history" aria-labelledby="history-title"/);
+  assert.match(html, /id="marketGrid" aria-live="polite" aria-busy="true"/);
+  assert.match(source, /marketGrid\.setAttribute\("aria-busy", "false"\)/);
+  assert.match(source, /target\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(source, /target\.setAttribute\("aria-busy", "false"\)/);
+});
+
+test("chat composer requires a non-empty message", () => {
+  const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+  assert.match(html, /id="messageInput"[^>]*required/);
+});
