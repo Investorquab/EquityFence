@@ -820,3 +820,19 @@ test("stale chat responses remove their own thinking state without changing the 
   assert.match(source, /if \(requestId !== chatRequestId\) \{\r?\n      thinking\.remove\(\);\r?\n      return;\r?\n    \}/);
   assert.match(source, /catch \(error\) \{\r?\n    if \(requestId !== chatRequestId\) \{\r?\n      thinking\.remove\(\);\r?\n      return;\r?\n    \}/);
 });
+
+
+test("markets expose searchable discovery controls", () => {
+  const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
+  assert.match(html, /id="marketSearch"/);
+  assert.match(html, /aria-label="Search markets"/);
+  assert.match(source, /let marketRecords = \[\]/);
+  assert.match(source, /function renderMarketResults\(\)/);
+  assert.match(source, /marketSearch\?\.addEventListener\("input", renderMarketResults\)/);
+});
+
+test("market search matches ticker, token symbol, and provider", () => {
+  assert.match(source, /\[market\.ticker, market\.tokenSymbol, market\.provider\]/);
+  assert.match(source, /toLowerCase\(\)\.includes\(query\)/);
+  assert.match(source, /No markets match that search/);
+});
