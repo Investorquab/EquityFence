@@ -836,3 +836,18 @@ test("market search matches ticker, token symbol, and provider", () => {
   assert.match(source, /toLowerCase\(\)\.includes\(query\)/);
   assert.match(source, /No markets match that search/);
 });
+
+
+test("market cards expose live detail actions", () => {
+  assert.match(source, /data-market-detail/);
+  assert.match(source, /function openMarketDetail\(index\)/);
+  assert.match(source, /Ask Handelo about this/);
+  assert.match(source, /marketGrid\.addEventListener\("click"/);
+});
+
+test("market detail uses existing market context without inventing metrics", () => {
+  assert.match(source, /market\.tokenPrice/);
+  assert.match(source, /market\.referencePrice/);
+  assert.match(source, /market\.premiumPct/);
+  assert.match(source, /marketSchedule\(market\)/);
+});
