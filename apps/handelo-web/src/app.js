@@ -586,7 +586,8 @@ async function loadPortfolio() {
       <div class="portfolio-list">${data.positions.length ? data.positions.map(p => `<article class="portfolio-row"><div><strong>${escapeHtml(p.ticker)}</strong><span>${escapeHtml(p.tokenSymbol)} · ${escapeHtml(p.provider)}</span></div><div class="portfolio-value">${p.estimatedValueUsd === null ? "—" : money(p.estimatedValueUsd)}</div></article>`).join("") : '<div class="empty-row">No supported tokenized-stock positions found in this wallet.</div>'}</div>`;
     target.setAttribute("aria-busy", "false");
   } catch (error) {
-    target.innerHTML = `<div class="loading-card">Portfolio data is unavailable. ${escapeHtml(error.message)}</div>`;
+    target.innerHTML = `<div class="loading-card">Portfolio data is unavailable. ${escapeHtml(error.message)}<br><button class="primary-button" id="portfolioRetry" type="button">Retry</button></div>`;
+    target.querySelector("#portfolioRetry").addEventListener("click", loadPortfolio);
     target.setAttribute("aria-busy", "false");
   }
 }
@@ -603,7 +604,8 @@ async function loadMarkets() {
     marketGrid.innerHTML = markets.map(renderMarketCard).join("");
     marketGrid.setAttribute("aria-busy", "false");
   } catch (error) {
-    marketGrid.innerHTML = `<div class="loading-card">Market data is unavailable. ${escapeHtml(error.message)}</div>`;
+    marketGrid.innerHTML = `<div class="loading-card">Market data is unavailable. ${escapeHtml(error.message)}<br><button class="primary-button" id="marketsRetry" type="button">Retry</button></div>`;
+    marketGrid.querySelector("#marketsRetry").addEventListener("click", loadMarkets);
     marketGrid.setAttribute("aria-busy", "false");
   }
 }
