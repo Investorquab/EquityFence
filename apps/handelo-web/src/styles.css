@@ -415,3 +415,14 @@ button{cursor:pointer}
 .market-detail-grid strong{font:11px var(--mono)}
 .market-detail-chat{margin-top:26px;width:100%}
 @media(max-width:600px){.market-detail-panel{padding:30px 20px}.market-detail-price strong{font-size:34px}}
+
+
+.history-toolbar{max-width:1080px;margin:0 auto 14px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding-bottom:10px;border-bottom:1px solid var(--line)}
+.history-toolbar>span{font:9px var(--mono);letter-spacing:.08em;color:var(--faint)}
+.history-toolbar .secondary-button{padding:8px 12px}
+.portfolio-row small{display:block;margin-top:6px;font:9px var(--mono);letter-spacing:.04em;color:var(--faint)}
+@media(max-width:620px){
+  .history-toolbar{align-items:flex-start}
+  .history-row{flex-direction:column}
+  .history-hash{max-width:100%;width:100%}
+}
