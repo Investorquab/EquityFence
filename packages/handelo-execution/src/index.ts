@@ -3,8 +3,8 @@ import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 
 const execFileAsync=promisify(execFile);
-const BAW_COMMAND=process.platform==="win32"?"baw.cmd":"baw";
-const BAW_SHELL=process.platform==="win32";
+export const BAW_COMMAND=process.platform==="win32"?"baw.cmd":"baw";
+export const BAW_SHELL=process.platform==="win32";
 
 export interface EvmTransaction{from:string;to:string;value:string;data?:string;}
 export interface SimulationResult{status:string;failReason:string|null;balanceChanges:Array<{contractAddress:string;tokenType:string;change:string;owner:string}>;allowanceChanges:Array<{tokenAddress:string;owner:string;spender:string;preAmount:string;postAmount:string}>;}
