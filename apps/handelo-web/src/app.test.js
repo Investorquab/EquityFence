@@ -785,3 +785,9 @@ test("portfolio and history validate response shapes before rendering", () => {
   assert.match(source, /if \(!data \|\| !Array\.isArray\(data\.positions\)\) throw new Error\("Portfolio response was invalid\."\);/);
   assert.match(source, /if \(!Array\.isArray\(data\.transactions\)\) throw new Error\("History response was invalid\."\);/);
 });
+
+test("chat and wallet flows validate response shapes before using them", () => {
+  assert.match(source, /if \(!data \|\| typeof data !== "object" \|\| typeof data\.answer !== "string"\) throw new Error\("Handelo response was invalid\."\);/);
+  assert.match(source, /if \(!data \|\| typeof data !== "object" \|\| typeof data\.status !== "string"\) throw new Error\("Wallet status response was invalid\."\);/);
+  assert.match(source, /if \(!data \|\| typeof data !== "object" \|\| typeof data\.status !== "string"\) throw new Error\("Wallet authentication response was invalid\."\);/);
+});
