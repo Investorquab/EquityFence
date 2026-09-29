@@ -124,7 +124,13 @@ function addReviewCard(data, amountUsd) {
   const quote = data.quote;
   const security = data.securityAudit || null;
   const securityBlocked = data.executionBlocked === true;
-  const securityLabel = securityBlocked ? "EXECUTION BLOCKED" : security?.riskLevelEnum ? `SECURITY ${security.riskLevelEnum}` : "SECURITY CHECKED";
+  const securityLabel = securityBlocked && data.securityAuditError
+    ? "SECURITY CHECK UNAVAILABLE — EXECUTION BLOCKED"
+    : securityBlocked
+      ? "EXECUTION BLOCKED"
+      : security?.riskLevelEnum
+        ? `SECURITY ${security.riskLevelEnum}`
+        : "SECURITY CHECKED";
   const decision = policy.decision || "BLOCK";
   const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
   const canConfirm = decision !== "BLOCK" && !securityBlocked && Boolean(data.reviewToken && quote);
