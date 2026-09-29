@@ -5,7 +5,7 @@ import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError } from "@handelo/market";
-import { auditToken } from "@handelo/execution";
+import { auditToken, normalizeTokenAudit } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 
 const port = Number(process.env.PORT ?? "8787");
@@ -278,7 +278,7 @@ const server = createServer(async (req, res) => {
       let securityAuditError: string | null = null;
       let executionBlocked = false;
       try {
-        securityAudit = await auditToken("56", asset.tokenContractAddress);
+        securityAudit = normalizeTokenAudit(await auditToken("56", asset.tokenContractAddress));
         executionBlocked =
           !securityAudit.hasResult ||
           !securityAudit.isSupported ||
