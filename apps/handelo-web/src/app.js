@@ -99,7 +99,7 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
     });
     const data = await response.json();
     if (tradeReviewRequestIds.get(promptNode) !== requestId) return;
-    if (!response.ok) throw new Error(data.error || "Review failed.");
+    if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Review failed.");
     promptNode.remove();
     addReviewCard(data, amountUsd);
   } catch (error) {
@@ -197,7 +197,7 @@ async function confirmTrade(data, amountUsd, card) {
     });
     const result = await response.json();
     if (executionRequestIds.get(card) !== requestId) return;
-    if (!response.ok) throw new Error(result.error || "Execution failed.");
+    if (!response.ok) throw new Error((result && typeof result === "object" && result.error) || "Execution failed.");
     card.remove();
     addExecutionResult(result);
   } catch (error) {
