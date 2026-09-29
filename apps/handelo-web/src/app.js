@@ -16,6 +16,7 @@ let walletAuthKeydown = null;
 let dataViewRequestId = 0;
 const tradeReviewRequestIds = new WeakMap();
 const executionRequestIds = new WeakMap();
+const walletStatusRequestIds = new WeakMap();
 
 function money(value) {
   const n = Number(value);
@@ -433,14 +434,18 @@ async function ask(message) {
 }
 
 async function refreshWalletStatus() {
+  const requestId = Symbol("wallet-status");
+  walletStatusRequestIds.set(connectButton, requestId);
   try {
     const response = await fetch(API_BASE + "/api/wallet/status", { cache: "no-store" });
     const data = await response.json();
+    if (walletStatusRequestIds.get(connectButton) !== requestId) return;
     const connected = data.status === "CONNECTED";
     walletState.textContent = connected ? "WALLET CONNECTED" : "WALLET NOT CONNECTED";
     connectButton.innerHTML = connected ? "Wallet connected <span>✓</span>" : 'Connect wallet <span>↗</span>';
     connectButton.classList.toggle("connected", connected);
   } catch {
+    if (walletStatusRequestIds.get(connectButton) !== requestId) return;
     walletState.textContent = "WALLET STATUS UNAVAILABLE";
   }
 }
