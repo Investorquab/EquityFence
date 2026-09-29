@@ -742,3 +742,10 @@ test("wallet status refresh guards against stale responses", () => {
   assert.match(source, /walletStatusRequestIds\.set\(connectButton, requestId\)/);
   assert.match(source, /walletStatusRequestIds\.get\(connectButton\) !== requestId/);
 });
+
+
+test("chat requests guard against stale responses", () => {
+  assert.match(source, /let chatRequestId = 0/);
+  assert.match(source, /const requestId = \+\+chatRequestId/);
+  assert.match(source, /requestId !== chatRequestId/);
+});
