@@ -11,6 +11,8 @@ const walletState = document.querySelector(".wallet-state");
 let walletAuthPoll = null;
 let walletAuthTimeout = null;
 let walletAuthActive = false;
+let walletAuthReturnFocus = null;
+let walletAuthKeydown = null;
 
 function money(value) {
   const n = Number(value);
@@ -488,22 +490,46 @@ async function connectWallet() {
 function showWalletAuth(data) {
   let modal = document.querySelector(".wallet-modal");
   if (modal) modal.remove();
+  walletAuthReturnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : connectButton;
   modal = document.createElement("div");
   modal.className = "wallet-modal";
   modal.innerHTML = `
     <div class="wallet-modal-backdrop"></div>
-    <div class="wallet-dialog" role="dialog" aria-modal="true" aria-labelledby="wallet-title">
+    <div class="wallet-dialog" role="dialog" aria-modal="true" aria-labelledby="wallet-title" aria-describedby="wallet-description">
       <button class="wallet-close" type="button" aria-label="Close">×</button>
       <div class="eyebrow">BINANCE AGENTIC WALLET</div>
       <h2 id="wallet-title">Connect your wallet.</h2>
-      <p>Open the Binance sign-in page, then confirm the matching code in your Binance Wallet App.</p>
+      <p id="wallet-description">Open the Binance sign-in page, then confirm the matching code in your Binance Wallet App.</p>
       <div class="pairing-code">${escapeHtml(data.pairingCode || "—")}</div>
       <a class="wallet-link" href="${escapeHtml(safeExternalUrl(data.urlForWeb))}" target="_blank" rel="noopener">Open Binance sign-in ↗</a>
       <div class="wallet-wait">Waiting for confirmation…</div>
     </div>`;
+  const dialog = modal.querySelector(".wallet-dialog");
   modal.querySelector(".wallet-close").addEventListener("click", closeWalletAuth);
   modal.querySelector(".wallet-modal-backdrop").addEventListener("click", closeWalletAuth);
+  walletAuthKeydown = (event) => {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      closeWalletAuth();
+      return;
+    }
+    if (event.key !== "Tab") return;
+    const focusable = [...dialog.querySelectorAll("button, a[href], input, select, textarea, [tabindex]:not([tabindex="-1"])")]
+      .filter((element) => !element.hasAttribute("disabled"));
+    if (!focusable.length) return;
+    const first = focusable[0];
+    const last = focusable[focusable.length - 1];
+    if (event.shiftKey && document.activeElement === first) {
+      event.preventDefault();
+      last.focus();
+    } else if (!event.shiftKey && document.activeElement === last) {
+      event.preventDefault();
+      first.focus();
+    }
+  };
+  modal.addEventListener("keydown", walletAuthKeydown);
   document.body.appendChild(modal);
+  modal.querySelector(".wallet-close").focus();
 }
 
 function clearWalletAuthPolling() {
@@ -523,7 +549,14 @@ function closeWalletAuth() {
   connectButton.disabled = false;
   connectButton.removeAttribute("aria-busy");
   if (!connectButton.classList.contains("connected")) connectButton.innerHTML = 'Connect wallet <span>↗</span>';
-  document.querySelector(".wallet-modal")?.remove();
+  const modal = document.querySelector(".wallet-modal");
+  if (modal) {
+    if (walletAuthKeydown) modal.removeEventListener("keydown", walletAuthKeydown);
+    modal.remove();
+  }
+  if (walletAuthReturnFocus?.isConnected) walletAuthReturnFocus.focus();
+  walletAuthReturnFocus = null;
+  walletAuthKeydown = null;
 }
 
 connectButton.addEventListener("click", connectWallet);
