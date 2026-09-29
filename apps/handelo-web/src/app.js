@@ -14,6 +14,7 @@ let walletAuthActive = false;
 let walletAuthReturnFocus = null;
 let walletAuthKeydown = null;
 let dataViewRequestId = 0;
+let tradeReviewRequestId = 0;
 
 function money(value) {
   const n = Number(value);
