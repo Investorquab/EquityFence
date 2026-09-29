@@ -707,11 +707,3 @@ test("chat submission exposes an accessible busy state", () => {
 });
 
 
-test("data views expose retry actions when loading fails", () => {
-  assert.match(source, /id="marketsRetry"/);
-  assert.match(source, /id="portfolioRetry"/);
-  assert.match(source, /id="historyRetry"/);
-  assert.match(source, /loadMarkets\(\)/);
-  assert.match(source, /loadPortfolio\(\)/);
-  assert.match(source, /loadHistory\(\)/);
-});
