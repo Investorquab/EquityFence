@@ -13,6 +13,7 @@ let walletAuthTimeout = null;
 let walletAuthActive = false;
 let walletAuthReturnFocus = null;
 let walletAuthKeydown = null;
+let dataViewRequestId = 0;
 
 function money(value) {
   const n = Number(value);
@@ -566,12 +567,14 @@ connectButton.addEventListener("click", connectWallet);
 refreshWalletStatus();
 input.focus();
 async function loadPortfolio() {
+  const requestId = ++dataViewRequestId;
   const target = document.querySelector("#portfolioContent");
   target.setAttribute("aria-busy", "true");
   target.innerHTML = '<div class="loading-card">Reading wallet positions...</div>';
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
     const address = await addressResponse.json();
+    if (requestId !== dataViewRequestId) return;
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">03</div><h3>Connect a wallet to see your portfolio.</h3><p>Handelo reads the connected wallet. It never asks for a private key.</p><button class="primary-button" id="portfolioConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#portfolioConnect").addEventListener("click", connectWallet);
@@ -580,6 +583,7 @@ async function loadPortfolio() {
     }
     const response = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
     const data = await response.json();
+    if (requestId !== dataViewRequestId) return;
     if (!response.ok) throw new Error(data.error || "Portfolio request failed.");
     target.innerHTML = `
       <div class="portfolio-summary"><div><span>ESTIMATED VALUE</span><strong>${data.totalEstimatedValueUsd === null ? "—" : money(data.totalEstimatedValueUsd)}</strong></div><div><span>POSITIONS</span><strong>${data.positions.length}</strong></div></div>
@@ -593,11 +597,13 @@ async function loadPortfolio() {
 }
 
 async function loadMarkets() {
+  const requestId = ++dataViewRequestId;
   marketGrid.setAttribute("aria-busy", "true");
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
     const response = await fetch(API_BASE + "/api/markets", { cache: "no-store" });
     const markets = await response.json();
+    if (requestId !== dataViewRequestId) return;
     if (!response.ok || !Array.isArray(markets) || !markets.length) {
       throw new Error(markets.error || "No market records returned.");
     }
@@ -611,6 +617,7 @@ async function loadMarkets() {
 }
 
 async function loadHistory() {
+  const requestId = ++dataViewRequestId;
   const target = document.querySelector("#historyContent");
   target.setAttribute("aria-busy", "true");
   target.innerHTML = '<div class="loading-card">Reading on-chain history...</div>';
@@ -625,6 +632,7 @@ async function loadHistory() {
     }
     const response = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
     const data = await response.json();
+    if (requestId !== dataViewRequestId) return;
     if (!response.ok) throw new Error(data.error || "History request failed.");
     if (!data.transactions.length) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p></div>';
