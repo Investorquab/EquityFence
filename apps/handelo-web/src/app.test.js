@@ -707,3 +707,10 @@ test("chat submission exposes an accessible busy state", () => {
 });
 
 
+
+
+test("data views guard against stale responses", () => {
+  assert.match(source, /let dataViewRequestId = 0/);
+  assert.match(source, /const requestId = \+\+dataViewRequestId/);
+  assert.match(source, /requestId !== dataViewRequestId/);
+});
