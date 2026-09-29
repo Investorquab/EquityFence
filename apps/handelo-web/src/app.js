@@ -423,7 +423,7 @@ async function ask(message) {
     const data = await response.json();
     if (requestId !== chatRequestId) return;
     thinking.remove();
-    if (!response.ok) throw new Error(data.error || "Handelo API request failed.");
+    if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Handelo API request failed.");
     addAgentMessage(data);
   } catch (error) {
     if (requestId !== chatRequestId) return;
@@ -464,7 +464,7 @@ async function connectWallet() {
   try {
     const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
     const data = await response.json();
-    if (!response.ok) throw new Error(data.error || "Could not start wallet connection.");
+    if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Could not start wallet connection.");
 
     if (data.status === "SUCCESS") {
       walletAuthActive = false;
