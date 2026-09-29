@@ -752,8 +752,8 @@ test("chat requests guard against stale responses", () => {
 
 
 test("trade errors safely parse malformed error payloads", () => {
-  assert.match(source, /\(data && typeof data === "object" && data\\.error\) \\|\\| "Review failed\\."/);
-  assert.match(source, /\(result && typeof result === "object" && result\\.error\) \\|\\| "Execution failed\\."/);
+  assert.match(source, /\(data && typeof data === "object" && data\.error\) \|\| "Review failed\."/);
+  assert.match(source, /\(result && typeof result === "object" && result\.error\) \|\| "Execution failed\."/);
 });
 
 test("data view errors safely parse malformed error payloads", () => {
