@@ -676,3 +676,15 @@ test("chat composer requires a non-empty message", () => {
   const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
   assert.match(html, /id="messageInput"[^>]*required/);
 });
+
+
+test("frontend exposes keyboard-visible focus states", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /:focus-visible/);
+});
+
+test("frontend focus states remain usable on dark surfaces", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /outline:/);
+  assert.match(styles, /outline-offset:/);
+});
