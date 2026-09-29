@@ -714,3 +714,10 @@ test("data views guard against stale responses", () => {
   assert.match(source, /const requestId = \+\+dataViewRequestId/);
   assert.match(source, /requestId !== dataViewRequestId/);
 });
+
+
+test("history address loading ignores stale responses", () => {
+  const history = source.slice(source.indexOf("async function loadHistory"), source.indexOf("function showView"));
+  assert.match(history, /const address = await addressResponse\.json\(\);\s+if \(requestId !== dataViewRequestId\) return;/);
+  assert.match(history, /const data = await response\.json\(\);\s+if \(requestId !== dataViewRequestId\) return;/);
+});
