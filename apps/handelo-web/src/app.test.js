@@ -851,3 +851,10 @@ test("market detail uses existing market context without inventing metrics", () 
   assert.match(source, /market\.premiumPct/);
   assert.match(source, /marketSchedule\(market\)/);
 });
+
+
+test('market detail exposes same-ticker representations', () => {
+  assert.match(source, /marketRecords\.filter\(\(candidate\) => candidate\.ticker === market\.ticker\)/);
+  assert.match(source, /AVAILABLE REPRESENTATIONS/);
+  assert.match(source, /data-market-representation/);
+});
