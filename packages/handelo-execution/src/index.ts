@@ -49,6 +49,14 @@ export interface TokenAudit {
   riskItems?:unknown[];
 }
 
+export function normalizeTokenAudit(audit:TokenAudit):TokenAudit{
+  if(audit.hasResult && audit.isSupported) return audit;
+  return {
+    hasResult:audit.hasResult,
+    isSupported:audit.isSupported
+  };
+}
+
 export const TOKEN_AUDIT_HEADERS={
   "content-type":"application/json",
   "source":"agent",
