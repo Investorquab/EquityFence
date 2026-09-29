@@ -796,3 +796,10 @@ test("wallet polling validates status response shapes", () => {
   assert.match(source, /if \(!auth \|\| typeof auth !== "object" \|\| typeof auth\.status !== "string"\)/);
   assert.match(source, /Wallet authentication status response was invalid/);
 });
+
+test("wallet polling ignores stale sessions after close or replacement", () => {
+  assert.match(source, /let walletAuthSessionId = 0/);
+  assert.match(source, /const sessionId = \+\+walletAuthSessionId/);
+  assert.match(source, /if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
+  assert.match(source, /walletAuthSessionId \+= 1;/);
+});
