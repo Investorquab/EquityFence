@@ -707,3 +707,11 @@ test("chat submission exposes an accessible busy state", () => {
 });
 
 
+
+
+test("data view errors offer accessible retry controls", () => {
+  assert.match(source, /id="portfolioRetry"/);
+  assert.match(source, /id="marketsRetry"/);
+  assert.match(source, /id="historyRetry"/);
+  assert.match(source, /type="button">Retry/);
+});
