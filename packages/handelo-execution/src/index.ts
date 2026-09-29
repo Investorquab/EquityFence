@@ -3,6 +3,8 @@ import { promisify } from "node:util";
 import { randomUUID } from "node:crypto";
 
 const execFileAsync=promisify(execFile);
+const BAW_COMMAND=process.platform==="win32"?"baw.cmd":"baw";
+const BAW_SHELL=process.platform==="win32";
 
 export interface EvmTransaction{from:string;to:string;value:string;data?:string;}
 export interface SimulationResult{status:string;failReason:string|null;balanceChanges:Array<{contractAddress:string;tokenType:string;change:string;owner:string}>;allowanceChanges:Array<{tokenAddress:string;owner:string;spender:string;preAmount:string;postAmount:string}>;}
@@ -25,7 +27,7 @@ interface MarketOrderList{list:MarketOrderStatus[];}
 
 async function baw<T>(args:string[]):Promise<T>{
   try{
-    const {stdout,stderr}=await execFileAsync("baw",[...args,"--json"],{maxBuffer:1024*1024});
+    const {stdout,stderr}=await execFileAsync(BAW_COMMAND,[...args,"--json"],{maxBuffer:1024*1024,shell:BAW_SHELL});
     const raw=(stdout||stderr).trim();
     const payload=JSON.parse(raw) as BawEnvelope<T>;
     if(!payload.success) throw new Error(payload.message??"Binance Agentic Wallet command failed.");
