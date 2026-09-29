@@ -743,9 +743,3 @@ document.querySelector("#portfolioConnect")?.addEventListener("click", () => con
 document.querySelector("#historyConnect")?.addEventListener("click", () => connectButton.click());
 
 input.focus();
-\ntest("wallet polling ignores stale sessions after close or replacement", () => {
-  assert.match(source, /let walletAuthSessionId = 0/);
-  assert.match(source, /const sessionId = \\+\\+walletAuthSessionId/);
-  assert.match(source, /if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;/);
-  assert.match(source, /walletAuthSessionId \\+= 1;/);
-});
