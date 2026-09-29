@@ -14,7 +14,7 @@ let walletAuthActive = false;
 let walletAuthReturnFocus = null;
 let walletAuthKeydown = null;
 let dataViewRequestId = 0;
-let tradeReviewRequestId = 0;
+const tradeReviewRequestIds = new WeakMap();
 
 function money(value) {
   const n = Number(value);
@@ -80,6 +80,8 @@ function addReviewPrompt(market, amountUsd, action) {
 }
 
 async function reviewTrade(ticker, amountUsd, action, promptNode) {
+  const requestId = Symbol("trade-review");
+  tradeReviewRequestIds.set(promptNode, requestId);
   const button = promptNode.querySelector("button");
   button.disabled = true;
   button.setAttribute("aria-busy", "true");
@@ -93,10 +95,12 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
       body: JSON.stringify({ ticker, amountUsd, action })
     });
     const data = await response.json();
+    if (tradeReviewRequestIds.get(promptNode) !== requestId) return;
     if (!response.ok) throw new Error(data.error || "Review failed.");
     promptNode.remove();
     addReviewCard(data, amountUsd);
   } catch (error) {
+    if (tradeReviewRequestIds.get(promptNode) !== requestId) return;
     button.disabled = false;
     button.removeAttribute("aria-busy");
     button.removeAttribute("aria-label");
