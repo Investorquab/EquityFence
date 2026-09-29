@@ -728,3 +728,10 @@ test("transaction reviews guard against stale responses", () => {
   assert.match(source, /tradeReviewRequestIds\.set\(promptNode, requestId\)/);
   assert.match(source, /tradeReviewRequestIds\.get\(promptNode\) !== requestId/);
 });
+
+
+test("transaction execution guards against stale responses", () => {
+  assert.match(source, /const executionRequestIds = new WeakMap\(\)/);
+  assert.match(source, /executionRequestIds\.set\(card, requestId\)/);
+  assert.match(source, /executionRequestIds\.get\(card\) !== requestId/);
+});
