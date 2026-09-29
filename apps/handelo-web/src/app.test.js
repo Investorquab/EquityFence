@@ -749,3 +749,9 @@ test("chat requests guard against stale responses", () => {
   assert.match(source, /const requestId = \+\+chatRequestId/);
   assert.match(source, /requestId !== chatRequestId/);
 });
+
+
+test("data view errors ignore stale requests", () => {
+  const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
+  assert.equal((views.match(/if \(requestId !== dataViewRequestId\) return;/g) || []).length, 6);
+});
