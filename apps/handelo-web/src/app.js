@@ -15,6 +15,7 @@ let walletAuthReturnFocus = null;
 let walletAuthKeydown = null;
 let dataViewRequestId = 0;
 const tradeReviewRequestIds = new WeakMap();
+const executionRequestIds = new WeakMap();
 
 function money(value) {
   const n = Number(value);
@@ -172,6 +173,8 @@ function addReviewCard(data, amountUsd) {
 }
 
 async function confirmTrade(data, amountUsd, card) {
+  const requestId = Symbol("execution");
+  executionRequestIds.set(card, requestId);
   const button = card.querySelector("[data-confirm]");
   button.disabled = true;
   button.setAttribute("aria-busy", "true");
@@ -191,10 +194,12 @@ async function confirmTrade(data, amountUsd, card) {
       })
     });
     const result = await response.json();
+    if (executionRequestIds.get(card) !== requestId) return;
     if (!response.ok) throw new Error(result.error || "Execution failed.");
     card.remove();
     addExecutionResult(result);
   } catch (error) {
+    if (executionRequestIds.get(card) !== requestId) return;
     button.disabled = false;
     button.removeAttribute("aria-busy");
     button.removeAttribute("aria-label");
