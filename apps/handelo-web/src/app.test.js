@@ -751,6 +751,11 @@ test("chat requests guard against stale responses", () => {
 });
 
 
+test("chat and wallet errors safely parse malformed error payloads", () => {
+  assert.match(source, /\(data && typeof data === "object" && data\.error\) \|\| "Handelo API request failed\."/);
+  assert.match(source, /\(data && typeof data === "object" && data\.error\) \|\| "Could not start wallet connection\."/);
+});
+
 test("trade errors safely parse malformed error payloads", () => {
   assert.match(source, /\(data && typeof data === "object" && data\.error\) \|\| "Review failed\."/);
   assert.match(source, /\(result && typeof result === "object" && result\.error\) \|\| "Execution failed\."/);
