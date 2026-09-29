@@ -624,6 +624,7 @@ async function loadHistory() {
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
     const address = await addressResponse.json();
+    if (requestId !== dataViewRequestId) return;
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>Connect a wallet to see transaction history.</h3><p>Handelo reads recent BSC transactions from the connected wallet.</p><button class="primary-button" id="historyConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#historyConnect").addEventListener("click", connectWallet);
