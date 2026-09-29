@@ -688,3 +688,13 @@ test("frontend focus states remain usable on dark surfaces", () => {
   assert.match(styles, /outline:/);
   assert.match(styles, /outline-offset:/);
 });
+
+
+test("wallet authentication dialog manages keyboard focus", () => {
+  assert.match(source, /walletAuthReturnFocus/);
+  assert.match(source, /aria-describedby="wallet-description"/);
+  assert.match(source, /document\.activeElement/);
+  assert.match(source, /keydown/);
+  assert.match(source, /key === "Escape"/);
+  assert.match(source, /focus\(\)/);
+});
