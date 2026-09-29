@@ -424,6 +424,7 @@ async function ask(message) {
     if (requestId !== chatRequestId) return;
     thinking.remove();
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Handelo API request failed.");
+    if (!data || typeof data !== "object" || typeof data.answer !== "string") throw new Error("Handelo response was invalid.");
     addAgentMessage(data);
   } catch (error) {
     if (requestId !== chatRequestId) return;
@@ -445,6 +446,7 @@ async function refreshWalletStatus() {
     const response = await fetch(API_BASE + "/api/wallet/status", { cache: "no-store" });
     const data = await response.json();
     if (walletStatusRequestIds.get(connectButton) !== requestId) return;
+    if (!data || typeof data !== "object" || typeof data.status !== "string") throw new Error("Wallet status response was invalid.");
     const connected = data.status === "CONNECTED";
     walletState.textContent = connected ? "WALLET CONNECTED" : "WALLET NOT CONNECTED";
     connectButton.innerHTML = connected ? "Wallet connected <span>✓</span>" : 'Connect wallet <span>↗</span>';
@@ -465,6 +467,7 @@ async function connectWallet() {
     const response = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
     const data = await response.json();
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "Could not start wallet connection.");
+    if (!data || typeof data !== "object" || typeof data.status !== "string") throw new Error("Wallet authentication response was invalid.");
 
     if (data.status === "SUCCESS") {
       walletAuthActive = false;
