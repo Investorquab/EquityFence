@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 
 const appPath = fileURLToPath(new URL("./app.js", import.meta.url));
 const source = readFileSync(appPath, "utf8");
+const indexSource = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
 
 test("selected representation is reviewed directly without re-resolving through chat", () => {
   assert.match(source, /reviewTrade\(market\.tokenSymbol, amount, action, prompt\)/);
