@@ -721,6 +721,39 @@ function showView(view) {
   if (view === "history") loadHistory();
 }
 
+function openMarketDetail(index) {
+  const market = marketRecords[index];
+  if (!market) return;
+  let panel = document.querySelector('.market-detail');
+  if (panel) panel.remove();
+  panel = document.createElement('aside');
+  panel.className = 'market-detail';
+  panel.setAttribute('role', 'dialog');
+  panel.setAttribute('aria-modal', 'true');
+  panel.setAttribute('aria-labelledby', 'market-detail-title');
+  panel.innerHTML = `
+    <div class="market-detail-backdrop"></div>
+    <div class="market-detail-panel">
+      <button class="market-detail-close" type="button" aria-label="Close market details">×</button>
+      <div class="eyebrow">MARKET REPRESENTATION</div>
+      <h3 id="market-detail-title">${escapeHtml(market.ticker)} <span>${escapeHtml(market.tokenSymbol)}</span></h3>
+      <div class="market-detail-provider">${escapeHtml(market.provider || 'BSC')}</div>
+      <div class="market-detail-price"><strong>${money(market.tokenPrice)}</strong><span>ON-CHAIN PRICE</span></div>
+      <div class="market-detail-grid">
+        <div><small>REFERENCE</small><strong>${money(market.referencePrice)}</strong></div>
+        <div><small>DIFFERENCE</small><strong>${market.premiumPct === null ? '—' : (market.premiumPct >= 0 ? '+' : '') + market.premiumPct.toFixed(2) + '%'}</strong></div>
+        <div><small>STATUS</small><strong>${market.marketOpen ? 'LIVE' : 'CLOSED'}</strong></div>
+        <div><small>SCHEDULE</small><strong>${escapeHtml(marketSchedule(market))}</strong></div>
+      </div>
+      <button class="primary-button market-detail-chat" type="button">Ask Handelo about this</button>
+    </div>`;
+  document.body.appendChild(panel);
+  const close = () => panel.remove();
+  panel.querySelector('.market-detail-close').addEventListener('click', close);
+  panel.querySelector('.market-detail-backdrop').addEventListener('click', close);
+  panel.querySelector('.market-detail-chat').addEventListener('click', () => { close(); showView('chat'); ask(`Explain ${market.tokenSymbol} compared with its reference price.`); });
+  panel.querySelector('.market-detail-close').focus();
+}
 function renderMarketResults() {
   const query = String(marketSearch?.value || "").trim().toLowerCase();
   const filtered = marketRecords.filter((market) => {
@@ -736,11 +769,11 @@ function renderMarketResults() {
   }
 
   marketGrid.innerHTML = filtered.length
-    ? filtered.map(renderMarketCard).join("")
+    ? filtered.map((market) => renderMarketCard(market, marketRecords.indexOf(market))).join("")
     : '<div class="loading-card market-empty">No markets match that search.</div>';
 }
 
-function renderMarketCard(market) {
+function renderMarketCard(market, index) {
   const gap = market.premiumPct;
   const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
   return `
@@ -754,6 +787,7 @@ function renderMarketCard(market) {
         <div><small>REFERENCE</small><b>${money(market.referencePrice)}</b></div>
         <div><small>DIFFERENCE</small><b class="${gap >= 0 ? "positive" : "negative"}">${gapText}</b></div>
       </div>
+      <button class="market-card-detail" type="button" data-market-detail="${index}">View details ↗</button>
       <div class="market-card-schedule"><span>${market.marketOpen ? "NEXT CLOSE" : "NEXT OPEN"}</span><b>${escapeHtml(marketSchedule(market))}</b></div>
     </article>`;
 }
@@ -763,6 +797,12 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 });
 
 marketSearch?.addEventListener("input", renderMarketResults);
+
+marketGrid.addEventListener("click", (event) => {
+  const button = event.target.closest("[data-market-detail]");
+  if (!button) return;
+  openMarketDetail(Number(button.dataset.marketDetail));
+});
 
 document.querySelectorAll("[data-prompt]").forEach((button) => {
   button.addEventListener("click", () => ask(button.dataset.prompt || ""));
