@@ -858,3 +858,10 @@ test('market detail exposes same-ticker representations', () => {
   assert.match(source, /AVAILABLE REPRESENTATIONS/);
   assert.match(source, /data-market-representation/);
 });
+
+
+test("wallet state is announced accessibly", () => {
+  assert.match(indexSource, /class="wallet-state" aria-live="polite"/);
+  assert.match(source, /WALLET CONNECTED/);
+  assert.match(source, /WALLET NOT CONNECTED/);
+});
