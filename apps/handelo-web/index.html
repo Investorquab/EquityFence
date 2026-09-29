@@ -22,8 +22,8 @@
         <span>HANDELO</span>
       </div>
 
-      <nav class="nav">
-        <button class="nav-item active" data-view="chat">
+      <nav class="nav" aria-label="Primary">
+        <button class="nav-item active" data-view="chat" aria-current="page">
           <span>01</span>
           <strong>New chat</strong>
         </button>
@@ -53,12 +53,12 @@
         <button class="connect" id="connectButton" type="button">Connect wallet <span>↗</span></button>
       </header>
 
-      <section class="view active" id="view-chat">
+      <section class="view active" id="view-chat" aria-labelledby="chat-title">
         <div class="chat-layout">
           <div class="conversation" id="conversation" aria-live="polite">
             <div class="welcome" id="welcome">
               <div class="eyebrow">HANDELO / BSC</div>
-              <h1>What can I help you <em>understand?</em></h1>
+              <h1 id="chat-title">What can I help you <em>understand?</em></h1>
               <p>Ask about a tokenized stock, a market difference, or an opportunity. Handelo turns the moving pieces into a clear picture.</p>
 
               <div class="suggestions">
@@ -72,7 +72,7 @@
           <form class="composer" id="composer">
             <div class="composer-inner">
               <span class="composer-mark">↳</span>
-              <input id="messageInput" autocomplete="off" placeholder="Ask Handelo anything..." aria-label="Message Handelo">
+              <input id="messageInput" autocomplete="off" placeholder="Ask Handelo anything..." aria-label="Message Handelo" required>
               <button id="sendButton" type="submit" aria-label="Send message">↑</button>
             </div>
             <div class="composer-note">Handelo explains the market before it asks you to act.</div>
@@ -80,27 +80,27 @@
         </div>
       </section>
 
-      <section class="view" id="view-markets">
+      <section class="view" id="view-markets" aria-labelledby="markets-title">
         <div class="section-heading">
           <div>
             <div class="eyebrow">LIVE / BSC</div>
-            <h2>Markets</h2>
+            <h2 id="markets-title">Markets</h2>
           </div>
           <span class="section-meta">REFERENCE + ON-CHAIN</span>
         </div>
-        <div class="market-grid" id="marketGrid">
+        <div class="market-grid" id="marketGrid" aria-live="polite" aria-busy="true">
           <div class="loading-card">Loading market context...</div>
         </div>
       </section>
 
-      <section class="view" id="view-portfolio">
+      <section class="view" id="view-portfolio" aria-labelledby="portfolio-title">
         <div class="section-heading">
           <div>
             <div class="eyebrow">YOUR POSITION</div>
-            <h2>Portfolio</h2>
+            <h2 id="portfolio-title">Portfolio</h2>
           </div>
         </div>
-        <div id="portfolioContent"><div class="empty-state">
+        <div id="portfolioContent" aria-live="polite" aria-busy="false"><div class="empty-state">
           <div class="empty-number">03</div>
           <h3>Connect a wallet to see your portfolio.</h3>
           <p>Handelo will keep the portfolio surface quiet until there is a wallet to read.</p>
@@ -108,15 +108,15 @@
         </div></div>
       </section>
 
-      <section class="view" id="view-history">
+      <section class="view" id="view-history" aria-labelledby="history-title">
         <div class="section-heading">
           <div>
             <div class="eyebrow">ON-CHAIN / BSC</div>
-            <h2>History</h2>
+            <h2 id="history-title">History</h2>
           </div>
           <span class="section-meta">CONNECTED WALLET</span>
         </div>
-        <div id="historyContent">
+        <div id="historyContent" aria-live="polite" aria-busy="false">
           <div class="empty-state">
             <div class="empty-number">04</div>
             <h3>Connect a wallet to see transaction history.</h3>
