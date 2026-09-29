@@ -17,6 +17,7 @@ let dataViewRequestId = 0;
 const tradeReviewRequestIds = new WeakMap();
 const executionRequestIds = new WeakMap();
 const walletStatusRequestIds = new WeakMap();
+let chatRequestId = 0;
 
 function money(value) {
   const n = Number(value);
@@ -397,6 +398,7 @@ function scrollConversation() {
 }
 
 async function ask(message) {
+  const requestId = ++chatRequestId;
   const clean = message.trim();
   if (!clean) return;
   addUserMessage(clean);
@@ -419,13 +421,16 @@ async function ask(message) {
       body: JSON.stringify({ message: clean })
     });
     const data = await response.json();
+    if (requestId !== chatRequestId) return;
     thinking.remove();
     if (!response.ok) throw new Error(data.error || "Handelo API request failed.");
     addAgentMessage(data);
   } catch (error) {
+    if (requestId !== chatRequestId) return;
     thinking.remove();
     addAgentMessage({ answer: `I could not reach the Handelo agent. ${error.message}` });
   } finally {
+    if (requestId !== chatRequestId) return;
     sendButton.disabled = false;
     sendButton.setAttribute("aria-busy", "false");
     input.disabled = false;
