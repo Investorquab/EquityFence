@@ -735,3 +735,10 @@ test("transaction execution guards against stale responses", () => {
   assert.match(source, /executionRequestIds\.set\(card, requestId\)/);
   assert.match(source, /executionRequestIds\.get\(card\) !== requestId/);
 });
+
+
+test("wallet status refresh guards against stale responses", () => {
+  assert.match(source, /const walletStatusRequestIds = new WeakMap\(\)/);
+  assert.match(source, /walletStatusRequestIds\.set\(connectButton, requestId\)/);
+  assert.match(source, /walletStatusRequestIds\.get\(connectButton\) !== requestId/);
+});
