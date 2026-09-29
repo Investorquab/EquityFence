@@ -780,3 +780,8 @@ test("data view failures are announced as alerts", () => {
   assert.match(views, /Market data is unavailable/);
   assert.match(views, /History data is unavailable/);
 });
+
+test("portfolio and history validate response shapes before rendering", () => {
+  assert.match(source, /if \(!data \|\| !Array\.isArray\(data\.positions\)\) throw new Error\("Portfolio response was invalid\."\);/);
+  assert.match(source, /if \(!Array\.isArray\(data\.transactions\)\) throw new Error\("History response was invalid\."\);/);
+});
