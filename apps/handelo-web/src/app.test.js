@@ -698,3 +698,10 @@ test("wallet authentication dialog manages keyboard focus", () => {
   assert.match(source, /key === "Escape"/);
   assert.match(source, /focus\(\)/);
 });
+
+
+test("chat submission exposes an accessible busy state", () => {
+  assert.match(source, /sendButton\.setAttribute\("aria-busy", "true"\)/);
+  assert.match(source, /sendButton\.setAttribute\("aria-busy", "false"\)/);
+  assert.match(source, /thinking\.setAttribute\("aria-live", "polite"\)/);
+});
