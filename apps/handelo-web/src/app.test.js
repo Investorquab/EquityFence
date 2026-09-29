@@ -751,6 +751,11 @@ test("chat requests guard against stale responses", () => {
 });
 
 
+test("trade errors safely parse malformed error payloads", () => {
+  assert.match(source, /\(data && typeof data === "object" && data\\.error\) \\|\\| "Review failed\\."/);
+  assert.match(source, /\(result && typeof result === "object" && result\\.error\) \\|\\| "Execution failed\\."/);
+});
+
 test("data view errors safely parse malformed error payloads", () => {
   const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
   assert.match(views, /\(data && typeof data === "object" && data\.error\) \|\| "Portfolio request failed\."/);
