@@ -531,6 +531,7 @@ refreshWalletStatus();
 input.focus();
 async function loadPortfolio() {
   const target = document.querySelector("#portfolioContent");
+  target.setAttribute("aria-busy", "true");
   target.innerHTML = '<div class="loading-card">Reading wallet positions...</div>';
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
@@ -538,6 +539,7 @@ async function loadPortfolio() {
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">03</div><h3>Connect a wallet to see your portfolio.</h3><p>Handelo reads the connected wallet. It never asks for a private key.</p><button class="primary-button" id="portfolioConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#portfolioConnect").addEventListener("click", connectWallet);
+      target.setAttribute("aria-busy", "false");
       return;
     }
     const response = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
@@ -546,12 +548,15 @@ async function loadPortfolio() {
     target.innerHTML = `
       <div class="portfolio-summary"><div><span>ESTIMATED VALUE</span><strong>${data.totalEstimatedValueUsd === null ? "—" : money(data.totalEstimatedValueUsd)}</strong></div><div><span>POSITIONS</span><strong>${data.positions.length}</strong></div></div>
       <div class="portfolio-list">${data.positions.length ? data.positions.map(p => `<article class="portfolio-row"><div><strong>${escapeHtml(p.ticker)}</strong><span>${escapeHtml(p.tokenSymbol)} · ${escapeHtml(p.provider)}</span></div><div class="portfolio-value">${p.estimatedValueUsd === null ? "—" : money(p.estimatedValueUsd)}</div></article>`).join("") : '<div class="empty-row">No supported tokenized-stock positions found in this wallet.</div>'}</div>`;
+    target.setAttribute("aria-busy", "false");
   } catch (error) {
     target.innerHTML = `<div class="loading-card">Portfolio data is unavailable. ${escapeHtml(error.message)}</div>`;
+    target.setAttribute("aria-busy", "false");
   }
 }
 
 async function loadMarkets() {
+  marketGrid.setAttribute("aria-busy", "true");
   marketGrid.innerHTML = '<div class="loading-card">Reading BSC market data...</div>';
   try {
     const response = await fetch(API_BASE + "/api/markets", { cache: "no-store" });
@@ -560,13 +565,16 @@ async function loadMarkets() {
       throw new Error(markets.error || "No market records returned.");
     }
     marketGrid.innerHTML = markets.map(renderMarketCard).join("");
+    marketGrid.setAttribute("aria-busy", "false");
   } catch (error) {
     marketGrid.innerHTML = `<div class="loading-card">Market data is unavailable. ${escapeHtml(error.message)}</div>`;
+    marketGrid.setAttribute("aria-busy", "false");
   }
 }
 
 async function loadHistory() {
   const target = document.querySelector("#historyContent");
+  target.setAttribute("aria-busy", "true");
   target.innerHTML = '<div class="loading-card">Reading on-chain history...</div>';
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", { cache: "no-store" });
@@ -574,6 +582,7 @@ async function loadHistory() {
     if (!address.connected || !address.address) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>Connect a wallet to see transaction history.</h3><p>Handelo reads recent BSC transactions from the connected wallet.</p><button class="primary-button" id="historyConnect" type="button">Connect wallet</button></div>';
       target.querySelector("#historyConnect").addEventListener("click", connectWallet);
+      target.setAttribute("aria-busy", "false");
       return;
     }
     const response = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), { cache: "no-store" });
@@ -581,6 +590,7 @@ async function loadHistory() {
     if (!response.ok) throw new Error(data.error || "History request failed.");
     if (!data.transactions.length) {
       target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p></div>';
+      target.setAttribute("aria-busy", "false");
       return;
     }
     target.innerHTML = '<div class="history-list">' + data.transactions.map(tx => {
@@ -594,13 +604,20 @@ async function loadHistory() {
         : '<span class="history-hash">' + escapeHtml(shortHash) + '</span>';
       return '<article class="history-row"><div><div class="history-main"><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><span class="history-status ' + escapeHtml(String(tx.txStatus || "").toLowerCase()) + '">' + escapeHtml(tx.txStatus || "unknown") + '</span></div><span class="history-meta">' + escapeHtml(date) + ' · ' + escapeHtml(String(tx.amount || "—")) + ' ' + escapeHtml(tx.symbol || "") + '</span></div>' + hashLink + '</article>';
     }).join("") + '</div>';
+    target.setAttribute("aria-busy", "false");
   } catch (error) {
     target.innerHTML = '<div class="loading-card">History data is unavailable. ' + escapeHtml(error.message) + '</div>';
+    target.setAttribute("aria-busy", "false");
   }
 }
 
 function showView(view) {
-  document.querySelectorAll(".nav-item").forEach((item) => item.classList.toggle("active", item.dataset.view === view));
+  document.querySelectorAll(".nav-item").forEach((item) => {
+    const active = item.dataset.view === view;
+    item.classList.toggle("active", active);
+    if (active) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
+  });
   document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
   if (view === "markets") loadMarkets();
   if (view === "portfolio") loadPortfolio();
