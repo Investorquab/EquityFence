@@ -875,3 +875,6 @@ test("review security label explains unavailable audits", () => {
 
 
 test("portfolio rows expose current market context", () => { assert.match(source, /LIVE MARKET/); assert.match(source, /MARKET CLOSED/); assert.match(source, /p\.tokenPrice/); });
+
+
+test("history exposes a refresh control", () => { assert.match(source, /history-toolbar/); assert.match(source, /historyRefresh/); });
