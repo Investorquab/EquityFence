@@ -815,3 +815,8 @@ test("wallet authentication ignores stale startup responses after close or repla
 test("wallet authentication ignores stale polling errors after close or replacement", () => {
   assert.match(source, /catch \(error\) \{\r?\n        if \(sessionId !== walletAuthSessionId \|\| !walletAuthActive\) return;\r?\n        clearWalletAuthPolling\(\);/);
 });
+
+test("stale chat responses remove their own thinking state without changing the active request", () => {
+  assert.match(source, /if \(requestId !== chatRequestId\) \{\r?\n      thinking\.remove\(\);\r?\n      return;\r?\n    \}/);
+  assert.match(source, /catch \(error\) \{\r?\n    if \(requestId !== chatRequestId\) \{\r?\n      thinking\.remove\(\);\r?\n      return;\r?\n    \}/);
+});
