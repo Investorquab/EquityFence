@@ -638,6 +638,7 @@ async function loadPortfolio() {
     target.innerHTML = `
       <div class="portfolio-summary"><div><span>ESTIMATED VALUE</span><strong>${data.totalEstimatedValueUsd === null ? "—" : money(data.totalEstimatedValueUsd)}</strong></div><div><span>POSITIONS</span><strong>${data.positions.length}</strong></div></div>
       <div class="portfolio-list">${data.positions.length ? data.positions.map(p => `<article class="portfolio-row"><div><strong>${escapeHtml(p.ticker)}</strong><span>${escapeHtml(p.tokenSymbol)} · ${escapeHtml(p.provider)}</span><small>${p.marketOpen ? "LIVE MARKET" : "MARKET CLOSED"} · ${p.tokenPrice === null || p.tokenPrice === undefined ? "PRICE UNAVAILABLE" : money(p.tokenPrice)}</small></div><div class="portfolio-value">${p.estimatedValueUsd === null ? "—" : money(p.estimatedValueUsd)}</div></article>`).join("") : '<div class="empty-row">No supported tokenized-stock positions found in this wallet.</div>'}</div>`;
+    target.querySelector("#historyRefresh")?.addEventListener("click", loadHistory);
     target.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
@@ -694,7 +695,7 @@ async function loadHistory() {
       target.setAttribute("aria-busy", "false");
       return;
     }
-    target.innerHTML = '<div class="history-list">' + data.transactions.map(tx => {
+    target.innerHTML = '<div class="history-toolbar"><span>RECENT ACTIVITY</span><button class="secondary-button" id="historyRefresh" type="button">Refresh</button></div><div class="history-list">' + data.transactions.map(tx => {
       const time = Number(tx.txTime);
       const date = Number.isFinite(time) ? new Date(time).toLocaleString(undefined, { dateStyle: "medium", timeStyle: "short" }) : "Unknown time";
       const hash = String(tx.txHash || "");
