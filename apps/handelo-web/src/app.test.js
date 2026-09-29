@@ -751,6 +751,13 @@ test("chat requests guard against stale responses", () => {
 });
 
 
+test("data view errors safely parse malformed error payloads", () => {
+  const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
+  assert.match(views, /\(data && typeof data === "object" && data\.error\) \|\| "Portfolio request failed\."/);
+  assert.match(views, /\(markets && typeof markets === "object" && markets\.error\) \|\| "No market records returned\."/);
+  assert.match(views, /\(data && typeof data === "object" && data\.error\) \|\| "History request failed\."/);
+});
+
 test("data view errors ignore stale requests", () => {
   const views = source.slice(source.indexOf("async function loadPortfolio"), source.indexOf("function showView"));
   assert.equal((views.match(/if \(requestId !== dataViewRequestId\) return;/g) || []).length, 8);
