@@ -480,6 +480,9 @@ async function connectWallet() {
       try {
         const authResponse = await fetch(API_BASE + "/api/wallet/auth", { cache: "no-store" });
         const auth = await authResponse.json();
+        if (!auth || typeof auth !== "object" || typeof auth.status !== "string") {
+          throw new Error("Wallet authentication status response was invalid.");
+        }
 
         if (auth.status === "SUCCESS") {
           clearWalletAuthPolling();
