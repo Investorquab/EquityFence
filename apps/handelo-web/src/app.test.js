@@ -878,3 +878,11 @@ test("portfolio rows expose current market context", () => { assert.match(source
 
 
 test("history exposes a refresh control", () => { assert.match(source, /history-toolbar/); assert.match(source, /historyRefresh/); });
+
+
+test("data view controls share consistent toolbar and mobile treatment", () => {
+  const styles = readFileSync(fileURLToPath(new URL("./styles.css", import.meta.url)), "utf8");
+  assert.match(styles, /\.history-toolbar/);
+  assert.match(styles, /\.portfolio-row small/);
+  assert.match(styles, /\.history-row\{flex-direction:column\}/);
+});
