@@ -908,3 +908,10 @@ test("wallet and transaction failures use the custom error presentation", () => 
   assert.match(source, /addAgentError\(userFacingError\(error, "I could not start the wallet connection/);
   assert.match(source, /addAgentError\(userFacingError\(error, "The transaction was not completed/);
 });
+
+
+test("data view failures use normalized user-facing error messages", () => {
+  assert.match(source, /Portfolio data is unavailable\. \$\{escapeHtml\(userFacingError\(error, "Portfolio data could not be loaded\. Please try again\."\)\)\}/);
+  assert.match(source, /Market data is unavailable\. \$\{escapeHtml\(userFacingError\(error, "Market data could not be loaded\. Please try again\."\)\)\}/);
+  assert.match(source, /History data is unavailable\. ' \+ escapeHtml\(userFacingError\(error, "Transaction history could not be loaded\. Please try again\."\)\)/);
+});
