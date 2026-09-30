@@ -30,25 +30,25 @@ Last updated: 2026-10-01
 ## Remaining work
 
 ### 1. Telegram control surface
-- [ ] Telegram bot package
-- [ ] `/start` and `/help`
-- [ ] Natural-language requests through Handelo runtime
-- [ ] Telegram-friendly structured responses
-- [ ] Per-user/session isolation
-- [ ] Explicit review/approval boundary
-- [ ] No private keys in bot
-- [ ] Tests
-- [ ] Deployment/run documentation
+- [x] Telegram bot package
+- [x] `/start` and `/help`
+- [x] Natural-language requests through Handelo runtime
+- [x] Telegram-friendly structured responses
+- [x] Per-user/session isolation
+- [x] Explicit review/approval boundary
+- [x] No private keys in bot
+- [x] Tests
+- [x] Deployment/run documentation
 
 ### 2. Workspace completion
-- [ ] Capability prompt chips
+- [x] Capability prompt chips
 - [ ] Complete structured-card coverage
 - [ ] Market Radar polish
 - [ ] Truthful chart/history source where available
-- [ ] Responsive behavior
-- [ ] Loading/empty/error states
+- [x] Responsive behavior
+- [x] Loading/empty/error states
 - [ ] Accessibility
-- [ ] Motion/transitions pass
+- [x] Motion/transitions pass
 
 ### 3. End-to-end validation
 - [ ] Clean install
@@ -75,15 +75,14 @@ Last updated: 2026-10-01
 
 ## Execution order
 
-1. Telegram control surface.
-2. Workspace UX completion.
+1. Workspace UX completion.
 3. Full regression/security validation.
 4. Deployment, demo and submission.
 
 ## Checkpoints
 
 ### Checkpoint A
-After Telegram + Workspace completion: local clean install/check/test and both web/Telegram smoke tests.
+After Workspace UX completion: local clean install/check/test and both web/Telegram smoke tests.
 
 ### Checkpoint B
 Final: security regression, deployment verification, demo evidence and submission package.
