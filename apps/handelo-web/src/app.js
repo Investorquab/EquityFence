@@ -30,6 +30,41 @@ const workspacePortfolio = document.querySelector("#workspacePortfolio");
 const workspaceActivity = document.querySelector("#workspaceActivity");
 const workspaceGapRadar = document.querySelector("#workspaceGapRadar");
 const workspaceGapRadarStatus = document.querySelector("#workspaceGapRadarStatus");
+const workspaceStrategies = document.querySelector("#workspaceStrategies");
+const workspaceRiskState = document.querySelector("#workspaceRiskState");
+const workspaceRiskBar = document.querySelector("#workspaceRiskBar");
+const workspaceRiskCopy = document.querySelector("#workspaceRiskCopy");
+const workspaceWalletAction = document.querySelector("#workspaceWalletAction");
+const workspacePortfolioRefresh = document.querySelector("#workspacePortfolioRefresh");
+const workspaceHistoryRefresh = document.querySelector("#workspaceHistoryRefresh");
+
+function renderWorkspaceRisk(risk) {
+  if (!workspaceRiskState || !workspaceRiskCopy || !workspaceRiskBar) return;
+  if (!risk) {
+    workspaceRiskState.textContent = "—";
+    workspaceRiskState.className = "risk-state";
+    workspaceRiskBar.style.width = "18%";
+    workspaceRiskCopy.textContent = "Risk context will appear as strategies are reviewed.";
+    return;
+  }
+  const blocked = risk.decision === "BLOCK";
+  workspaceRiskState.textContent = blocked ? "BLOCKED" : "PASS";
+  workspaceRiskState.className = blocked ? "risk-state blocked" : "risk-state";
+  workspaceRiskBar.style.width = blocked ? "82%" : "28%";
+  workspaceRiskCopy.textContent = blocked ? risk.reasons?.[0] || "Portfolio risk controls blocked this action." : "Portfolio risk checks passed for the reviewed action.";
+}
+
+function renderWorkspaceStrategies() {
+  if (!workspaceStrategies) return;
+  const drafts = JSON.parse(localStorage.getItem("handelo_strategy_drafts") || "[]");
+  if (!Array.isArray(drafts) || !drafts.length) {
+    workspaceStrategies.innerHTML = '<div class="workspace-empty">No active strategies yet. Drafts appear in Chat for review.</div>';
+    return;
+  }
+  workspaceStrategies.innerHTML = drafts.slice(-3).reverse().map(strategy =>
+    `<div class="workspace-position"><span>${escapeHtml(strategy.asset || strategy.name || "Strategy")}<small>${escapeHtml(strategy.type || "STRATEGY")} · ${escapeHtml(strategy.status || "DRAFT")}</small></span><b>${escapeHtml(strategy.frequency || "—")}</b></div>`
+  ).join("");
+}
 
 function renderWorkspaceMarket(market) {
   if (!workspaceMarket) return;
@@ -61,6 +96,8 @@ function renderWorkspaceGapRadar(markets) {
 }
 
 async function refreshWorkspaceContext() {
+  renderWorkspaceStrategies();
+  renderWorkspaceRisk(null);
   try {
     const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
     const markets = await marketsResponse.json();
@@ -340,6 +377,7 @@ function addReviewCard(data, amountUsd) {
       <button type="button" class="primary-button" data-confirm ${canConfirm ? "" : "disabled"}>${canConfirm ? "Confirm purchase" : "Execution blocked"}</button>
     </div>`;
 
+  renderWorkspaceRisk(data.portfolioRisk);
   card.querySelector("[data-cancel]").addEventListener("click", () => card.remove());
   card.querySelector("[data-confirm]").addEventListener("click", () => confirmTrade(data, amountUsd, card));
   conversation.appendChild(card);
@@ -780,6 +818,9 @@ function closeWalletAuth() {
 }
 
 connectButton.addEventListener("click", connectWallet);
+workspaceWalletAction?.addEventListener("click", connectWallet);
+workspacePortfolioRefresh?.addEventListener("click", refreshWorkspaceContext);
+workspaceHistoryRefresh?.addEventListener("click", refreshWorkspaceContext);
 refreshWalletStatus();
 input.focus();
 async function loadPortfolio() {
