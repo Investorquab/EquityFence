@@ -915,3 +915,19 @@ test("data view failures use normalized user-facing error messages", () => {
   assert.match(source, /Market data is unavailable\. \$\{escapeHtml\(userFacingError\(error, "Market data could not be loaded\. Please try again\."\)\)\}/);
   assert.match(source, /History data is unavailable\. ' \+ escapeHtml\(userFacingError\(error, "Transaction history could not be loaded\. Please try again\."\)\)/);
 });
+
+
+test("market records normalize Binance Web3 field names for the UI", () => {
+  assert.match(source, /ticker: market\?\.ticker \|\| market\?\.underlyingTicker \|\| ""/);
+  assert.match(source, /provider: market\?\.provider \|\| market\?\.platformId \|\| ""/);
+  assert.match(source, /markets\.map\(normalizeMarketRecord\)/);
+  assert.match(source, /data\.candidates\.map\(normalizeMarketRecord\)/);
+});
+
+test("agent replies render basic markdown as structured HTML", () => {
+  assert.match(source, /function formatAgentText\(value\)/);
+  assert.match(source, /<strong>\$1<\/strong>/);
+  assert.match(source, /<ul>/);
+  assert.match(source, /<ol>/);
+  assert.match(source, /innerHTML = formatAgentText\(data\.answer/);
+});
