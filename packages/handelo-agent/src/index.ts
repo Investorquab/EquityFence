@@ -108,8 +108,8 @@ export function validateUserIntent(value: unknown): UserIntent {
   if (!strategyTypes.includes((intent.strategyType ?? null) as StrategyType | null)) throw new Error("LLM returned an invalid strategy type.");
   if (intent.frequency !== null && intent.frequency !== undefined && typeof intent.frequency !== "string") throw new Error("LLM returned an invalid strategy frequency.");
   if (intent.condition !== null && intent.condition !== undefined && typeof intent.condition !== "string") throw new Error("LLM returned an invalid strategy condition.");
-  if (!Array.isArray(intent.basketAssets) || intent.basketAssets.some((asset) => typeof asset !== "string")) throw new Error("LLM returned invalid basket assets.");
-  if (intent.basketAssets.length > 8) throw new Error("A basket cannot contain more than 8 assets.");
+  if (intent.basketAssets !== undefined && (!Array.isArray(intent.basketAssets) || intent.basketAssets.some((asset) => typeof asset !== "string"))) throw new Error("LLM returned invalid basket assets.");
+  if (Array.isArray(intent.basketAssets) && intent.basketAssets.length > 8) throw new Error("A basket cannot contain more than 8 assets.");
   if (intent.basketName !== null && intent.basketName !== undefined && typeof intent.basketName !== "string") throw new Error("LLM returned an invalid basket name.");
   if (intent.horizon !== null && typeof intent.horizon !== "string") {
     throw new Error("LLM returned an invalid horizon.");
@@ -123,7 +123,7 @@ export function validateUserIntent(value: unknown): UserIntent {
     strategyType: (intent.strategyType ?? null) as StrategyType | null,
     frequency: (intent.frequency ?? null) as string | null,
     condition: (intent.condition ?? null) as string | null,
-    basketAssets: intent.basketAssets as string[],
+    basketAssets: (intent.basketAssets ?? []) as string[],
     basketName: (intent.basketName ?? null) as string | null
   };
 }
