@@ -23,8 +23,12 @@
       </div>
 
       <nav class="nav" aria-label="Primary">
-        <button class="nav-item active" data-view="workspace" aria-current="page">
+        <button class="nav-item active" data-view="home" aria-current="page">
           <span>01</span>
+          <strong>Home</strong>
+        </button>
+        <button class="nav-item" data-view="workspace">
+          <span>02</span>
           <strong>Workspace</strong>
         </button>
       </nav>
@@ -37,11 +41,96 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="topbar-label">HANDELO / WORKSPACE</div>
+        <div class="topbar-label" id="topbarLabel">HANDELO / HOME</div>
         <button class="connect" id="connectButton" type="button">Connect wallet <span>↗</span></button>
       </header>
 
-      <section class="view active" id="view-workspace" aria-labelledby="workspace-title">
+      <section class="view active home-view" id="view-home" aria-labelledby="home-title">
+        <div class="home-hero">
+          <div class="eyebrow">AI OPERATING LAYER / BSC</div>
+          <h1 id="home-title">Understand.<br><em>Strategize. Execute.</em></h1>
+          <p>Handelo turns tokenized-stock market data, portfolio context, strategy rules, and execution risk into one decision surface.</p>
+          <div class="home-actions">
+            <button class="primary-button home-cta" id="homeWorkspaceCta" type="button">Open Workspace ↗</button>
+            <span class="home-proof">LIVE MARKET CONTEXT · HUMAN APPROVAL · BSC MAINNET</span>
+          </div>
+        </div>
+
+        <section class="home-problem">
+          <div class="eyebrow">THE MARKET GAP</div>
+          <div>
+            <h2>Markets close.<br><em>Tokenized stocks don't.</em></h2>
+            <p>Handelo helps you see the difference between a reference market and its on-chain representation, then turns that context into deterministic, risk-aware actions.</p>
+          </div>
+        </section>
+
+        <section class="home-flow" aria-labelledby="home-flow-title">
+          <div class="home-section-head">
+            <div class="eyebrow">THE OPERATING LOOP</div>
+            <h2 id="home-flow-title">From signal to settlement.</h2>
+          </div>
+          <div class="home-flow-grid">
+            <div><span>01</span><strong>Discover</strong><p>Find market and representation gaps.</p></div>
+            <div><span>02</span><strong>Understand</strong><p>Ask Handelo to explain what changed.</p></div>
+            <div><span>03</span><strong>Strategize</strong><p>Turn intent into deterministic rules.</p></div>
+            <div><span>04</span><strong>Check Risk</strong><p>Test exposure before activation.</p></div>
+            <div><span>05</span><strong>Approve</strong><p>Review the exact transaction.</p></div>
+            <div><span>06</span><strong>Execute</strong><p>Pass the approved action to the wallet.</p></div>
+            <div><span>07</span><strong>Monitor</strong><p>Keep portfolio and activity in context.</p></div>
+          </div>
+        </section>
+
+        <section class="home-capabilities" aria-labelledby="home-capabilities-title">
+          <div class="home-section-head">
+            <div class="eyebrow">WHAT HANDELO OPERATES</div>
+            <h2 id="home-capabilities-title">One surface. Seven capabilities.</h2>
+          </div>
+          <div class="home-capability-grid">
+            <article class="home-capability-card">
+              <div class="message-label">MARKET INSIGHT</div>
+              <h3>See the representation gap.</h3>
+              <div class="home-ui-snippet"><span>NVDAB</span><b>ON-CHAIN</b><strong>REFERENCE ↔ $178.42</strong><i>+1.84%</i></div>
+            </article>
+            <article class="home-capability-card">
+              <div class="message-label">STRATEGY PREVIEW</div>
+              <h3>Make intent deterministic.</h3>
+              <div class="home-ui-snippet"><span>WEEKLY DCA</span><b>$10 / MONDAY</b><strong>MAX EXPOSURE 35%</strong><i>DRAFT</i></div>
+            </article>
+            <article class="home-capability-card">
+              <div class="message-label">RISK RESULT</div>
+              <h3>Govern the action.</h3>
+              <div class="home-ui-snippet"><span>PORTFOLIO RISK</span><b>PASS / BLOCK</b><strong>EXPOSURE + RESERVE CHECK</strong><i>SERVER-SIDE</i></div>
+            </article>
+            <article class="home-capability-card">
+              <div class="message-label">TRANSACTION PREVIEW</div>
+              <h3>Know what gets signed.</h3>
+              <div class="home-ui-snippet"><span>BUY NVDAB</span><b>BSC</b><strong>QUOTE · WALLET · SECURITY</strong><i>PENDING</i></div>
+            </article>
+          </div>
+        </section>
+
+        <section class="home-how" aria-labelledby="home-how-title">
+          <div>
+            <div class="eyebrow">HOW IT WORKS</div>
+            <h2 id="home-how-title">The AI explains.<br><em>The system governs.</em></h2>
+          </div>
+          <div class="home-how-copy">
+            <p>Handelo combines market intelligence, deterministic strategy construction, portfolio constraints, and wallet execution behind a persistent AI control surface.</p>
+            <div class="home-principles">
+              <span>LIVE DATA</span><span>DETERMINISTIC RULES</span><span>SERVER-SIDE RISK</span><span>HUMAN APPROVAL</span>
+            </div>
+          </div>
+        </section>
+
+        <section class="home-final">
+          <div class="eyebrow">READY WHEN YOU ARE</div>
+          <h2>Bring the market into focus.</h2>
+          <p>Open the workspace and let Handelo build the context before you decide what to do.</p>
+          <button class="primary-button home-cta" id="homeFinalCta" type="button">Enter Handelo Workspace ↗</button>
+        </section>
+      </section>
+
+      <section class="view" id="view-workspace" aria-labelledby="workspace-title">
         <div class="workspace-grid">
           <aside class="workspace-context" aria-label="Market and portfolio context">
             <div class="workspace-intro"><div class="eyebrow">LIVE / BSC</div><h1 id="workspace-title">Market context, <em>at a glance.</em></h1><p>Handelo keeps the numbers visible while you work with the AI.</p></div>
