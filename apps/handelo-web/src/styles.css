@@ -426,3 +426,5 @@ button{cursor:pointer}
   .history-row{flex-direction:column}
   .history-hash{max-width:100%;width:100%}
 }
+
+.error-message{border-left:2px solid rgba(211,112,96,.55);padding-left:14px}.error-message .message-label{color:#d3a097}.error-message .message-text{color:#d8c6c0}
