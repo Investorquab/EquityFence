@@ -368,7 +368,7 @@ function addExecutionResult(data) {
     button.setAttribute("aria-disabled", "true");
     button.textContent = "Refreshing…";
     button.setAttribute("aria-label", "Refreshing portfolio");
-    showView("portfolio");
+    refreshWorkspaceContext();
   });
   node.querySelector("[data-view-history]")?.addEventListener("click", (event) => {
     const button = event.currentTarget;
@@ -379,7 +379,7 @@ function addExecutionResult(data) {
     button.setAttribute("aria-label", "Opening transaction history");
     button.setAttribute("data-navigation-disabled", "true");
     button.setAttribute("data-navigation-busy", "true");
-    showView("history");
+    refreshWorkspaceContext();
   });
   scrollConversation();
 }
@@ -832,17 +832,13 @@ async function loadHistory() {
   }
 }
 
-function showView(view) {
+function showView() {
   document.querySelectorAll(".nav-item").forEach((item) => {
-    const active = item.dataset.view === view;
-    item.classList.toggle("active", active);
-    if (active) item.setAttribute("aria-current", "page");
-    else item.removeAttribute("aria-current");
+    item.classList.toggle("active", true);
+    item.setAttribute("aria-current", "page");
   });
-  const targetView = view === "workspace" ? "workspace" : "workspace";
-  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + targetView));
+  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-workspace"));
   refreshWorkspaceContext();
-
 }
 
 function openMarketDetail(index) {
