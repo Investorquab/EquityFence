@@ -127,3 +127,36 @@ test("basket strategy intelligence renders a deterministic draft preview",()=>{a
 test("strategy preview exposes deterministic portfolio risk review",()=>{assert.match(source,/api\/strategy\/risk/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/activation remains blocked/);});
 
 test("transaction preview requires portfolio risk to pass before confirmation",()=>{assert.match(source,/riskDecision !== "PASS"/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/TRANSACTION PREVIEW/);assert.match(source,/wallet: workspaceWalletAddress/);});
+
+
+test("Handelo exposes exactly two primary navigation destinations", () => {
+  assert.match(indexSource, /data-view="home"/);
+  assert.match(indexSource, /data-view="workspace"/);
+  assert.match(indexSource, /id="view-home"/);
+  assert.match(indexSource, /id="view-workspace"/);
+  assert.match(source, /function showView\(view = "workspace"\)/);
+  assert.match(source, /section\.id === "view-" \+ nextView/);
+});
+
+test("homepage contains the locked product narrative and real UI surfaces", () => {
+  assert.match(indexSource, /Understand\.\\?<br><em>Strategize\. Execute\.<\\?\/em>/);
+  assert.match(indexSource, /Markets close\.<br><em>Tokenized stocks don't\.<\\?\/em>/);
+  assert.match(indexSource, /DISCOVER|Discover/);
+  assert.match(indexSource, /MARKET INSIGHT/);
+  assert.match(indexSource, /STRATEGY PREVIEW/);
+  assert.match(indexSource, /RISK RESULT/);
+  assert.match(indexSource, /TRANSACTION PREVIEW/);
+});
+
+test("homepage CTAs open the unified workspace", () => {
+  assert.match(indexSource, /id="homeWorkspaceCta"/);
+  assert.match(indexSource, /id="homeFinalCta"/);
+  assert.match(source, /showView\("workspace"\)/);
+});
+
+test("workspace remains the single persistent AI control surface", () => {
+  assert.match(indexSource, /id="conversation"/);
+  assert.match(indexSource, /id="composer"/);
+  assert.match(indexSource, /class="workspace-context"/);
+  assert.match(indexSource, /class="workspace-chat"/);
+});
