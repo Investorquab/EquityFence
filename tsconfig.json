@@ -15,5 +15,4 @@
       "@handelo/mcp":["packages/handelo-mcp/src/index.ts"]
     }
   },
-  "files":[]
 }
