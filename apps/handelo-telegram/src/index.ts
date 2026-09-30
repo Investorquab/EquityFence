@@ -89,7 +89,7 @@ export function formatHandeloResponse(result: {
       [
         "BASKET PREVIEW",
         `Name: ${result.basket.name}`,
-        `Assets: ${result.basket.assets.join(", ")}`,
+        `Assets: ${result.basket.assets.map((asset) => asset.asset).join(", ")}`,
       ].join("\n"),
     );
   }
