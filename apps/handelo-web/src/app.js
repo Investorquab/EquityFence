@@ -249,7 +249,7 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
     const response = await fetch(API_BASE + "/api/review", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ticker, amountUsd, action })
+      body: JSON.stringify({ ticker, amountUsd, action, wallet: workspaceWalletAddress?.textContent?.trim() || "" })
     });
     const data = await response.json();
     if (tradeReviewRequestIds.get(promptNode) !== requestId) return;
@@ -272,7 +272,7 @@ function addReviewCard(data, amountUsd) {
   const policy = data.policy || {};
   const market = data.asset || {};
   const quote = data.quote;
-  const security = data.securityAudit || null;
+  const security = data.securityAudit || null;\n  const portfolioRisk = data.portfolioRisk || null;
   const securityBlocked = data.executionBlocked === true;
   const securityLabel = securityBlocked && data.securityAuditError
     ? "SECURITY CHECK UNAVAILABLE — EXECUTION BLOCKED"
@@ -283,7 +283,7 @@ function addReviewCard(data, amountUsd) {
         : "SECURITY CHECKED";
   const decision = policy.decision || "BLOCK";
   const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
-  const canConfirm = decision !== "BLOCK" && !securityBlocked && Boolean(data.reviewToken && quote);
+  const riskBlocked = data.riskDecision !== "PASS";\n  const canConfirm = decision !== "BLOCK" && !riskBlocked && !securityBlocked && Boolean(data.reviewToken && quote);
   const quoteLine = quote
     ? `${escapeHtml(quote.fromCoinSymbol)} ${escapeHtml(quote.fromCoinAmount)} → ${escapeHtml(quote.toCoinAmount)} ${escapeHtml(quote.toCoinSymbol)}`
     : "Live quote unavailable until the Agentic Wallet is connected.";
@@ -291,12 +291,12 @@ function addReviewCard(data, amountUsd) {
   card.innerHTML = `
     <div class="review-head">
       <div>
-        <div class="message-label">TRANSACTION REVIEW</div>
-        <h3>Buy ${escapeHtml(market.ticker || "asset")}</h3>
+        <div class="message-label">TRANSACTION PREVIEW</div>
+        <h3>BUY ${escapeHtml(market.tokenSymbol || market.ticker || "asset")}</h3>
       </div>
       <span class="review-status ${decision.toLowerCase()}">${decisionLabel}</span>
     </div>
-    <div class="review-amount">${money(amountUsd)}<span>requested</span></div>
+    <div class="review-amount">${money(amountUsd)}<span>requested · BSC</span></div>
     <div class="review-grid">
       <div><small>ON-CHAIN</small><strong>${money(market.tokenPrice)}</strong></div>
       <div><small>REFERENCE</small><strong>${money(market.referencePrice)}</strong></div>

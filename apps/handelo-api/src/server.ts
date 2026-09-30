@@ -296,6 +296,7 @@ const server = createServer(async (req, res) => {
         return json(res, 400, { error: "ticker and positive amountUsd are required" });
       }
 
+      const walletAddress = String(body.wallet ?? "").trim();
       const asset = await market.find(ticker);
       if (!isExecutableMarketAsset(asset)) {
         return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so Handelo will not create an executable review." });
@@ -313,6 +314,21 @@ const server = createServer(async (req, res) => {
         marketOpen: asset.statusInfo.openState,
         premiumPct
       });
+
+      let portfolioRisk = null;
+      let portfolioRiskError: string | null = null;
+      if (walletAddress) {
+        try {
+          const snapshot = await portfolioSnapshot(walletAddress);
+          const { evaluatePortfolioStrategyRisk } = await import("@handelo/core");
+          portfolioRisk = evaluatePortfolioStrategyRisk(snapshot, asset.tokenSymbol, amountUsd);
+        } catch (error) {
+          portfolioRiskError = error instanceof Error ? error.message : String(error);
+        }
+      } else {
+        portfolioRiskError = "A connected wallet is required for portfolio risk review.";
+      }
+      const riskDecision = portfolioRisk?.decision ?? "BLOCK";
 
       let securityAudit: Awaited<ReturnType<typeof auditToken>> | null = null;
       let securityAuditError: string | null = null;
@@ -338,7 +354,7 @@ const server = createServer(async (req, res) => {
       const slippage = slippageResult.value;
       let quoteError: string | null = null;
 
-      if (fromToken && policy.decision !== "BLOCK") {
+      if (fromToken && policy.decision !== "BLOCK" && riskDecision === "PASS") {
         try {
           if (fromToken.toLowerCase() !== DEFAULT_BSC_QUOTE_TOKEN.toLowerCase()) {
             throw new Error("Handelo's USD-notional execution path currently requires the BSC USDT quote token.");
@@ -367,13 +383,16 @@ const server = createServer(async (req, res) => {
           market: asset.statusInfo
         },
         policy,
+        portfolioRisk,
+        portfolioRiskError,
+        riskDecision,
         securityAudit,
         securityAuditError,
         executionBlocked,
         quote,
         quoteError,
         quoteToken: fromToken || null,
-        reviewToken: quote ? createReviewToken({
+        reviewToken: quote && riskDecision === "PASS" ? createReviewToken({
           ticker: asset.underlyingTicker,
           amountUsd,
           fromToken,

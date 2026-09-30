@@ -194,3 +194,27 @@ export function evaluatePortfolioStrategyRisk(
     now: new Date().toISOString()
   });
 }
+
+
+export function createTransactionPreview(input: {
+  asset: string;
+  amountUsd: number;
+  estimatedQuantity?: number | null;
+  referencePrice?: number | null;
+  onChainPrice?: number | null;
+  wallet: string;
+  risk: RiskResult;
+}): TransactionPreview {
+  return {
+    action: "BUY",
+    asset: input.asset,
+    amountUsd: input.amountUsd,
+    estimatedQuantity: input.estimatedQuantity ?? null,
+    referencePrice: input.referencePrice ?? null,
+    onChainPrice: input.onChainPrice ?? null,
+    network: "BSC",
+    wallet: input.wallet,
+    risk: input.risk,
+    executionState: "PENDING"
+  };
+}
