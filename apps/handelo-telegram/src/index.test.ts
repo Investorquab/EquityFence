@@ -4,7 +4,7 @@ import { createTelegramHandler, formatHandeloResponse } from "./index.js";
 import type { AgentResult } from "@handelo/agent";
 
 test("Telegram formatter renders structured Handelo context", () => {
-  const text = formatHandeloResponse({
+  const result = {
     answer: "NVIDIA has a live tokenized representation.",
     market: {
       tokenSymbol: "NVDAB",
@@ -23,7 +23,8 @@ test("Telegram formatter renders structured Handelo context", () => {
     },
     policy: { decision: "READY", reasons: ["Policy checks passed."] },
     basket: { name: "AI basket", assets: [{ asset: "NVDAB", weightPercent: 50 }, { asset: "MSFTB", weightPercent: 50 }], strategyType: "REBALANCE", status: "DRAFT" },
-  });
+  } as AgentResult;
+  const text = formatHandeloResponse(result);
 
   assert.match(text, /MARKET INSIGHT/);
   assert.match(text, /STRATEGY PREVIEW/);
@@ -40,8 +41,7 @@ test("Telegram ignores group messages", async () => {
     },
   };
   const transport = {
-    call: async (method: string) => {
-      calls.push(method);
+    call: async <T>(_method: string): Promise<T> => {
       return {} as T;
     },
   };
@@ -58,9 +58,9 @@ test("Telegram /start and /help are handled without the LLM", async () => {
   const messages: string[] = [];
   const client = { chat: async (): Promise<AgentResult> => ({ answer: "unused" } as AgentResult) };
   const transport = {
-    call: async (_method: string, body?: Record<string, unknown>) => {
+    call: async <T>(_method: string, body?: Record<string, unknown>): Promise<T> => {
       messages.push(String(body?.text ?? ""));
-      return {};
+      return {} as T;
     },
   };
   const handler = createTelegramHandler(client, transport);
