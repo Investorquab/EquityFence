@@ -59,6 +59,11 @@ function renderWorkspaceStrategies() {
   workspaceStrategies.innerHTML = '<div class="workspace-empty">No active strategies yet. Strategy activation will appear here.</div>';
 }
 
+function renderWorkspaceError(element, message) {
+  if (!element) return;
+  element.innerHTML = `<div class="workspace-empty workspace-error" role="status">${escapeHtml(message)}</div>`;
+}
+
 function renderWorkspaceMarket(market) {
   if (!workspaceMarket) return;
   const gap = market.premiumPct;
@@ -90,27 +95,39 @@ function renderWorkspaceGapRadar(markets) {
 
 async function refreshWorkspaceContext() {
   renderWorkspaceStrategies();
+  [workspaceMarket, workspaceGapRadar, workspacePortfolio, workspaceActivity].forEach((element) => {
+    element?.setAttribute("aria-busy", "true");
+  });
   try {
     const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
     const markets = await marketsResponse.json();
     if (marketsResponse.ok && Array.isArray(markets) && markets.length) renderWorkspaceMarket(normalizeMarketRecord(markets[0]));
-  } catch {}
+    else renderWorkspaceError(workspaceMarket, "Market data is unavailable right now.");
+  } catch {
+    renderWorkspaceError(workspaceMarket, "Could not reach market data. Try again.");
+  }
   try {
     const gapResponse = await fetch(API_BASE + "/api/gap-radar?limit=5", {cache:"no-store"});
     const gapData = await gapResponse.json();
     if (gapResponse.ok && Array.isArray(gapData.markets)) {
       renderWorkspaceGapRadar(gapData.markets);
       if (workspaceGapRadarStatus) workspaceGapRadarStatus.textContent = "LIVE";
-    } else if (workspaceGapRadarStatus) {
-      workspaceGapRadarStatus.textContent = "UNAVAILABLE";
+    } else {
+      if (workspaceGapRadarStatus) workspaceGapRadarStatus.textContent = "UNAVAILABLE";
+      renderWorkspaceError(workspaceGapRadar, "No live gap data is available right now.");
     }
   } catch {
     if (workspaceGapRadarStatus) workspaceGapRadarStatus.textContent = "UNAVAILABLE";
+    renderWorkspaceError(workspaceGapRadar, "Could not reach the Gap Radar service.");
   }
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", {cache:"no-store"});
     const address = await addressResponse.json();
-    if (!address.connected || !address.address) return;
+    if (!address.connected || !address.address) {
+      if (workspaceWalletBalance) workspaceWalletBalance.textContent = "—";
+      if (workspaceWalletAddress) workspaceWalletAddress.textContent = "WALLET NOT CONNECTED";
+      return;
+    }
     if (workspaceWalletAddress) workspaceWalletAddress.textContent = address.address.slice(0,6) + "…" + address.address.slice(-4);
     const portfolioResponse = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
     const portfolio = await portfolioResponse.json();
@@ -119,7 +136,14 @@ async function refreshWorkspaceContext() {
     const historyResponse = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
     const history = await historyResponse.json();
     if (workspaceActivity && Array.isArray(history?.transactions)) workspaceActivity.innerHTML = history.transactions.slice(0,3).map(tx => `<div class="workspace-activity"><span>${escapeHtml(tx.symbol || "BSC transaction")}</span><b>${escapeHtml(tx.txStatus || "UNKNOWN")}</b></div>`).join("") || '<div class="workspace-empty">No recent activity.</div>';
-  } catch {}
+  } catch {
+    renderWorkspaceError(workspacePortfolio, "Portfolio data is unavailable. Try refreshing.");
+    renderWorkspaceError(workspaceActivity, "Activity data is unavailable. Try refreshing.");
+  } finally {
+    [workspaceMarket, workspaceGapRadar, workspacePortfolio, workspaceActivity].forEach((element) => {
+      element?.setAttribute("aria-busy", "false");
+    });
+  }
 }
 
 
