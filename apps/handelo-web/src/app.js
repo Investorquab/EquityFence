@@ -166,6 +166,7 @@ function addAgentMessage(data) {
   const context = node.querySelector(".market-context");
 
   if (data.strategy) addStrategyPreview(data.strategy);
+  if (data.basket) addBasketPreview(data.basket);
 
   if (data.market) {
     context.classList.add("visible");
@@ -189,6 +190,15 @@ function addAgentMessage(data) {
     addReviewPrompt(data.market, amount, action);
   }
 
+  scrollConversation();
+}
+
+function addBasketPreview(basket) {
+  const node = document.createElement("article");
+  node.className = "strategy-preview basket-preview";
+  node.setAttribute("role", "status");
+  node.innerHTML = `<div class="strategy-preview-head"><div><div class="message-label">BASKET PREVIEW</div><h3>${escapeHtml(basket.name || "Custom basket")}</h3></div><span class="strategy-draft">DRAFT</span></div><div class="strategy-preview-grid">${(basket.assets || []).map(asset => `<div><small>${escapeHtml(asset.asset)}</small><strong>${Number(asset.weightPercent).toFixed(2)}%</strong></div>`).join("")}</div><div class="strategy-preview-note">REBALANCE strategy · draft only · no orders created.</div>`;
+  conversation.appendChild(node);
   scrollConversation();
 }
 
