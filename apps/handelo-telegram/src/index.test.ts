@@ -1,6 +1,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { createTelegramHandler, formatHandeloResponse } from "./index.js";
+import type { AgentResult } from "@handelo/agent";
 
 test("Telegram formatter renders structured Handelo context", () => {
   const text = formatHandeloResponse({
@@ -20,8 +21,8 @@ test("Telegram formatter renders structured Handelo context", () => {
       frequency: "Every Monday",
       status: "DRAFT",
     },
-    policy: { decision: "PASS", reason: "Policy checks passed." },
-    basket: { name: "AI basket", assets: ["NVDAB", "MSFTB"] },
+    policy: { decision: "READY", reasons: ["Policy checks passed."] },
+    basket: { name: "AI basket", assets: [{ asset: "NVDAB", weightPercent: 50 }, { asset: "MSFTB", weightPercent: 50 }], strategyType: "REBALANCE", status: "DRAFT" },
   });
 
   assert.match(text, /MARKET INSIGHT/);
@@ -41,7 +42,7 @@ test("Telegram ignores group messages", async () => {
   const transport = {
     call: async (method: string) => {
       calls.push(method);
-      return {};
+      return {} as T;
     },
   };
 
@@ -55,7 +56,7 @@ test("Telegram ignores group messages", async () => {
 
 test("Telegram /start and /help are handled without the LLM", async () => {
   const messages: string[] = [];
-  const client = { chat: async () => ({ answer: "unused" }) };
+  const client = { chat: async (): Promise<AgentResult> => ({ answer: "unused" } as AgentResult) };
   const transport = {
     call: async (_method: string, body?: Record<string, unknown>) => {
       messages.push(String(body?.text ?? ""));
