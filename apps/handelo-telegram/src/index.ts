@@ -23,26 +23,7 @@ export interface TelegramBotOptions {
   fetch?: typeof globalThis.fetch;
 }
 
-export function formatHandeloResponse(result: {
-  answer: string;
-  market?: {
-    tokenSymbol: string;
-    provider: string;
-    tokenPrice: string;
-    referencePrice: string;
-    premiumPct: number | null;
-    marketStatus: string;
-  } | null;
-  strategy?: {
-    type: string;
-    asset: string;
-    amountUsd?: number;
-    frequency?: string;
-    status: string;
-  } | null;
-  policy?: { decision: string; reasons: string[] } | null;
-  basket?: { name: string; assets: string[] } | null;
-}): string {
+export function formatHandeloResponse(result: AgentResult): string {
   const sections = [result.answer.trim()];
 
   if (result.market) {
