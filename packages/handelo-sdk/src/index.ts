@@ -32,7 +32,11 @@ export function createHandeloClient(options:HandeloClientOptions={}):HandeloClie
     return {
       async chat(request){
         const message=normalizeChatMessage(request.message);
-        const response=await fetch(base+"/api/chat",{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({message})});
+        const requestFetch=options.fetch ?? globalThis.fetch;
+        if(!requestFetch) throw new Error("fetch is required for the remote Handelo client");
+        const headers:Record<string,string>={"content-type":"application/json"};
+        if(options.apiKey) headers["x-handelo-api-key"]=options.apiKey;
+        const response=await requestFetch(base+"/api/chat",{method:"POST",headers,body:JSON.stringify({message})});
         const raw=await response.text();
         let payload:AgentResult & {error?:string};
         try{ payload=JSON.parse(raw) as AgentResult & {error?:string}; }
