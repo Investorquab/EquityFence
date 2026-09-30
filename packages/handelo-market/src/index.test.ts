@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { HandeloMarketClient, MarketResolutionError, isExecutableMarketAsset, normalizeTransactionLimit, normalizeTransactions, type RwaAsset, type WalletTransaction } from "./index.js";
+import { HandeloMarketClient, MarketResolutionError, isExecutableMarketAsset, normalizeTransactionLimit, normalizeTransactions, rankGapRadarAssets, toMarketInsight, type RwaAsset, type WalletTransaction } from "./index.js";
 
 const asset = (overrides: Partial<RwaAsset> = {}): RwaAsset => ({
   binanceChainId: "56",
@@ -249,6 +249,20 @@ test("executable market validation rejects malformed price or contract", () => {
   assert.equal(isExecutableMarketAsset(asset({ binanceChainId: "1" })), false);
 });
 
+
+test("market insight exposes reference gap and market status",()=>{
+  const insight=toMarketInsight(asset({tokenPrice:"110",referencePrice:"100"}));
+  assert.equal(insight.onChainPrice,110);
+  assert.equal(insight.referencePrice,100);
+  assert.equal(insight.divergencePercent,10);
+  assert.equal(insight.marketStatus,"OPEN");
+});
+
+test("gap radar ranks assets by absolute divergence",()=>{
+  const low=asset({tokenSymbol:"LOW",tokenPrice:"101",referencePrice:"100"});
+  const high=asset({tokenSymbol:"HIGH",tokenPrice:"120",referencePrice:"100"});
+  assert.deepEqual(rankGapRadarAssets([low,high]).map(item=>item.tokenSymbol),["HIGH","LOW"]);
+});
 
 test("market resolution errors expose actionable categories",async()=>{
   const market=client([],[]);
