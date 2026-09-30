@@ -1,5 +1,3 @@
-co
-
 const API_BASE = window.HANDELO_API_URL || localStorage.getItem("handelo_api_url") || "http://localhost:8787";
 
 const conversation = document.querySelector("#conversation");
