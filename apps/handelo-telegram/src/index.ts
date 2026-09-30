@@ -1,4 +1,5 @@
 import { createHandeloClient, type HandeloClient } from "@handelo/sdk";
+import type { AgentResult } from "@handelo/agent";
 
 type TelegramChat = { id: number; type: string };
 type TelegramMessage = { chat: TelegramChat; text?: string };
@@ -39,7 +40,7 @@ export function formatHandeloResponse(result: {
     frequency?: string;
     status: string;
   } | null;
-  policy?: { decision: string; reason: string } | null;
+  policy?: { decision: string; reasons: string[] } | null;
   basket?: { name: string; assets: string[] } | null;
 }): string {
   const sections = [result.answer.trim()];
@@ -78,7 +79,7 @@ export function formatHandeloResponse(result: {
       [
         "RISK RESULT",
         `Decision: ${result.policy.decision}`,
-        `Reason: ${result.policy.reason}`,
+        `Reason: ${result.policy.reasons[0] ?? "No reason supplied."}`,
       ].join("\n"),
     );
   }
@@ -102,7 +103,7 @@ export function createTelegramTransport(
 ): TelegramTransport {
   const base = `https://api.telegram.org/bot${token}`;
   return {
-    async call<T>(method, body = {}) {
+    async call<T>(method: string, body: Record<string, unknown> = {}): Promise<T> {
       const response = await requestFetch(`${base}/${method}`, {
         method: "POST",
         headers: { "content-type": "application/json" },
@@ -141,7 +142,7 @@ export function createTelegramHandler(client: HandeloClient, transport: Telegram
       return;
     }
 
-    const result = await client.chat({ message: text });
+    const result: AgentResult = await client.chat({ message: text });
     await transport.call("sendMessage", {
       chat_id: message.chat.id,
       text: formatHandeloResponse(result),
