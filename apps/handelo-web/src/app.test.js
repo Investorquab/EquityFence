@@ -47,6 +47,8 @@ test("chat responses auto-scroll to the latest content", () => {
 });
 
 test("structured market insight remains available in chat", () => {
+  assert.match(source, /context-kicker/);
+  assert.match(source, /MARKET INSIGHT/);
   assert.match(source, /function renderMarketContext/);
   assert.match(source, /function renderCandidates/);
   assert.match(source, /data\.market/);
