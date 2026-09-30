@@ -823,6 +823,13 @@ test("stale chat responses remove their own thinking state without changing the 
 });
 
 
+test("market API records are normalized before market rendering", () => {
+  assert.match(source, /function normalizeMarketRecord\(market\)/);
+  assert.match(source, /marketRecords = markets\.map\(normalizeMarketRecord\)/);
+  assert.match(source, /statusInfo\.openState/);
+  assert.match(source, /premiumPct = Number\.isFinite\(tokenPrice\) && Number\.isFinite\(referencePrice\)/);
+});
+
 test("markets expose searchable discovery controls", () => {
   const html = readFileSync(fileURLToPath(new URL("../index.html", import.meta.url)), "utf8");
   assert.match(html, /id="marketSearch"/);
