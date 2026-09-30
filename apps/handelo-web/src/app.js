@@ -284,7 +284,8 @@ function addReviewCard(data, amountUsd) {
         : "SECURITY CHECKED";
   const decision = policy.decision || "BLOCK";
   const decisionLabel = decision === "READY" ? "READY FOR CONFIRMATION" : decision === "CONFIRM" ? "CONFIRM REQUIRED" : "BLOCKED";
-  const riskBlocked = data.riskDecision !== "PASS";\n  const canConfirm = decision !== "BLOCK" && !riskBlocked && !securityBlocked && Boolean(data.reviewToken && quote);
+  const riskBlocked = data.riskDecision !== "PASS";
+  const canConfirm = decision !== "BLOCK" && !riskBlocked && !securityBlocked && Boolean(data.reviewToken && quote);
   const quoteLine = quote
     ? `${escapeHtml(quote.fromCoinSymbol)} ${escapeHtml(quote.fromCoinAmount)} → ${escapeHtml(quote.toCoinAmount)} ${escapeHtml(quote.toCoinSymbol)}`
     : "Live quote unavailable until the Agentic Wallet is connected.";
