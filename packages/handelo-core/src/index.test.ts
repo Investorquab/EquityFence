@@ -25,3 +25,27 @@ test("risk governor passes when constraints are satisfied",()=>{
   assert.equal(result.decision,"PASS");
   assert.deepEqual(result.reasons,[]);
 });
+
+
+test("portfolio strategy risk blocks excessive projected exposure", () => {
+  const portfolio: PortfolioSnapshot = {
+    wallet: "0x1111111111111111111111111111111111111111",
+    balanceUsd: null,
+    totalValueUsd: 100,
+    positions: [{ asset: "NVDAB", tokenSymbol: "NVDAB", allocationPercent: 80, valueUsd: 80 }]
+  };
+  const result = evaluatePortfolioStrategyRisk(portfolio, "NVDAB", 30);
+  assert.equal(result.decision, "BLOCK");
+  assert.match(result.reasons[0], /exposure/i);
+});
+
+test("portfolio strategy risk passes a small diversified addition", () => {
+  const portfolio: PortfolioSnapshot = {
+    wallet: "0x1111111111111111111111111111111111111111",
+    balanceUsd: null,
+    totalValueUsd: 100,
+    positions: [{ asset: "NVDAB", tokenSymbol: "NVDAB", allocationPercent: 20, valueUsd: 20 }]
+  };
+  const result = evaluatePortfolioStrategyRisk(portfolio, "NVDAB", 10);
+  assert.equal(result.decision, "PASS");
+});

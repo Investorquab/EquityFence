@@ -165,3 +165,32 @@ export function createStrategyId(prefix = "strategy"): string {
   const safePrefix = prefix.replace(/[^a-z0-9_-]/gi, "").toLowerCase() || "strategy";
   return safePrefix + "-" + Date.now().toString(36);
 }
+
+
+export function evaluatePortfolioStrategyRisk(
+  portfolio: PortfolioSnapshot,
+  asset: string,
+  amountUsd: number,
+  constraints: StrategyConstraints = {
+    maxSingleAssetExposurePercent: 35,
+    maxTransactionUsd: 100,
+    minimumReservePercent: 10
+  }
+): RiskResult {
+  const total = Number(portfolio.totalValueUsd);
+  const current = portfolio.positions.find(
+    (position) =>
+      position.asset.toLowerCase() === asset.toLowerCase() ||
+      position.tokenSymbol.toLowerCase() === asset.toLowerCase()
+  );
+  const currentValue = Number(current?.valueUsd ?? 0);
+  const projectedTotal = Number.isFinite(total) && total >= 0 ? total + amountUsd : amountUsd;
+  const projectedExposurePercent = projectedTotal > 0
+    ? ((currentValue + amountUsd) / projectedTotal) * 100
+    : 100;
+  return createRiskResult(constraints, {
+    proposedAmountUsd: amountUsd,
+    projectedAssetExposurePercent: projectedExposurePercent,
+    now: new Date().toISOString()
+  });
+}

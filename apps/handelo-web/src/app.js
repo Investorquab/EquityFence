@@ -197,8 +197,28 @@ function addStrategyPreview(strategy) {
   node.className = "strategy-preview";
   const amount = Number(strategy.amountUsd);
   const amountText = Number.isFinite(amount) ? money(amount) : "—";
-  node.innerHTML = `<div class="strategy-preview-head"><div><div class="message-label">STRATEGY PREVIEW</div><h3>${escapeHtml(strategy.type || "STRATEGY")}</h3></div><span class="strategy-draft">DRAFT</span></div><div class="strategy-preview-grid"><div><small>ASSET</small><strong>${escapeHtml(strategy.asset || "—")}</strong></div><div><small>AMOUNT</small><strong>${amountText}</strong></div><div><small>FREQUENCY</small><strong>${escapeHtml(strategy.frequency || "—")}</strong></div><div><small>STATUS</small><strong>${escapeHtml(strategy.status || "DRAFT")}</strong></div></div><div class="strategy-preview-checks"><div>✓ Strategy inputs validated</div><div>• Risk review required before activation</div></div><div class="strategy-preview-note">Draft only. No schedule or transaction has been created.</div>`;
+  node.innerHTML = `<div class="strategy-preview-head"><div><div class="message-label">STRATEGY PREVIEW</div><h3>${escapeHtml(strategy.type || "STRATEGY")}</h3></div><span class="strategy-draft">DRAFT</span></div><div class="strategy-preview-grid"><div><small>ASSET</small><strong>${escapeHtml(strategy.asset || "—")}</strong></div><div><small>AMOUNT</small><strong>${amountText}</strong></div><div><small>FREQUENCY</small><strong>${escapeHtml(strategy.frequency || "—")}</strong></div><div><small>STATUS</small><strong>${escapeHtml(strategy.status || "DRAFT")}</strong></div></div><div class="strategy-preview-checks"><div>✓ Strategy inputs validated</div><div>• Portfolio risk review required before activation</div></div><div class="strategy-risk-result" data-strategy-risk><span>PORTFOLIO RISK</span><strong>Connect a wallet to check projected exposure.</strong></div><div class="strategy-preview-note">Draft only. No schedule or transaction has been created.</div>`;
   conversation.appendChild(node);
+  const walletAddress = workspaceWalletAddress?.textContent?.trim() || "";
+  const normalizedWallet = walletAddress.length === 42 && /^0x[0-9a-fA-F]{40}$/.test(walletAddress) ? walletAddress : "";
+  if (normalizedWallet && Number.isFinite(amount) && amount > 0) {
+    fetch(API_BASE + "/api/strategy/risk", {
+      method: "POST",
+      headers: {"content-type":"application/json"},
+      body: JSON.stringify({wallet: normalizedWallet, asset: strategy.asset, amountUsd: amount})
+    }).then(async response => {
+      const data = await response.json();
+      if (!response.ok) throw new Error(data?.error || "Risk review failed.");
+      const result = data.risk || {};
+      const target = node.querySelector("[data-strategy-risk]");
+      if (!target) return;
+      target.className = "strategy-risk-result " + String(result.decision || "BLOCK").toLowerCase();
+      target.innerHTML = `<span>PORTFOLIO RISK · ${escapeHtml(result.decision || "BLOCK")}</span><strong>${escapeHtml((result.reasons || ["Projected exposure is within configured constraints."]).join(" "))}</strong>`;
+    }).catch(() => {
+      const target = node.querySelector("[data-strategy-risk]");
+      if (target) target.innerHTML = "<span>PORTFOLIO RISK</span><strong>Risk check unavailable; activation remains blocked until it passes.</strong>";
+    });
+  }
   scrollConversation();
 }
 

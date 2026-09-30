@@ -252,6 +252,26 @@ const server = createServer(async (req, res) => {
     }
   }
 
+  if (req.method === "POST" && req.url === "/api/strategy/risk") {
+    try {
+      const raw = await readRequestBody(req);
+      const body = parseJsonBody<{ wallet?: unknown; asset?: unknown; amountUsd?: unknown }>(raw);
+      const walletAddress = String(body.wallet ?? "").trim();
+      const asset = String(body.asset ?? "").trim();
+      const amountUsd = Number(body.amountUsd);
+      if (!isEvmAddress(walletAddress) || !asset || !Number.isFinite(amountUsd) || amountUsd <= 0) {
+        return json(res, 400, { error: "wallet, asset, and positive amountUsd are required" });
+      }
+      const snapshot = await portfolioSnapshot(walletAddress);
+      const { evaluatePortfolioStrategyRisk } = await import("@handelo/core");
+      const risk = evaluatePortfolioStrategyRisk(snapshot, asset, amountUsd);
+      return json(res, 200, { risk, portfolio: snapshot });
+    } catch (error) {
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
+    }
+  }
+
   if (req.method === "POST" && req.url === "/api/review") {
     try {
       const raw = await readRequestBody(req);
