@@ -34,13 +34,13 @@ This file is the execution checklist for the locked Handelo product specificatio
 ## Phase 2 — Seven capabilities
 
 ### 1. Market Intelligence / Gap Radar
-- [ ] On-chain price context
-- [ ] Reference price context
-- [ ] Divergence calculation/presentation
-- [ ] Market status
-- [ ] Market-hours context
+- [x] On-chain price context
+- [x] Reference price context
+- [x] Divergence calculation/presentation
+- [x] Market status
+- [x] Market-hours context
 - [ ] Liquidity/context
-- [ ] Representation comparison
+- [x] Representation comparison
 
 ### 2. AI Analyst / Chat
 - [ ] Persistent workspace Chat
@@ -167,7 +167,7 @@ After homepage + polish: user pulls and performs final demo/regression test.
 
 ## Current batch
 
-**Batch 1 — Shared foundations + strategy construction**
+**Batch 2 — Gap Radar market-data foundation**
 
 Completed:
 - Product specification locked.
@@ -177,8 +177,11 @@ Completed:
 - Deterministic divergence calculation created.
 - Deterministic risk result model created.
 - Strategy construction and validation created in @handelo/strategy.
+- Gap Radar market insight and divergence helpers created in @handelo/market.
+- Gap Radar ranking and market-status tests added.
+- Market package connected to shared core contracts.
 
 Next:
-- Integrate shared contracts with existing API/agent/portfolio surfaces.
-- Build the first Market Intelligence / Gap Radar slice.
-- Continue batching related commits before the next CI checkpoint.
+- Expose Gap Radar through the API/agent.
+- Start the single-page workspace shell and persistent context cards.
+- Integrate structured Chat cards with the shared contracts.
