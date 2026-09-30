@@ -354,6 +354,7 @@ async function confirmTrade(data, amountUsd, card) {
         amountUsd,
         fromToken: data.quoteToken,
         reviewToken: data.reviewToken,
+        wallet: workspaceWalletAddress,
         confirmed: true
       })
     });
