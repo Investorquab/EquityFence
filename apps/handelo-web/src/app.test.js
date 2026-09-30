@@ -874,6 +874,11 @@ test("wallet state is announced accessibly", () => {
   assert.match(source, /WALLET NOT CONNECTED/);
 });
 
+test("wallet connection refreshes active portfolio and history views", () => {
+  assert.match(source, /document\.querySelector\("#view-portfolio\.active"\)\) loadPortfolio\(\)/);
+  assert.match(source, /document\.querySelector\("#view-history\.active"\)\) loadHistory\(\)/);
+});
+
 
 test("review security label explains unavailable audits", () => {
   assert.match(source, /SECURITY CHECK UNAVAILABLE — EXECUTION BLOCKED/);
