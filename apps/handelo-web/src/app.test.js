@@ -897,7 +897,7 @@ test("data view controls share consistent toolbar and mobile treatment", () => {
 
 test("custom errors hide technical fetch details", () => {
   assert.match(source, /function userFacingError\(error, fallback\)/);
-  assert.match(source, /Failed to fetch\|networkerror\|load failed/);
+  assert.match(source, /failed to fetch\|networkerror\|load failed/);
   assert.match(source, /spawn baw\|enoent/);
   assert.match(source, /function addAgentError\(message\)/);
   assert.match(source, /role", "alert/);
