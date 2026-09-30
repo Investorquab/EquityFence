@@ -537,6 +537,8 @@ async function connectWallet() {
     if (data.status === "SUCCESS") {
       walletAuthActive = false;
       await refreshWalletStatus();
+      if (document.querySelector("#view-portfolio.active")) loadPortfolio();
+      if (document.querySelector("#view-history.active")) loadHistory();
       return;
     }
 
@@ -555,6 +557,8 @@ async function connectWallet() {
           clearWalletAuthPolling();
           closeWalletAuth();
           await refreshWalletStatus();
+          if (document.querySelector("#view-portfolio.active")) loadPortfolio();
+          if (document.querySelector("#view-history.active")) loadHistory();
         } else if (auth.status === "FAILED") {
           clearWalletAuthPolling();
           closeWalletAuth();
