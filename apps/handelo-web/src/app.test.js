@@ -56,7 +56,7 @@ test("structured market insight remains available in chat", () => {
 });
 
 test("transaction review requires policy and security checks before confirmation", () => {
-  assert.match(source, /decision !== "BLOCK" && !securityBlocked && Boolean\(data\.reviewToken && quote\)/);
+  assert.match(source, /decision !== "BLOCK" && !riskBlocked && !securityBlocked && Boolean\(data\.reviewToken && quote\)/);
   assert.match(source, /data-cancel/);
   assert.match(source, /data-confirm/);
   assert.match(source, /Confirm purchase/);
