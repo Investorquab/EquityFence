@@ -1,6 +1,8 @@
 import { createLlmClient, type LlmClient } from "@handelo/llm";
 import { HandeloMarketClient, marketClientFromEnv, toMarketInsight, type RwaAsset } from "@handelo/market";
 import { evaluatePolicy, type PolicyResult } from "@handelo/policy";
+import { createDraftStrategy, type StrategyInput } from "@handelo/strategy";
+import type { StrategyDefinition, StrategyType } from "@handelo/core";
 
 export interface UserIntent {
   action: "research" | "buy" | "sell" | "invest";
@@ -8,6 +10,9 @@ export interface UserIntent {
   amountUsd: number | null;
   horizon: string | null;
   riskTolerance: "low" | "medium" | "high" | "unknown";
+  strategyType: StrategyType | null;
+  frequency: string | null;
+  condition: string | null;
 }
 
 export interface MarketBrief {
@@ -31,6 +36,7 @@ export interface AgentResult {
   marketInsight: ReturnType<typeof toMarketInsight> | null;
   candidates: MarketBrief[];
   policy: PolicyResult | null;
+  strategy: StrategyDefinition | null;
   answer: string;
   provider: string;
   model: string;
@@ -43,7 +49,10 @@ const INTENT_SCHEMA = {
     ticker: { type: ["string", "null"] },
     amountUsd: { type: ["number", "null"] },
     horizon: { type: ["string", "null"] },
-    riskTolerance: { type: "string", enum: ["low", "medium", "high", "unknown"] }
+    riskTolerance: { type: "string", enum: ["low", "medium", "high", "unknown"] },
+    strategyType: { type: ["string", "null"], enum: ["DCA", "RECURRING", "CONDITIONAL", "REBALANCE", null] },
+    frequency: { type: ["string", "null"] },
+    condition: { type: ["string", "null"] }
   },
   required: ["action", "ticker", "amountUsd", "horizon", "riskTolerance"],
   additionalProperties: false
@@ -80,6 +89,7 @@ export function validateUserIntent(value: unknown): UserIntent {
   const intent = value as Record<string, unknown>;
   const actions = ["research", "buy", "sell", "invest"];
   const risks = ["low", "medium", "high", "unknown"];
+  const strategyTypes = ["DCA", "RECURRING", "CONDITIONAL", "REBALANCE", null];
   if (!actions.includes(String(intent.action)) || !risks.includes(String(intent.riskTolerance))) {
     throw new Error("LLM returned an invalid investment intent.");
   }
@@ -89,6 +99,9 @@ export function validateUserIntent(value: unknown): UserIntent {
   if (intent.amountUsd !== null && (typeof intent.amountUsd !== "number" || !Number.isFinite(intent.amountUsd))) {
     throw new Error("LLM returned an invalid amount.");
   }
+  if (!strategyTypes.includes(intent.strategyType ?? null)) throw new Error("LLM returned an invalid strategy type.");
+  if (intent.frequency !== null && intent.frequency !== undefined && typeof intent.frequency !== "string") throw new Error("LLM returned an invalid strategy frequency.");
+  if (intent.condition !== null && intent.condition !== undefined && typeof intent.condition !== "string") throw new Error("LLM returned an invalid strategy condition.");
   if (intent.horizon !== null && typeof intent.horizon !== "string") {
     throw new Error("LLM returned an invalid horizon.");
   }
@@ -97,7 +110,10 @@ export function validateUserIntent(value: unknown): UserIntent {
     ticker: intent.ticker as string | null,
     amountUsd: intent.amountUsd as number | null,
     horizon: intent.horizon as string | null,
-    riskTolerance: intent.riskTolerance as UserIntent["riskTolerance"]
+    riskTolerance: intent.riskTolerance as UserIntent["riskTolerance"],
+    strategyType: (intent.strategyType ?? null) as StrategyType | null,
+    frequency: (intent.frequency ?? null) as string | null,
+    condition: (intent.condition ?? null) as string | null
   };
 }
 
@@ -139,7 +155,7 @@ export class HandeloAgent {
     const intent = await this.llm.generateJson<UserIntent>({
       schemaName: "handelo_intent",
       schema: INTENT_SCHEMA,
-      system: "You are Handelo's intent parser. Extract the user's investment intent without inventing a ticker or amount. If they did not name a stock, ticker is null. Amount is USD when explicitly stated.",
+      system: "You are Handelo's intent parser. Extract the user's investment intent without inventing a ticker or amount. If they did not name a stock, ticker is null. Amount is USD when explicitly stated. If the user explicitly describes DCA, recurring, conditional, or rebalancing behavior, extract strategyType, frequency, and condition; otherwise return null for those fields.",
       user: normalizedMessage
     });
 
@@ -148,6 +164,7 @@ export class HandeloAgent {
     let market: MarketBrief | null = null;
     let marketInsight: ReturnType<typeof toMarketInsight> | null = null;
     let candidates: MarketBrief[] = [];
+    let strategy: StrategyDefinition | null = null;
 
     let marketResolutionError: string | null = null;
 
@@ -172,6 +189,22 @@ export class HandeloAgent {
         candidates = (await this.market.discover(4)).map(marketBrief);
       } catch {
         marketResolutionError = "The live market discovery service is unavailable right now.";
+      }
+    }
+
+    if (market && parsedIntent.strategyType) {
+      try {
+        const input: StrategyInput = {
+          type: parsedIntent.strategyType,
+          asset: market.tokenSymbol,
+          amountUsd: parsedIntent.amountUsd ?? undefined,
+          frequency: parsedIntent.frequency ?? undefined,
+          condition: parsedIntent.condition ?? undefined,
+          constraints: {}
+        };
+        strategy = createDraftStrategy(input);
+      } catch {
+        strategy = null;
       }
     }
 
@@ -210,6 +243,7 @@ Respond naturally and concisely.`
       marketInsight,
       candidates,
       policy,
+      strategy,
       answer: validatedResponse.answer,
       provider: this.llm.provider,
       model: this.llm.model

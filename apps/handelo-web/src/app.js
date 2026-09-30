@@ -165,6 +165,8 @@ function addAgentMessage(data) {
   node.querySelector(".message-text").innerHTML = formatAgentText(data.answer || "I could not generate an explanation.");
   const context = node.querySelector(".market-context");
 
+  if (data.strategy) addStrategyPreview(data.strategy);
+
   if (data.market) {
     context.classList.add("visible");
     renderMarketContext(context, normalizeMarketRecord(data.market));
@@ -187,6 +189,16 @@ function addAgentMessage(data) {
     addReviewPrompt(data.market, amount, action);
   }
 
+  scrollConversation();
+}
+
+function addStrategyPreview(strategy) {
+  const node = document.createElement("article");
+  node.className = "strategy-preview";
+  const amount = Number(strategy.amountUsd);
+  const amountText = Number.isFinite(amount) ? money(amount) : "—";
+  node.innerHTML = `<div class="strategy-preview-head"><div><div class="message-label">STRATEGY PREVIEW</div><h3>${escapeHtml(strategy.type || "STRATEGY")}</h3></div><span class="strategy-draft">DRAFT</span></div><div class="strategy-preview-grid"><div><small>ASSET</small><strong>${escapeHtml(strategy.asset || "—")}</strong></div><div><small>AMOUNT</small><strong>${amountText}</strong></div><div><small>FREQUENCY</small><strong>${escapeHtml(strategy.frequency || "—")}</strong></div><div><small>STATUS</small><strong>${escapeHtml(strategy.status || "DRAFT")}</strong></div></div><div class="strategy-preview-checks"><div>✓ Strategy inputs validated</div><div>• Risk review required before activation</div></div><div class="strategy-preview-note">Draft only. No schedule or transaction has been created.</div>`;
+  conversation.appendChild(node);
   scrollConversation();
 }
 

@@ -17,7 +17,7 @@ test("Handelo resolves live market context before generating its explanation",as
     provider:"groq",model:"openai/gpt-oss-120b",
     async generateJson<T>(request:{system:string;user:string;schemaName:string;schema:Record<string,unknown>}):Promise<T>{
       calls++;
-      if(request.schemaName==="handelo_intent") return {action:"research",ticker:"NVDA",amountUsd:20,horizon:null,riskTolerance:"unknown"} as T;
+      if(request.schemaName==="handelo_intent") return {action:"research",ticker:"NVDA",amountUsd:20,horizon:null,riskTolerance:"unknown",strategyType:null,frequency:null,condition:null} as T;
       return {answer:"NVDA's latest tokenized price is below the latest reference price, and the traditional market is closed."} as T;
     }
   };
@@ -37,7 +37,7 @@ test("Handelo contains unresolved market errors without inventing market context
   const llm:LlmClient={
     provider:"groq",model:"test",
     async generateJson<T>(request:{system:string;user:string;schemaName:string;schema:Record<string,unknown>}):Promise<T>{
-      if(request.schemaName==="handelo_intent") return {action:"research",ticker:"UNKNOWN",amountUsd:null,horizon:null,riskTolerance:"unknown"} as T;
+      if(request.schemaName==="handelo_intent") return {action:"research",ticker:"UNKNOWN",amountUsd:null,horizon:null,riskTolerance:"unknown",strategyType:null,frequency:null,condition:null} as T;
       assert.match(request.user,/could not find a supported BSC tokenized-stock market/i);
       return {answer:"I couldn't resolve a supported tokenized-stock market for that ticker."} as T;
     }
@@ -53,15 +53,15 @@ test("Handelo contains unresolved market errors without inventing market context
 
 test("structured intent validation rejects malformed LLM output", () => {
   assert.throws(
-    () => validateUserIntent({ action: "buy", ticker: 123, amountUsd: 20, horizon: null, riskTolerance: "low" }),
+    () => validateUserIntent({ action: "buy", ticker: 123, amountUsd: 20, horizon: null, riskTolerance: "low", strategyType: null, frequency: null, condition: null }),
     /invalid ticker/,
   );
   assert.throws(
-    () => validateUserIntent({ action: "buy", ticker: "NVDA", amountUsd: Number.NaN, horizon: null, riskTolerance: "low" }),
+    () => validateUserIntent({ action: "buy", ticker: "NVDA", amountUsd: Number.NaN, horizon: null, riskTolerance: "low", strategyType: null, frequency: null, condition: null }),
     /invalid amount/,
   );
   assert.throws(
-    () => validateUserIntent({ action: "unknown", ticker: null, amountUsd: null, horizon: null, riskTolerance: "low" }),
+    () => validateUserIntent({ action: "unknown", ticker: null, amountUsd: null, horizon: null, riskTolerance: "low", strategyType: null, frequency: null, condition: null }),
     /invalid investment intent/,
   );
 });
@@ -79,3 +79,6 @@ test("agent response validation rejects malformed provider output", () => {
   assert.throws(() => validateAgentResponse({ answer: "x".repeat(12001) }), /answer that is too long/);
   assert.deepEqual(validateAgentResponse({ answer: "  Ready.  " }), { answer: "Ready." });
 });
+
+
+test("explicit DCA intent becomes a deterministic draft strategy",async()=>{const llm:LlmClient={provider:"test",model:"test",async generateJson<T>(request:any):Promise<T>{if(request.schemaName==="handelo_intent")return {action:"invest",ticker:"NVDA",amountUsd:10,horizon:null,riskTolerance:"unknown",strategyType:"DCA",frequency:"Every Monday",condition:null} as T;return {answer:"Draft prepared."} as T;}};const market={findAll:async()=>[asset]} as unknown as HandeloMarketClient;const result=await new HandeloAgent({llmClient:llm,marketClient:market}).run("Buy $10 of NVDA every Monday.");assert.equal(result.strategy?.type,"DCA");assert.equal(result.strategy?.status,"DRAFT");assert.equal(result.strategy?.frequency,"Every Monday");assert.equal(result.strategy?.amountUsd,10);});

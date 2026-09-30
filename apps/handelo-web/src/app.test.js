@@ -118,3 +118,6 @@ test("frontend exposes keyboard-visible focus states", () => {
 test("chat composer requires a non-empty message", () => {
   assert.match(indexSource, /id="messageInput"[^>]*required/);
 });
+
+
+test("strategy preview is rendered from agent strategy data",()=>{assert.match(source,/data\.strategy/);assert.match(source,/function addStrategyPreview\(strategy\)/);assert.match(source,/STRATEGY PREVIEW/);});
