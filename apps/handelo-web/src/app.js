@@ -69,15 +69,15 @@ function formatAgentText(value) {
   for (const line of lines) {
     const trimmed = line.trim();
     if (!trimmed) { closeList(); html.push("<br>"); continue; }
-    const escaped = escapeHtml(trimmed).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>");
-    const unordered = /^[-*]\\s+(.+)$/.exec(trimmed);
-    const ordered = /^(\\d+)\\.\\s+(.+)$/.exec(trimmed);
+    const escaped = escapeHtml(trimmed).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>");
+    const unordered = /^[-*]\s+(.+)$/.exec(trimmed);
+    const ordered = /^(\d+)\.\s+(.+)$/.exec(trimmed);
     if (unordered) {
       if (listType !== "ul") { closeList(); html.push("<ul>"); listType = "ul"; }
-      html.push(`<li>${escapeHtml(unordered[1]).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")}</li>`);
+      html.push(`<li>${escapeHtml(unordered[1]).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</li>`);
     } else if (ordered) {
       if (listType !== "ol") { closeList(); html.push("<ol>"); listType = "ol"; }
-      html.push(`<li>${escapeHtml(ordered[2]).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")}</li>`);
+      html.push(`<li>${escapeHtml(ordered[2]).replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")}</li>`);
     } else {
       closeList();
       html.push(`<p>${escaped}</p>`);
