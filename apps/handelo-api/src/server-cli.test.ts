@@ -9,3 +9,9 @@ test("wallet auth uses the platform-safe BAW command configuration", () => {
   assert.match(source, /import \{ BAW_COMMAND, BAW_SHELL, BinanceAgenticWalletAdapter \} from "@handelo\/execution";/);
   assert.match(source, /execFileAsync\(BAW_COMMAND, \[\.\.\.args, "--json"\], \{ maxBuffer: 1024 \* 1024, shell: BAW_SHELL \}\)/);
 });
+
+test("wallet address reads the BSC address from the Agentic Wallet address list", () => {
+  assert.match(source, /addresses\?: Array<\{ binanceChainId\?: string; address\?: string \}>/);
+  assert.match(source, /\.find\(\(entry\) => entry\.binanceChainId === "56"\)/);
+  assert.match(source, /\.address\?\.trim\(\) \?\? ""/);
+});
