@@ -89,7 +89,7 @@ export function validateUserIntent(value: unknown): UserIntent {
   const intent = value as Record<string, unknown>;
   const actions = ["research", "buy", "sell", "invest"];
   const risks = ["low", "medium", "high", "unknown"];
-  const strategyTypes = ["DCA", "RECURRING", "CONDITIONAL", "REBALANCE", null];
+  const strategyTypes: Array<StrategyType | null> = ["DCA", "RECURRING", "CONDITIONAL", "REBALANCE", null];
   if (!actions.includes(String(intent.action)) || !risks.includes(String(intent.riskTolerance))) {
     throw new Error("LLM returned an invalid investment intent.");
   }
@@ -99,7 +99,8 @@ export function validateUserIntent(value: unknown): UserIntent {
   if (intent.amountUsd !== null && (typeof intent.amountUsd !== "number" || !Number.isFinite(intent.amountUsd))) {
     throw new Error("LLM returned an invalid amount.");
   }
-  if (!strategyTypes.includes(intent.strategyType ?? null)) throw new Error("LLM returned an invalid strategy type.");
+  if (intent.strategyType !== null && intent.strategyType !== undefined && typeof intent.strategyType !== "string") throw new Error("LLM returned an invalid strategy type.");
+  if (!strategyTypes.includes((intent.strategyType ?? null) as StrategyType | null)) throw new Error("LLM returned an invalid strategy type.");
   if (intent.frequency !== null && intent.frequency !== undefined && typeof intent.frequency !== "string") throw new Error("LLM returned an invalid strategy frequency.");
   if (intent.condition !== null && intent.condition !== undefined && typeof intent.condition !== "string") throw new Error("LLM returned an invalid strategy condition.");
   if (intent.horizon !== null && typeof intent.horizon !== "string") {
