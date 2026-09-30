@@ -1,8 +1,8 @@
 # Handelo Product Specification
 
 Status: LOCKED
-Version: 1.0
-Date: 2026-09-30
+Version: 1.1
+Date: 2026-10-01
 
 ## 1. Product definition
 
@@ -47,6 +47,17 @@ The workspace uses a persistent two-column model:
 
 Left: financial and market context.
 Right: persistent AI Chat.
+
+
+### External control surfaces
+
+The web pages remain the only primary product pages. Handelo may also expose the same runtime through:
+
+- **SDK** — `@handelo/sdk` for applications and agents sending natural-language requests.
+- **MCP** — read-only market-intelligence tools.
+- **Telegram** — a conversational client routed through the same Handelo runtime.
+
+These are control surfaces, not parallel business-logic implementations.
 
 The left context remains visible while the user interacts with Chat.
 
@@ -237,7 +248,20 @@ A new user should be able to understand the path from first stock discovery to a
 
 The workspace should guide users toward supported tokenized-stock representations and wallet connection when required.
 
-## 8. Visual and interaction rules
+## 8. External interface rules
+
+### SDK
+The SDK is a typed client over the Handelo runtime. It must not hold private keys, sign transactions, bypass risk/review controls, or fabricate execution evidence.
+
+### Telegram
+Telegram is a conversational client, not a separate trading engine. It routes requests through the same market, strategy, portfolio, risk, review, and execution boundaries.
+
+The bot must isolate Telegram users by application session, never receive or store private keys, preserve deterministic risk decisions, and never claim execution without verified evidence. If secured wallet interaction cannot be safely represented in Telegram, execution must hand off to the web wallet flow.
+
+### MCP
+MCP remains read-only for market intelligence and is not a signing boundary.
+
+## 9. Visual and interaction rules
 
 Preserve the existing Handelo visual identity:
 - typography;
@@ -251,7 +275,7 @@ Add transitions where they improve comprehension and continuity, not as decorati
 
 The product should feel like one coherent application rather than seven tools assembled together.
 
-## 9. Data and truth rules
+## 10. Data and truth rules
 
 Live market data is authoritative for market observations.
 
@@ -271,7 +295,7 @@ The LLM must not invent:
 
 Ambiguous stock requests must not silently select a representation.
 
-## 10. Security rules
+## 11. Security rules
 
 - Private keys never enter the LLM.
 - Explicit user approval is required before execution.
@@ -282,7 +306,7 @@ Ambiguous stock requests must not silently select a representation.
 - No fake execution evidence.
 - No bypass of wallet or audit controls for demos.
 
-## 11. Engineering direction
+## 12. Engineering direction
 
 Build the product as integrated vertical slices.
 
@@ -298,7 +322,7 @@ For each capability:
 7. commit it;
 8. continue the batch.
 
-## 12. Build order
+## 13. Build order
 
 1. Product/spec source of truth.
 2. Shared domain contracts and workspace state.
@@ -313,7 +337,7 @@ For each capability:
 11. Homepage and real UI demo snippets.
 12. Full regression, security review, demo and submission preparation.
 
-## 13. Explicit non-goals
+## 14. Explicit non-goals
 
 Handelo must not become:
 - a chatbot-only product;
@@ -323,7 +347,7 @@ Handelo must not become:
 - a UI that claims unsupported execution is working;
 - a fake demo assembled from unrelated mock screens.
 
-## 14. Change-control rule
+## 15. Change-control rule
 
 This specification is the source of truth.
 
