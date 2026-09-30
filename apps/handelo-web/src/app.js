@@ -61,19 +61,45 @@ function addAgentError(message) {
   scrollConversation();
 }
 
+function formatAgentText(value) {
+  const lines = String(value ?? "").split(/\r?\n/);
+  const html = [];
+  let listType = null;
+  const closeList = () => { if (listType) { html.push(`</${listType}>`); listType = null; } };
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed) { closeList(); html.push("<br>"); continue; }
+    const escaped = escapeHtml(trimmed).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>");
+    const unordered = /^[-*]\\s+(.+)$/.exec(trimmed);
+    const ordered = /^(\\d+)\\.\\s+(.+)$/.exec(trimmed);
+    if (unordered) {
+      if (listType !== "ul") { closeList(); html.push("<ul>"); listType = "ul"; }
+      html.push(`<li>${escapeHtml(unordered[1]).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")}</li>`);
+    } else if (ordered) {
+      if (listType !== "ol") { closeList(); html.push("<ol>"); listType = "ol"; }
+      html.push(`<li>${escapeHtml(ordered[2]).replace(/\\*\\*(.+?)\\*\\*/g, "<strong>$1</strong>")}</li>`);
+    } else {
+      closeList();
+      html.push(`<p>${escaped}</p>`);
+    }
+  }
+  closeList();
+  return html.join("");
+}
+
 function addAgentMessage(data) {
   const node = document.createElement("article");
   node.className = "message agent-message";
   node.innerHTML = '<div class="message-label">HANDELO</div><div class="message-text"></div><div class="market-context"></div>';
-  node.querySelector(".message-text").textContent = data.answer || "I could not generate an explanation.";
+  node.querySelector(".message-text").innerHTML = formatAgentText(data.answer || "I could not generate an explanation.");
   const context = node.querySelector(".market-context");
 
   if (data.market) {
     context.classList.add("visible");
-    renderMarketContext(context, data.market);
+    renderMarketContext(context, normalizeMarketRecord(data.market));
   } else if (Array.isArray(data.candidates) && data.candidates.length) {
     context.classList.add("visible");
-    renderCandidates(context, data.candidates, data.intent);
+    renderCandidates(context, data.candidates.map(normalizeMarketRecord), data.intent);
   }
 
   conversation.appendChild(node);
