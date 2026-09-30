@@ -955,3 +955,8 @@ test("history empty state keeps a refresh action available", () => {
   assert.match(source, /id="historyEmptyRefresh" type="button">Refresh/);
   assert.match(source, /target\.querySelector\("#historyEmptyRefresh"\)\.addEventListener\("click", loadHistory\)/);
 });
+
+test("portfolio empty state keeps a refresh action available", () => {
+  assert.match(source, /id="portfolioEmptyRefresh" type="button">Refresh/);
+  assert.match(source, /target\.querySelector\("#portfolioEmptyRefresh"\)\?\.addEventListener\("click", loadPortfolio\)/);
+});
