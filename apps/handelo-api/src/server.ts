@@ -178,8 +178,12 @@ const server = createServer(async (req, res) => {
     try {
       const status = await walletStatus();
       if (status.status !== "CONNECTED") return json(res, 200, { connected: false, address: null });
-      const wallet = await bawJson<{ address?: string }>(["wallet", "address"]);
-      const address = wallet.address?.trim() ?? "";
+      const wallet = await bawJson<{
+        addresses?: Array<{ binanceChainId?: string; address?: string }>;
+      }>(["wallet", "address"]);
+      const address = wallet.addresses
+        ?.find((entry) => entry.binanceChainId === "56")
+        ?.address?.trim() ?? "";
       if (!/^0x[a-fA-F0-9]{40}$/.test(address)) {
         return json(res, 502, {
           connected: false,
