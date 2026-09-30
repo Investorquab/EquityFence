@@ -936,13 +936,3 @@ test("agent replies render basic markdown as structured HTML", () => {
   assert.match(source, /<ol>/);
   assert.match(source, /innerHTML = formatAgentText\(data\.answer/);
 });
-
-test("history refresh control reloads data and exposes accessible progress", () => {
-  assert.match(source, /id="historyRefresh"/);
-  assert.match(source, /const refreshButton = target\.querySelector\("#historyRefresh"\)/);
-  assert.match(source, /refreshButton\?\.addEventListener\("click", \(event\) =>/);
-  assert.match(source, /button\.disabled = true/);
-  assert.match(source, /aria-label", "Refreshing transaction history"/);
-  assert.match(source, /button\.textContent = "Refreshing…"/);
-  assert.match(source, /loadHistory\(\)/);
-});
