@@ -945,3 +945,8 @@ test("market detail supports Escape close and restores focus", () => {
   assert.match(source, /document\.removeEventListener\("keydown", onKeydown\)/);
   assert.match(source, /returnFocus\?\.isConnected && returnFocus\.focus\(\)/);
 });
+
+
+test("portfolio does not bind the history refresh control", () => {
+  assert.doesNotMatch(source, /target\.querySelector\("#historyRefresh"\)\?\.addEventListener\("click", loadHistory\)/);
+});
