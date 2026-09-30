@@ -704,6 +704,8 @@ function normalizeMarketRecord(market) {
   const statusInfo = market?.statusInfo && typeof market.statusInfo === "object" ? market.statusInfo : {};
   return {
     ...market,
+    ticker: market?.ticker || market?.underlyingTicker || "",
+    provider: market?.provider || market?.platformId || "",
     premiumPct,
     marketOpen: Boolean(statusInfo.openState ?? market?.marketOpen),
     marketStatus: statusInfo.marketStatus ?? market?.marketStatus ?? null,
@@ -897,5 +899,3 @@ composer.addEventListener("submit", (event) => {
 
 document.querySelector("#portfolioConnect")?.addEventListener("click", () => connectButton.click());
 document.querySelector("#historyConnect")?.addEventListener("click", () => connectButton.click());
-
-input.focus();
