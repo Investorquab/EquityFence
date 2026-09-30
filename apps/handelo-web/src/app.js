@@ -28,6 +28,8 @@ const workspaceWalletBalance = document.querySelector("#workspaceWalletBalance")
 const workspaceWalletAddress = document.querySelector("#workspaceWalletAddress");
 const workspacePortfolio = document.querySelector("#workspacePortfolio");
 const workspaceActivity = document.querySelector("#workspaceActivity");
+const workspaceGapRadar = document.querySelector("#workspaceGapRadar");
+const workspaceGapRadarStatus = document.querySelector("#workspaceGapRadarStatus");
 
 function renderWorkspaceMarket(market) {
   if (!workspaceMarket) return;
@@ -38,12 +40,38 @@ function renderWorkspaceMarket(market) {
   workspaceMarket.innerHTML = `<div class="workspace-ticker"><strong>${escapeHtml(market.ticker)}</strong><span>${escapeHtml(market.tokenSymbol)}</span></div><div class="workspace-price">${money(market.tokenPrice)}</div><div class="workspace-market-grid"><div><small>REFERENCE</small><b>${money(market.referencePrice)}</b></div><div><small>GAP</small><b class="${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</b></div><div><small>STATUS</small><b>${escapeHtml(market.marketStatus || "—")}</b></div><div><small>PROVIDER</small><b>${escapeHtml(market.provider || "BSC")}</b></div></div>`;
 }
 
+function renderWorkspaceGapRadar(markets) {
+  if (!workspaceGapRadar) return;
+  if (!Array.isArray(markets) || !markets.length) {
+    workspaceGapRadar.innerHTML = '<div class="workspace-empty">No measurable gaps available.</div>';
+    return;
+  }
+  workspaceGapRadar.innerHTML = markets.slice(0, 5).map((market) => {
+    const gap = Number(market.divergencePercent);
+    const gapText = Number.isFinite(gap) ? (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%" : "—";
+    const gapClass = gap > 0 ? "positive" : gap < 0 ? "negative" : "";
+    return '<div class="workspace-gap-row"><span><strong>' + escapeHtml(market.underlyingTicker || "—") + '</strong><small>' + escapeHtml(market.tokenSymbol || "—") + " · " + escapeHtml(market.provider || "BSC") + '</small></span><b class="' + gapClass + '">' + gapText + '</b></div>';
+  }).join("");
+}
+
 async function refreshWorkspaceContext() {
   try {
     const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
     const markets = await marketsResponse.json();
     if (marketsResponse.ok && Array.isArray(markets) && markets.length) renderWorkspaceMarket(normalizeMarketRecord(markets[0]));
   } catch {}
+  try {
+    const gapResponse = await fetch(API_BASE + "/api/gap-radar?limit=5", {cache:"no-store"});
+    const gapData = await gapResponse.json();
+    if (gapResponse.ok && Array.isArray(gapData.markets)) {
+      renderWorkspaceGapRadar(gapData.markets);
+      if (workspaceGapRadarStatus) workspaceGapRadarStatus.textContent = "LIVE";
+    } else if (workspaceGapRadarStatus) {
+      workspaceGapRadarStatus.textContent = "UNAVAILABLE";
+    }
+  } catch {
+    if (workspaceGapRadarStatus) workspaceGapRadarStatus.textContent = "UNAVAILABLE";
+  }
   try {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", {cache:"no-store"});
     const address = await addressResponse.json();

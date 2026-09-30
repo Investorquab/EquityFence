@@ -24,8 +24,10 @@ test("workspace keeps market, wallet, portfolio, strategy, risk, and activity co
   }
 });
 
-test("workspace context refreshes from live market and wallet APIs", () => {
+test("workspace context refreshes from live market, gap radar, and wallet APIs", () => {
   assert.match(source, /API_BASE \+ "\/api\/markets"/);
+  assert.match(source, /API_BASE \+ "\/api\/gap-radar\?limit=5/);
+  assert.match(source, /function renderWorkspaceGapRadar\(markets\)/);
   assert.match(source, /API_BASE \+ "\/api\/wallet\/address"/);
   assert.match(source, /API_BASE \+ "\/api\/portfolio\?wallet=/);
   assert.match(source, /API_BASE \+ "\/api\/history\?wallet=/);
@@ -85,6 +87,13 @@ test("market records are normalized before rendering", () => {
   assert.match(source, /function normalizeMarketRecord\(market\)/);
   assert.match(source, /marketRecords = markets\.map\(normalizeMarketRecord\)/);
   assert.match(source, /premiumPct/);
+});
+
+test("workspace exposes a persistent Gap Radar context panel", () => {
+  assert.match(indexSource, /id="workspaceGapRadar"/);
+  assert.match(indexSource, /id="workspaceGapRadarStatus"/);
+  assert.match(source, /workspaceGapRadar/);
+  assert.match(source, /divergencePercent/);
 });
 
 test("workspace styling defines the persistent two-column layout", () => {

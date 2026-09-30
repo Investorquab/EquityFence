@@ -435,6 +435,14 @@ button{cursor:pointer}
 .error-message{border-left:2px solid rgba(211,112,96,.55);padding-left:14px}.error-message .message-label{color:#d3a097}.error-message .message-text{color:#d8c6c0}
 
 
+/* Handelo workspace gap radar */
+.workspace-gap-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.045)}
+.workspace-gap-row:last-child{border-bottom:0}
+.workspace-gap-row span{min-width:0}
+.workspace-gap-row strong{display:block;font:10px var(--mono);color:#ddd7cd}
+.workspace-gap-row small{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:8px var(--mono);color:var(--faint)}
+.workspace-gap-row b{font:10px var(--mono);font-weight:400;white-space:nowrap}
+
 /* Handelo single-page workspace */
 .workspace-grid{display:grid;grid-template-columns:minmax(300px,390px) minmax(0,1fr);gap:0;min-height:calc(100vh - 72px)}
 .workspace-context{border-right:1px solid var(--line);padding:30px 22px 90px;overflow:auto;max-height:calc(100vh - 72px)}
