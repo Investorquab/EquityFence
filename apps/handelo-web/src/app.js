@@ -61,12 +61,6 @@ async function refreshWorkspaceContext() {
   } catch {}
 }
 
-const workspaceMarket = document.querySelector("#workspaceMarket");
-const workspaceMarketStatus = document.querySelector("#workspaceMarketStatus");
-const workspaceWalletBalance = document.querySelector("#workspaceWalletBalance");
-const workspaceWalletAddress = document.querySelector("#workspaceWalletAddress");
-const workspacePortfolio = document.querySelector("#workspacePortfolio");
-const workspaceActivity = document.querySelector("#workspaceActivity");
 
 function money(value) {
   const n = Number(value);
