@@ -1,4 +1,5 @@
 import { createHmac, randomUUID } from "node:crypto";
+import type { MarketInsight } from "@handelo/core";
 
 export interface TokenBalance { assetId:string; wallet:string; rawBalance:string; decimals:number; }
 export interface WalletTransaction {
@@ -151,7 +152,7 @@ export class HandeloMarketClient {
   }
 }
 
-export function toMarketInsight(asset:RwaAsset){
+export function toMarketInsight(asset:RwaAsset):MarketInsight{
   const onChainPrice=Number(asset.tokenPrice);
   const referencePrice=Number(asset.referencePrice);
   const validOnChain=Number.isFinite(onChainPrice)&&onChainPrice>=0;
