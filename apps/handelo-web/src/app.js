@@ -663,7 +663,7 @@ async function loadPortfolio() {
     target.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
-    target.innerHTML = `<div class="loading-card" role="alert">Portfolio data is unavailable. ${escapeHtml(error.message)}<br><button class="primary-button" id="portfolioRetry" type="button">Retry</button></div>`;
+    target.innerHTML = `<div class="loading-card" role="alert">Portfolio data is unavailable. ${escapeHtml(userFacingError(error, "Portfolio data could not be loaded. Please try again."))}<br><button class="primary-button" id="portfolioRetry" type="button">Retry</button></div>`;
     target.querySelector("#portfolioRetry").addEventListener("click", loadPortfolio);
     target.setAttribute("aria-busy", "false");
   }
@@ -702,7 +702,7 @@ async function loadMarkets() {
     marketGrid.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
-    marketGrid.innerHTML = `<div class="loading-card" role="alert">Market data is unavailable. ${escapeHtml(error.message)}<br><button class="primary-button" id="marketsRetry" type="button">Retry</button></div>`;
+    marketGrid.innerHTML = `<div class="loading-card" role="alert">Market data is unavailable. ${escapeHtml(userFacingError(error, "Market data could not be loaded. Please try again."))}<br><button class="primary-button" id="marketsRetry" type="button">Retry</button></div>`;
     marketGrid.querySelector("#marketsRetry").addEventListener("click", loadMarkets);
     marketGrid.setAttribute("aria-busy", "false");
   }
@@ -747,7 +747,7 @@ async function loadHistory() {
     target.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
-    target.innerHTML = '<div class="loading-card" role="alert">History data is unavailable. ' + escapeHtml(error.message) + '<br><button class="primary-button" id="historyRetry" type="button">Retry</button></div>';
+    target.innerHTML = '<div class="loading-card" role="alert">History data is unavailable. ' + escapeHtml(userFacingError(error, "Transaction history could not be loaded. Please try again.")) + '<br><button class="primary-button" id="historyRetry" type="button">Retry</button></div>';
     target.querySelector("#historyRetry").addEventListener("click", loadHistory);
     target.setAttribute("aria-busy", "false");
   }
