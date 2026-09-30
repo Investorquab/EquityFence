@@ -3,7 +3,7 @@ import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
-import { BinanceAgenticWalletAdapter } from "@handelo/execution";
+import { BAW_COMMAND, BAW_SHELL, BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError } from "@handelo/market";
 import { auditToken, normalizeTokenAudit } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
@@ -35,7 +35,7 @@ function normalizeSlippage(value: unknown): { value?: string; error?: string } {
 }
 
 async function bawJson<T>(args: string[]): Promise<T> {
-  const { stdout, stderr } = await execFileAsync("baw", [...args, "--json"], { maxBuffer: 1024 * 1024 });
+  const { stdout, stderr } = await execFileAsync(BAW_COMMAND, [...args, "--json"], { maxBuffer: 1024 * 1024, shell: BAW_SHELL });
   const raw = (stdout || stderr).trim();
   const payload = JSON.parse(raw) as { success: boolean; data: T; message?: string };
   if (!payload.success) throw new Error(payload.message ?? "Binance Agentic Wallet command failed.");
