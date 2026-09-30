@@ -151,6 +151,46 @@ export class HandeloMarketClient {
   }
 }
 
+export function toMarketInsight(asset:RwaAsset){
+  const onChainPrice=Number(asset.tokenPrice);
+  const referencePrice=Number(asset.referencePrice);
+  const validOnChain=Number.isFinite(onChainPrice)&&onChainPrice>=0;
+  const validReference=Number.isFinite(referencePrice)&&referencePrice>0;
+  return {
+    underlyingTicker:asset.underlyingTicker,
+    tokenSymbol:asset.tokenSymbol,
+    provider:asset.platformId,
+    onChainPrice:validOnChain?onChainPrice:null,
+    referencePrice:validReference?referencePrice:null,
+    divergencePercent:validOnChain&&validReference
+      ? ((onChainPrice-referencePrice)/referencePrice)*100
+      : null,
+    marketStatus:asset.statusInfo?.openState===true
+      ?"OPEN"
+      :asset.statusInfo?.openState===false
+        ?"CLOSED"
+        :"UNKNOWN",
+    nextOpenAt:asset.statusInfo?.nextOpenTime
+      ?new Date(asset.statusInfo.nextOpenTime).toISOString()
+      :null,
+    liquidityContext:asset.volume24H
+      ?`24h volume ${asset.volume24H}`
+      :null
+  };
+}
+
+export function rankGapRadarAssets(assets:RwaAsset[]):RwaAsset[]{
+  return [...assets].sort((a,b)=>{
+    const ad=Math.abs(Number(a.referencePrice)>0
+      ?(Number(a.tokenPrice)-Number(a.referencePrice))/Number(a.referencePrice)
+      :0);
+    const bd=Math.abs(Number(b.referencePrice)>0
+      ?(Number(b.tokenPrice)-Number(b.referencePrice))/Number(b.referencePrice)
+      :0);
+    return bd-ad;
+  });
+}
+
 export function marketClientFromEnv(){
   return new HandeloMarketClient(process.env.BINANCE_WEB3_API_KEY?.trim()??"",process.env.BINANCE_WEB3_SECRET_KEY?.trim()??"");
 }
