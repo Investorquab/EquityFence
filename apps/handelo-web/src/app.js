@@ -776,6 +776,15 @@ async function loadHistory() {
         : '<span class="history-hash">' + escapeHtml(shortHash) + '</span>';
       return '<article class="history-row"><div><div class="history-main"><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><span class="history-status ' + escapeHtml(String(tx.txStatus || "").toLowerCase()) + '">' + escapeHtml(tx.txStatus || "unknown") + '</span></div><span class="history-meta">' + escapeHtml(date) + ' · ' + escapeHtml(String(tx.amount || "—")) + ' ' + escapeHtml(tx.symbol || "") + '</span></div>' + hashLink + '</article>';
     }).join("") + '</div>';
+    const refreshButton = target.querySelector("#historyRefresh");
+    refreshButton?.addEventListener("click", (event) => {
+      const button = event.currentTarget;
+      button.disabled = true;
+      button.setAttribute("aria-busy", "true");
+      button.setAttribute("aria-label", "Refreshing transaction history");
+      button.textContent = "Refreshing…";
+      loadHistory();
+    });
     target.setAttribute("aria-busy", "false");
   } catch (error) {
     if (requestId !== dataViewRequestId) return;
