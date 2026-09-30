@@ -4,7 +4,7 @@ import { promisify } from "node:util";
 import { HandeloAgent } from "@handelo/agent";
 import { portfolioSnapshot } from "./portfolio.js";
 import { BAW_COMMAND, BAW_SHELL, BinanceAgenticWalletAdapter } from "@handelo/execution";
-import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError } from "@handelo/market";
+import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError, rankGapRadarAssets, toMarketInsight } from "@handelo/market";
 import { auditToken, normalizeTokenAudit } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 import { walletServiceError } from "./wallet-errors.js";
@@ -168,6 +168,21 @@ const server = createServer(async (req, res) => {
   if (req.method === "GET" && req.url === "/api/markets") {
     try {
       return json(res, 200, await market.discover(8));
+    } catch (error) {
+      const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
+    }
+  }
+
+  if (req.method === "GET" && req.url?.startsWith("/api/gap-radar")) {
+    const requestedLimit = Number(new URL(req.url, "http://localhost").searchParams.get("limit") ?? "8");
+    const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.floor(requestedLimit), 1), 25) : 8;
+    try {
+      const assets = rankGapRadarAssets(await market.tokens());
+      return json(res, 200, {
+        markets: assets.slice(0, limit).map(toMarketInsight),
+        generatedAt: new Date().toISOString()
+      });
     } catch (error) {
       const status = marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
