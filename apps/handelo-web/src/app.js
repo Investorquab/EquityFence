@@ -844,19 +844,8 @@ function openMarketDetail(index) {
       if (selected) openMarketDetail(marketRecords.indexOf(selected));
     });
   });
-  const returnFocus = document.activeElement instanceof HTMLElement ? document.activeElement : null;
   document.body.appendChild(panel);
-  const close = () => {
-    document.removeEventListener("keydown", onKeydown);
-    panel.remove();
-    returnFocus?.isConnected && returnFocus.focus();
-  };
-  const onKeydown = (event) => {
-    if (event.key !== "Escape") return;
-    event.preventDefault();
-    close();
-  };
-  document.addEventListener("keydown", onKeydown);
+  const close = () => panel.remove();
   panel.querySelector('.market-detail-close').addEventListener('click', close);
   panel.querySelector('.market-detail-backdrop').addEventListener('click', close);
   panel.querySelector('.market-detail-chat').addEventListener('click', () => { close(); showView('chat'); ask(`Explain ${market.tokenSymbol} compared with its reference price.`); });

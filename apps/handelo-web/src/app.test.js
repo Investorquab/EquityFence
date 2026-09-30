@@ -936,3 +936,12 @@ test("agent replies render basic markdown as structured HTML", () => {
   assert.match(source, /<ol>/);
   assert.match(source, /innerHTML = formatAgentText\(data\.answer/);
 });
+
+test("market detail supports Escape close and restores focus", () => {
+  assert.match(source, /const returnFocus = document\.activeElement instanceof HTMLElement/);
+  assert.match(source, /const onKeydown = \(event\) =>/);
+  assert.match(source, /event\.key !== "Escape"/);
+  assert.match(source, /document\.addEventListener\("keydown", onKeydown\)/);
+  assert.match(source, /document\.removeEventListener\("keydown", onKeydown\)/);
+  assert.match(source, /returnFocus\?\.isConnected && returnFocus\.focus\(\)/);
+});
