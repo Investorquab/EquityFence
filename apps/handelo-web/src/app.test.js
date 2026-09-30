@@ -160,3 +160,6 @@ test("workspace remains the single persistent AI control surface", () => {
   assert.match(indexSource, /class="workspace-context"/);
   assert.match(indexSource, /class="workspace-chat"/);
 });
+
+
+test("workspace surfaces loading and service errors instead of failing silently",()=>{assert.match(source,/function renderWorkspaceError\(element, message\)/);assert.match(source,/Market data is unavailable right now/);assert.match(source,/Could not reach the Gap Radar service/);assert.match(source,/aria-busy/);});
