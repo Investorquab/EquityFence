@@ -483,14 +483,16 @@ const server = createServer(async (req, res) => {
         slippage?: unknown;
         confirmed?: unknown;
         reviewToken?: unknown;
+        wallet?: unknown;
       }>(raw);
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
       const fromToken = String(body.fromToken ?? "").trim();
       const amount = Number(body.amountUsd);
       const reviewToken = String(body.reviewToken ?? "").trim();
+      const walletAddress = String(body.wallet ?? "").trim();
 
-      if (!ticker || !Number.isFinite(amount) || amount <= 0 || !fromToken || !reviewToken) {
+      if (!ticker || !Number.isFinite(amount) || amount <= 0 || !fromToken || !reviewToken || !isEvmAddress(walletAddress)) {
         return json(res, 400, {
           error: "ticker, positive amountUsd, fromToken, and reviewToken are required"
         });
@@ -546,6 +548,35 @@ const server = createServer(async (req, res) => {
         });
       }
 
+      const snapshot = await portfolioSnapshot(walletAddress);
+      const { evaluatePortfolioStrategyRisk } = await import("@handelo/core");
+      const portfolioRisk = evaluatePortfolioStrategyRisk(snapshot, asset.tokenSymbol, amount);
+      if (portfolioRisk.decision !== "PASS") {
+        return json(res, 409, {
+          error: "Execution blocked by portfolio risk controls.",
+          policy,
+          portfolioRisk
+        });
+      }
+
+      const securityAudit = normalizeTokenAudit(await auditToken("56", asset.tokenContractAddress));
+      if (!securityAudit.hasResult || !securityAudit.isSupported) {
+        return json(res, 409, {
+          error: "Token security audit data is unavailable for the requested token; execution is blocked.",
+          policy,
+          portfolioRisk,
+          securityAudit
+        });
+      }
+      if (typeof securityAudit.riskLevel === "number" && securityAudit.riskLevel >= 4) {
+        return json(res, 409, {
+          error: "Token security audit returned high risk; execution is blocked.",
+          policy,
+          portfolioRisk,
+          securityAudit
+        });
+      }
+
       const reviewedQuote = await wallet.quote({
         fromTokenQty: String(amount),
         fromToken,
@@ -577,6 +608,8 @@ const server = createServer(async (req, res) => {
           provider: asset.platformId
         },
         policy,
+        portfolioRisk,
+        securityAudit,
         result
       });
     } catch (error) {
