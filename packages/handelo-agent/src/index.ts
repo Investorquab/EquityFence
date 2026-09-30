@@ -1,5 +1,5 @@
 import { createLlmClient, type LlmClient } from "@handelo/llm";
-import { HandeloMarketClient, marketClientFromEnv, type RwaAsset } from "@handelo/market";
+import { HandeloMarketClient, marketClientFromEnv, toMarketInsight, type RwaAsset } from "@handelo/market";
 import { evaluatePolicy, type PolicyResult } from "@handelo/policy";
 
 export interface UserIntent {
@@ -28,6 +28,7 @@ export interface MarketBrief {
 export interface AgentResult {
   intent: UserIntent;
   market: MarketBrief | null;
+  marketInsight: ReturnType<typeof toMarketInsight> | null;
   candidates: MarketBrief[];
   policy: PolicyResult | null;
   answer: string;
@@ -145,6 +146,7 @@ export class HandeloAgent {
     const parsedIntent = validateUserIntent(intent);
 
     let market: MarketBrief | null = null;
+    let marketInsight: ReturnType<typeof toMarketInsight> | null = null;
     let candidates: MarketBrief[] = [];
 
     let marketResolutionError: string | null = null;
@@ -155,8 +157,10 @@ export class HandeloAgent {
         const exact = matches.filter((asset) => asset.tokenSymbol.toLowerCase() === parsedIntent.ticker!.trim().toLowerCase());
         if (exact.length === 1) {
           market = marketBrief(exact[0]);
+          marketInsight = toMarketInsight(exact[0]);
         } else if (matches.length === 1) {
           market = marketBrief(matches[0]);
+          marketInsight = toMarketInsight(matches[0]);
         } else {
           candidates = matches.map(marketBrief);
         }
@@ -203,6 +207,7 @@ Respond naturally and concisely.`
     return {
       intent: parsedIntent,
       market,
+      marketInsight,
       candidates,
       policy,
       answer: validatedResponse.answer,
