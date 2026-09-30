@@ -1,5 +1,36 @@
 co
 
+const API_BASE = window.HANDELO_API_URL || localStorage.getItem("handelo_api_url") || "http://localhost:8787";
+
+const conversation = document.querySelector("#conversation");
+const welcome = document.querySelector("#welcome");
+const composer = document.querySelector("#composer");
+const input = document.querySelector("#messageInput");
+const sendButton = document.querySelector("#sendButton");
+const connectButton = document.querySelector("#connectButton");
+const marketGrid = document.querySelector("#marketGrid");
+const marketSearch = document.querySelector("#marketSearch");
+const marketCount = document.querySelector("#marketCount");
+let marketRecords = [];
+const walletState = document.querySelector(".wallet-state");
+let walletAuthPoll = null;
+let walletAuthTimeout = null;
+let walletAuthActive = false;
+let walletAuthSessionId = 0;
+let walletAuthReturnFocus = null;
+let walletAuthKeydown = null;
+let dataViewRequestId = 0;
+const tradeReviewRequestIds = new WeakMap();
+const executionRequestIds = new WeakMap();
+const walletStatusRequestIds = new WeakMap();
+let chatRequestId = 0;
+const workspaceMarket = document.querySelector("#workspaceMarket");
+const workspaceMarketStatus = document.querySelector("#workspaceMarketStatus");
+const workspaceWalletBalance = document.querySelector("#workspaceWalletBalance");
+const workspaceWalletAddress = document.querySelector("#workspaceWalletAddress");
+const workspacePortfolio = document.querySelector("#workspacePortfolio");
+const workspaceActivity = document.querySelector("#workspaceActivity");
+
 function renderWorkspaceMarket(market) {
   if (!workspaceMarket) return;
   const gap = market.premiumPct;
@@ -29,30 +60,7 @@ async function refreshWorkspaceContext() {
     if (workspaceActivity && Array.isArray(history?.transactions)) workspaceActivity.innerHTML = history.transactions.slice(0,3).map(tx => `<div class="workspace-activity"><span>${escapeHtml(tx.symbol || "BSC transaction")}</span><b>${escapeHtml(tx.txStatus || "UNKNOWN")}</b></div>`).join("") || '<div class="workspace-empty">No recent activity.</div>';
   } catch {}
 }
-nst API_BASE = window.HANDELO_API_URL || localStorage.getItem("handelo_api_url") || "http://localhost:8787";
 
-const conversation = document.querySelector("#conversation");
-const welcome = document.querySelector("#welcome");
-const composer = document.querySelector("#composer");
-const input = document.querySelector("#messageInput");
-const sendButton = document.querySelector("#sendButton");
-const connectButton = document.querySelector("#connectButton");
-const marketGrid = document.querySelector("#marketGrid");
-const marketSearch = document.querySelector("#marketSearch");
-const marketCount = document.querySelector("#marketCount");
-let marketRecords = [];
-const walletState = document.querySelector(".wallet-state");
-let walletAuthPoll = null;
-let walletAuthTimeout = null;
-let walletAuthActive = false;
-let walletAuthSessionId = 0;
-let walletAuthReturnFocus = null;
-let walletAuthKeydown = null;
-let dataViewRequestId = 0;
-const tradeReviewRequestIds = new WeakMap();
-const executionRequestIds = new WeakMap();
-const walletStatusRequestIds = new WeakMap();
-let chatRequestId = 0;
 const workspaceMarket = document.querySelector("#workspaceMarket");
 const workspaceMarketStatus = document.querySelector("#workspaceMarketStatus");
 const workspaceWalletBalance = document.querySelector("#workspaceWalletBalance");
