@@ -27,6 +27,8 @@ test("Handelo resolves live market context before generating its explanation",as
   assert.equal(result.intent.ticker,"NVDA");
   assert.equal(result.market?.marketOpen,false);
   assert.equal(result.market?.premiumPct,-4);
+  assert.equal(result.marketInsight?.tokenSymbol,"NVDAon");
+  assert.equal(result.marketInsight?.divergencePercent,-4);
   assert.match(result.answer,/reference price/);
 });
 
