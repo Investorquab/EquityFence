@@ -23,21 +23,9 @@
       </div>
 
       <nav class="nav" aria-label="Primary">
-        <button class="nav-item active" data-view="chat" aria-current="page">
+        <button class="nav-item active" data-view="workspace" aria-current="page">
           <span>01</span>
-          <strong>New chat</strong>
-        </button>
-        <button class="nav-item" data-view="markets">
-          <span>02</span>
-          <strong>Markets</strong>
-        </button>
-        <button class="nav-item" data-view="portfolio">
-          <span>03</span>
-          <strong>Portfolio</strong>
-        </button>
-        <button class="nav-item" data-view="history">
-          <span>04</span>
-          <strong>History</strong>
+          <strong>Workspace</strong>
         </button>
       </nav>
 
@@ -49,11 +37,22 @@
 
     <main class="main">
       <header class="topbar">
-        <div class="topbar-label">MARKET INTELLIGENCE</div>
+        <div class="topbar-label">HANDELO / WORKSPACE</div>
         <button class="connect" id="connectButton" type="button">Connect wallet <span>↗</span></button>
       </header>
 
-      <section class="view active" id="view-chat" aria-labelledby="chat-title">
+      <section class="view active" id="view-workspace" aria-labelledby="workspace-title">
+        <div class="workspace-grid">
+          <aside class="workspace-context" aria-label="Market and portfolio context">
+            <div class="workspace-intro"><div class="eyebrow">LIVE / BSC</div><h1 id="workspace-title">Market context, <em>at a glance.</em></h1><p>Handelo keeps the numbers visible while you work with the AI.</p></div>
+            <section class="context-panel"><div class="panel-head"><span>SELECTED MARKET</span><span id="workspaceMarketStatus">—</span></div><div id="workspaceMarket"><div class="workspace-empty">Reading market data…</div></div></section>
+            <section class="context-panel"><div class="panel-head"><span>WALLET</span><button type="button" class="panel-action" id="workspaceWalletAction">Connect</button></div><div class="wallet-balance" id="workspaceWalletBalance">—</div><div class="wallet-address" id="workspaceWalletAddress">WALLET NOT CONNECTED</div></section>
+            <section class="context-panel"><div class="panel-head"><span>PORTFOLIO</span><button type="button" class="panel-action" id="workspacePortfolioRefresh">Refresh</button></div><div id="workspacePortfolio"><div class="workspace-empty">Connect a wallet to load positions.</div></div></section>
+            <section class="context-panel"><div class="panel-head"><span>ACTIVE STRATEGIES</span><span class="panel-muted">LOCAL</span></div><div id="workspaceStrategies"><div class="workspace-empty">No active strategies yet.</div></div></section>
+            <section class="context-panel"><div class="panel-head"><span>RISK</span><span id="workspaceRiskState" class="risk-state">—</span></div><div class="risk-meter"><span id="workspaceRiskBar"></span></div><div class="risk-copy" id="workspaceRiskCopy">Risk context will appear as strategies are created.</div></section>
+            <section class="context-panel"><div class="panel-head"><span>RECENT ACTIVITY</span><button type="button" class="panel-action" id="workspaceHistoryRefresh">Refresh</button></div><div id="workspaceActivity"><div class="workspace-empty">No recent activity loaded.</div></div></section>
+          </aside>
+          <div class="workspace-chat">
         <div class="chat-layout">
           <div class="conversation" id="conversation" aria-live="polite">
             <div class="welcome" id="welcome">
@@ -76,9 +75,8 @@
               <button id="sendButton" type="submit" aria-label="Send message">↑</button>
             </div>
             <div class="composer-note">Handelo explains the market before it asks you to act.</div>
-          </form>
-        </div>
-      </section>
+          </form>        </div>
+      </section>/section>
 
       <section class="view" id="view-markets" aria-labelledby="markets-title">
         <div class="section-heading">
