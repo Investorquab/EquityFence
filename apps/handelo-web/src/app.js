@@ -56,14 +56,7 @@ function renderWorkspaceRisk(risk) {
 
 function renderWorkspaceStrategies() {
   if (!workspaceStrategies) return;
-  const drafts = JSON.parse(localStorage.getItem("handelo_strategy_drafts") || "[]");
-  if (!Array.isArray(drafts) || !drafts.length) {
-    workspaceStrategies.innerHTML = '<div class="workspace-empty">No active strategies yet. Drafts appear in Chat for review.</div>';
-    return;
-  }
-  workspaceStrategies.innerHTML = drafts.slice(-3).reverse().map(strategy =>
-    `<div class="workspace-position"><span>${escapeHtml(strategy.asset || strategy.name || "Strategy")}<small>${escapeHtml(strategy.type || "STRATEGY")} · ${escapeHtml(strategy.status || "DRAFT")}</small></span><b>${escapeHtml(strategy.frequency || "—")}</b></div>`
-  ).join("");
+  workspaceStrategies.innerHTML = '<div class="workspace-empty">No active strategies yet. Strategy activation will appear here.</div>';
 }
 
 function renderWorkspaceMarket(market) {
@@ -97,7 +90,6 @@ function renderWorkspaceGapRadar(markets) {
 
 async function refreshWorkspaceContext() {
   renderWorkspaceStrategies();
-  renderWorkspaceRisk(null);
   try {
     const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
     const markets = await marketsResponse.json();
