@@ -96,6 +96,12 @@ test("workspace exposes a persistent Gap Radar context panel", () => {
   assert.match(source, /divergencePercent/);
 });
 
+test("workspace market context includes a truthful current price comparison", () => {
+  assert.match(source, /workspace-price-compare/);
+  assert.match(source, /on-chain versus reference price comparison/);
+  assert.match(source, /referencePrice \/ scale/);
+});
+
 test("workspace styling defines the persistent two-column layout", () => {
   assert.match(styles, /\.workspace-grid/);
   assert.match(styles, /\.workspace-context/);

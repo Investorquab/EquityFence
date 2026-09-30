@@ -37,7 +37,13 @@ function renderWorkspaceMarket(market) {
   const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
   workspaceMarketStatus.textContent = market.marketOpen ? "LIVE" : "CLOSED";
   workspaceMarketStatus.className = market.marketOpen ? "market-live" : "market-closed";
-  workspaceMarket.innerHTML = `<div class="workspace-ticker"><strong>${escapeHtml(market.ticker)}</strong><span>${escapeHtml(market.tokenSymbol)}</span></div><div class="workspace-price">${money(market.tokenPrice)}</div><div class="workspace-market-grid"><div><small>REFERENCE</small><b>${money(market.referencePrice)}</b></div><div><small>GAP</small><b class="${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</b></div><div><small>STATUS</small><b>${escapeHtml(market.marketStatus || "—")}</b></div><div><small>PROVIDER</small><b>${escapeHtml(market.provider || "BSC")}</b></div></div>`;
+  const tokenPrice = Number(market.tokenPrice);
+  const referencePrice = Number(market.referencePrice);
+  const hasComparison = Number.isFinite(tokenPrice) && Number.isFinite(referencePrice) && referencePrice > 0;
+  const scale = hasComparison ? Math.max(tokenPrice, referencePrice) : 0;
+  const referenceWidth = hasComparison ? Math.max((referencePrice / scale) * 100, 4) : 0;
+  const tokenWidth = hasComparison ? Math.max((tokenPrice / scale) * 100, 4) : 0;
+  workspaceMarket.innerHTML = `<div class="workspace-ticker"><strong>${escapeHtml(market.ticker)}</strong><span>${escapeHtml(market.tokenSymbol)}</span></div><div class="workspace-price">${money(market.tokenPrice)}</div><div class="workspace-price-compare" aria-label="Current on-chain versus reference price comparison"><div class="workspace-price-row"><span>REFERENCE</span><div class="workspace-price-track"><i style="width:${referenceWidth}%"></i></div><b>${money(market.referencePrice)}</b></div><div class="workspace-price-row"><span>ON-CHAIN</span><div class="workspace-price-track"><i style="width:${tokenWidth}%"></i></div><b>${money(market.tokenPrice)}</b></div></div><div class="workspace-market-grid"><div><small>GAP</small><b class="${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</b></div><div><small>STATUS</small><b>${escapeHtml(market.marketStatus || "—")}</b></div><div><small>PROVIDER</small><b>${escapeHtml(market.provider || "BSC")}</b></div><div><small>REPRESENTATION</small><b>${escapeHtml(market.tokenSymbol || "—")}</b></div></div>`;
 }
 
 function renderWorkspaceGapRadar(markets) {

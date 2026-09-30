@@ -435,6 +435,13 @@ button{cursor:pointer}
 .error-message{border-left:2px solid rgba(211,112,96,.55);padding-left:14px}.error-message .message-label{color:#d3a097}.error-message .message-text{color:#d8c6c0}
 
 
+/* Handelo workspace price comparison */
+.workspace-price-compare{display:grid;gap:10px;margin:0 0 16px;padding:12px 0;border-top:1px solid var(--line);border-bottom:1px solid var(--line)}
+.workspace-price-row{display:grid;grid-template-columns:64px minmax(0,1fr) auto;align-items:center;gap:8px;font:8px var(--mono);color:var(--faint)}
+.workspace-price-row b{font:9px var(--mono);font-weight:400;color:#d6d0c5;white-space:nowrap}
+.workspace-price-track{height:4px;border-radius:999px;background:rgba(255,255,255,.07);overflow:hidden}
+.workspace-price-track i{display:block;height:100%;border-radius:999px;background:var(--gold)}
+
 /* Handelo workspace gap radar */
 .workspace-gap-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.045)}
 .workspace-gap-row:last-child{border-bottom:0}
