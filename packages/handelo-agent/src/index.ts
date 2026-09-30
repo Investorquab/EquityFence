@@ -2,7 +2,7 @@ import { createLlmClient, type LlmClient } from "@handelo/llm";
 import { HandeloMarketClient, marketClientFromEnv, toMarketInsight, type RwaAsset } from "@handelo/market";
 import { evaluatePolicy, type PolicyResult } from "@handelo/policy";
 import { createDraftStrategy, type StrategyInput } from "@handelo/strategy";
-import type { StrategyDefinition, StrategyType } from "@handelo/core";
+import { createBasketDefinition, type BasketDefinition, type StrategyDefinition, type StrategyType } from "@handelo/core";
 
 export interface UserIntent {
   action: "research" | "buy" | "sell" | "invest";
@@ -13,6 +13,8 @@ export interface UserIntent {
   strategyType: StrategyType | null;
   frequency: string | null;
   condition: string | null;
+  basketAssets: string[];
+  basketName: string | null;
 }
 
 export interface MarketBrief {
@@ -37,6 +39,7 @@ export interface AgentResult {
   candidates: MarketBrief[];
   policy: PolicyResult | null;
   strategy: StrategyDefinition | null;
+  basket: BasketDefinition | null;
   answer: string;
   provider: string;
   model: string;
@@ -52,7 +55,9 @@ const INTENT_SCHEMA = {
     riskTolerance: { type: "string", enum: ["low", "medium", "high", "unknown"] },
     strategyType: { type: ["string", "null"], enum: ["DCA", "RECURRING", "CONDITIONAL", "REBALANCE", null] },
     frequency: { type: ["string", "null"] },
-    condition: { type: ["string", "null"] }
+    condition: { type: ["string", "null"] },
+    basketAssets: { type: "array", items: { type: "string" }, maxItems: 8 },
+    basketName: { type: ["string", "null"] }
   },
   required: ["action", "ticker", "amountUsd", "horizon", "riskTolerance"],
   additionalProperties: false
@@ -103,6 +108,9 @@ export function validateUserIntent(value: unknown): UserIntent {
   if (!strategyTypes.includes((intent.strategyType ?? null) as StrategyType | null)) throw new Error("LLM returned an invalid strategy type.");
   if (intent.frequency !== null && intent.frequency !== undefined && typeof intent.frequency !== "string") throw new Error("LLM returned an invalid strategy frequency.");
   if (intent.condition !== null && intent.condition !== undefined && typeof intent.condition !== "string") throw new Error("LLM returned an invalid strategy condition.");
+  if (!Array.isArray(intent.basketAssets) || intent.basketAssets.some((asset) => typeof asset !== "string")) throw new Error("LLM returned invalid basket assets.");
+  if (intent.basketAssets.length > 8) throw new Error("A basket cannot contain more than 8 assets.");
+  if (intent.basketName !== null && intent.basketName !== undefined && typeof intent.basketName !== "string") throw new Error("LLM returned an invalid basket name.");
   if (intent.horizon !== null && typeof intent.horizon !== "string") {
     throw new Error("LLM returned an invalid horizon.");
   }
@@ -114,7 +122,9 @@ export function validateUserIntent(value: unknown): UserIntent {
     riskTolerance: intent.riskTolerance as UserIntent["riskTolerance"],
     strategyType: (intent.strategyType ?? null) as StrategyType | null,
     frequency: (intent.frequency ?? null) as string | null,
-    condition: (intent.condition ?? null) as string | null
+    condition: (intent.condition ?? null) as string | null,
+    basketAssets: intent.basketAssets as string[],
+    basketName: (intent.basketName ?? null) as string | null
   };
 }
 
@@ -166,6 +176,7 @@ export class HandeloAgent {
     let marketInsight: ReturnType<typeof toMarketInsight> | null = null;
     let candidates: MarketBrief[] = [];
     let strategy: StrategyDefinition | null = null;
+    let basket: BasketDefinition | null = null;
 
     let marketResolutionError: string | null = null;
 
@@ -209,6 +220,29 @@ export class HandeloAgent {
       }
     }
 
+    if (parsedIntent.basketAssets.length >= 2) {
+      const resolvedAssets: string[] = [];
+      for (const symbol of parsedIntent.basketAssets) {
+        try {
+          const matches = await this.market.findAll(symbol);
+          const exact = matches.find((asset) => asset.tokenSymbol.toLowerCase() === symbol.trim().toLowerCase()) ?? (matches.length === 1 ? matches[0] : null);
+          if (exact) resolvedAssets.push(exact.tokenSymbol);
+        } catch {
+          // Keep the basket draft limited to markets that resolve through live data.
+        }
+      }
+      if (resolvedAssets.length >= 2) {
+        try {
+          basket = createBasketDefinition({
+            name: parsedIntent.basketName ?? "Custom basket",
+            assets: resolvedAssets
+          });
+        } catch {
+          basket = null;
+        }
+      }
+    }
+
     const policy = market
       ? evaluatePolicy({
           action: parsedIntent.action,
@@ -245,6 +279,7 @@ Respond naturally and concisely.`
       candidates,
       policy,
       strategy,
+      basket,
       answer: validatedResponse.answer,
       provider: this.llm.provider,
       model: this.llm.model
