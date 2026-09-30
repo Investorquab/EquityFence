@@ -893,3 +893,18 @@ test("data view controls share consistent toolbar and mobile treatment", () => {
   assert.match(styles, /\.portfolio-row small/);
   assert.match(styles, /\.history-row\{flex-direction:column\}/);
 });
+
+
+test("custom errors hide technical fetch details", () => {
+  assert.match(source, /function userFacingError\(error, fallback\)/);
+  assert.match(source, /Failed to fetch\|networkerror\|load failed/);
+  assert.match(source, /spawn baw\|enoent/);
+  assert.match(source, /function addAgentError\(message\)/);
+  assert.match(source, /role", "alert/);
+});
+
+test("wallet and transaction failures use the custom error presentation", () => {
+  assert.match(source, /addAgentError\(auth\.error \|\| "The wallet did not complete authentication/);
+  assert.match(source, /addAgentError\(userFacingError\(error, "I could not start the wallet connection/);
+  assert.match(source, /addAgentError\(userFacingError\(error, "The transaction was not completed/);
+});
