@@ -281,6 +281,7 @@ const server = createServer(async (req, res) => {
         action?: unknown;
         fromToken?: unknown;
         slippage?: unknown;
+        wallet?: unknown;
       }>(raw);
 
       const ticker = String(body.ticker ?? "").trim().toUpperCase();
