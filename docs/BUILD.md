@@ -140,6 +140,6 @@ Existing security/audit blocking behavior remains intact.
 
 ## Hackathon alignment
 
-The current BNB Hack: Tokenized Stocks Edition requires a central bStocks, Ondo, or xStocks integration, spot-only BSC mainnet use, and a working project. Its stack explicitly provides RWA market/reference data, market data, trading, transaction, wallet and DeFi APIs, with Agentic Wallet as an optional but heavily weighted execution layer. citeturn0search0
+The current BNB Hack: Tokenized Stocks Edition requires a central bStocks, Ondo, or xStocks integration, spot-only BSC mainnet use, and a working project. Its stack explicitly provides RWA market/reference data, market data, trading, transaction, wallet and DeFi APIs, with Agentic Wallet as an optional but heavily weighted execution layer.
 
 Handelo's architecture therefore prioritizes the tokenized-stock market problem, understandable product UX, deterministic execution safety, and credible wallet integration rather than building unrelated features.
