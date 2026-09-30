@@ -1,4 +1,35 @@
-const API_BASE = window.HANDELO_API_URL || localStorage.getItem("handelo_api_url") || "http://localhost:8787";
+co
+
+function renderWorkspaceMarket(market) {
+  if (!workspaceMarket) return;
+  const gap = market.premiumPct;
+  const gapText = gap === null ? "—" : (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%";
+  workspaceMarketStatus.textContent = market.marketOpen ? "LIVE" : "CLOSED";
+  workspaceMarketStatus.className = market.marketOpen ? "market-live" : "market-closed";
+  workspaceMarket.innerHTML = `<div class="workspace-ticker"><strong>${escapeHtml(market.ticker)}</strong><span>${escapeHtml(market.tokenSymbol)}</span></div><div class="workspace-price">${money(market.tokenPrice)}</div><div class="workspace-market-grid"><div><small>REFERENCE</small><b>${money(market.referencePrice)}</b></div><div><small>GAP</small><b class="${gap === null ? "" : gap >= 0 ? "positive" : "negative"}">${gapText}</b></div><div><small>STATUS</small><b>${escapeHtml(market.marketStatus || "—")}</b></div><div><small>PROVIDER</small><b>${escapeHtml(market.provider || "BSC")}</b></div></div>`;
+}
+
+async function refreshWorkspaceContext() {
+  try {
+    const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
+    const markets = await marketsResponse.json();
+    if (marketsResponse.ok && Array.isArray(markets) && markets.length) renderWorkspaceMarket(normalizeMarketRecord(markets[0]));
+  } catch {}
+  try {
+    const addressResponse = await fetch(API_BASE + "/api/wallet/address", {cache:"no-store"});
+    const address = await addressResponse.json();
+    if (!address.connected || !address.address) return;
+    if (workspaceWalletAddress) workspaceWalletAddress.textContent = address.address.slice(0,6) + "…" + address.address.slice(-4);
+    const portfolioResponse = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
+    const portfolio = await portfolioResponse.json();
+    if (workspaceWalletBalance) workspaceWalletBalance.textContent = money(portfolio?.totalValueUsd ?? portfolio?.balanceUsd);
+    if (workspacePortfolio && Array.isArray(portfolio?.positions)) workspacePortfolio.innerHTML = portfolio.positions.slice(0,4).map(position => `<div class="workspace-position"><span>${escapeHtml(position.tokenSymbol || position.asset)}</span><b>${position.allocationPercent == null ? "—" : position.allocationPercent.toFixed(1) + "%"}</b></div>`).join("") || '<div class="workspace-empty">No positions yet.</div>';
+    const historyResponse = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
+    const history = await historyResponse.json();
+    if (workspaceActivity && Array.isArray(history?.transactions)) workspaceActivity.innerHTML = history.transactions.slice(0,3).map(tx => `<div class="workspace-activity"><span>${escapeHtml(tx.symbol || "BSC transaction")}</span><b>${escapeHtml(tx.txStatus || "UNKNOWN")}</b></div>`).join("") || '<div class="workspace-empty">No recent activity.</div>';
+  } catch {}
+}
+nst API_BASE = window.HANDELO_API_URL || localStorage.getItem("handelo_api_url") || "http://localhost:8787";
 
 const conversation = document.querySelector("#conversation");
 const welcome = document.querySelector("#welcome");
@@ -22,6 +53,12 @@ const tradeReviewRequestIds = new WeakMap();
 const executionRequestIds = new WeakMap();
 const walletStatusRequestIds = new WeakMap();
 let chatRequestId = 0;
+const workspaceMarket = document.querySelector("#workspaceMarket");
+const workspaceMarketStatus = document.querySelector("#workspaceMarketStatus");
+const workspaceWalletBalance = document.querySelector("#workspaceWalletBalance");
+const workspaceWalletAddress = document.querySelector("#workspaceWalletAddress");
+const workspacePortfolio = document.querySelector("#workspacePortfolio");
+const workspaceActivity = document.querySelector("#workspaceActivity");
 
 function money(value) {
   const n = Number(value);
@@ -802,10 +839,10 @@ function showView(view) {
     if (active) item.setAttribute("aria-current", "page");
     else item.removeAttribute("aria-current");
   });
-  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + view));
-  if (view === "markets") loadMarkets();
-  if (view === "portfolio") loadPortfolio();
-  if (view === "history") loadHistory();
+  const targetView = view === "workspace" ? "workspace" : "workspace";
+  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + targetView));
+  refreshWorkspaceContext();
+
 }
 
 function openMarketDetail(index) {
@@ -923,3 +960,6 @@ composer.addEventListener("submit", (event) => {
 
 document.querySelector("#portfolioConnect")?.addEventListener("click", () => connectButton.click());
 document.querySelector("#historyConnect")?.addEventListener("click", () => connectButton.click());
+
+
+refreshWorkspaceContext();
