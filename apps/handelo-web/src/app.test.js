@@ -63,6 +63,7 @@ test("transaction review requires policy and security checks before confirmation
 });
 
 test("transaction execution remains explicitly confirmed and status-aware", () => {
+  assert.match(source, /wallet: workspaceWalletAddress/);
   assert.match(source, /confirmed: true/);
   assert.match(source, /result\.status === "FINISHED"/);
   assert.match(source, /result\.status === "PENDING"/);
