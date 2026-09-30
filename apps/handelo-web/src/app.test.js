@@ -950,3 +950,8 @@ test("market detail supports Escape close and restores focus", () => {
 test("portfolio does not bind the history refresh control", () => {
   assert.doesNotMatch(source, /target\.querySelector\("#historyRefresh"\)\?\.addEventListener\("click", loadHistory\)/);
 });
+
+test("history empty state keeps a refresh action available", () => {
+  assert.match(source, /id="historyEmptyRefresh" type="button">Refresh/);
+  assert.match(source, /target\.querySelector\("#historyEmptyRefresh"\)\.addEventListener\("click", loadHistory\)/);
+});
