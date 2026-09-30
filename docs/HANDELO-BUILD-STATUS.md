@@ -1,7 +1,7 @@
 # Handelo Build Status
 
 Status: ACTIVE
-Last updated: 2026-09-30
+Last updated: 2026-10-01
 
 This file is the execution checklist for the locked Handelo product specification.
 
@@ -19,7 +19,7 @@ This file is the execution checklist for the locked Handelo product specificatio
 
 - [x] Lock product specification
 - [x] Create persistent build status
-- [ ] Align existing BUILD.md with locked product plan
+- [x] Align existing BUILD.md with locked product plan
 
 ## Phase 1 — Shared foundations
 
@@ -43,13 +43,13 @@ This file is the execution checklist for the locked Handelo product specificatio
 - [x] Representation comparison
 
 ### 2. AI Analyst / Chat
-- [ ] Persistent workspace Chat
+- [x] Persistent workspace Chat
 - [ ] Capability prompt chips
 - [ ] Structured insight cards
 - [ ] Structured strategy cards
 - [ ] Structured risk cards
 - [ ] Structured transaction cards
-- [ ] Auto-scroll to newest response
+- [x] Auto-scroll to newest response
 
 ### 3. Strategy Engine
 - [ ] Natural-language strategy creation
@@ -96,16 +96,16 @@ This file is the execution checklist for the locked Handelo product specificatio
 
 ## Phase 3 — Workspace
 
-- [ ] Single workspace page
-- [ ] Persistent left context column
+- [x] Single workspace page
+- [x] Persistent left context column
 - [ ] Market Radar card
 - [ ] Charts
-- [ ] Wallet balance
-- [ ] Portfolio
-- [ ] Active strategies
-- [ ] Risk state
-- [ ] Activity/history
-- [ ] Persistent right Chat
+- [x] Wallet balance
+- [x] Portfolio
+- [x] Active strategies
+- [x] Risk state
+- [x] Activity/history
+- [x] Persistent right Chat
 - [ ] Responsive behavior
 - [ ] Loading/empty/error states
 
@@ -167,7 +167,7 @@ After homepage + polish: user pulls and performs final demo/regression test.
 
 ## Current batch
 
-**Batch 2 — Gap Radar market-data foundation**
+**Batch 3 — Single-page workspace foundation**
 
 Completed:
 - Product specification locked.
@@ -180,8 +180,12 @@ Completed:
 - Gap Radar market insight and divergence helpers created in @handelo/market.
 - Gap Radar ranking and market-status tests added.
 - Market package connected to shared core contracts.
+- Gap Radar exposed through the API.
+- Single-page workspace shell created with persistent left context and right Chat.
+- Workspace context wired to live market, wallet, portfolio, and history endpoints.
+- Workspace regression fixed and frontend CI is green on run 623.
 
 Next:
-- Expose Gap Radar through the API/agent.
-- Start the single-page workspace shell and persistent context cards.
+- Add the Market Radar/chart layer to the workspace.
 - Integrate structured Chat cards with the shared contracts.
+- Continue Strategy Engine integration.
