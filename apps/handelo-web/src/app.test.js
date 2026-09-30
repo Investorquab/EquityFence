@@ -14,8 +14,8 @@ test("workspace is the single primary application view", () => {
   assert.match(indexSource, /class="workspace-grid"/);
   assert.match(indexSource, /class="workspace-context"/);
   assert.match(indexSource, /class="workspace-chat"/);
-  assert.match(source, /function showView\(\)/);
-  assert.match(source, /section\.id === "view-workspace"/);
+  assert.match(source, /function showView\(view = "workspace"\)/);
+  assert.match(source, /section\.id === "view-" \+ nextView/);
 });
 
 test("workspace keeps market, wallet, portfolio, strategy, risk, and activity context visible", () => {
