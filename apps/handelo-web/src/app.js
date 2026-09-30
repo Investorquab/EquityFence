@@ -648,6 +648,23 @@ async function loadPortfolio() {
   }
 }
 
+function normalizeMarketRecord(market) {
+  const tokenPrice = Number(market?.tokenPrice);
+  const referencePrice = Number(market?.referencePrice);
+  const premiumPct = Number.isFinite(tokenPrice) && Number.isFinite(referencePrice) && referencePrice !== 0
+    ? ((tokenPrice - referencePrice) / referencePrice) * 100
+    : null;
+  const statusInfo = market?.statusInfo && typeof market.statusInfo === "object" ? market.statusInfo : {};
+  return {
+    ...market,
+    premiumPct,
+    marketOpen: Boolean(statusInfo.openState ?? market?.marketOpen),
+    marketStatus: statusInfo.marketStatus ?? market?.marketStatus ?? null,
+    nextOpenTime: statusInfo.nextOpenTime ?? market?.nextOpenTime ?? null,
+    nextCloseTime: statusInfo.nextCloseTime ?? market?.nextCloseTime ?? null
+  };
+}
+
 async function loadMarkets() {
   const requestId = ++dataViewRequestId;
   marketGrid.setAttribute("aria-busy", "true");
@@ -659,7 +676,7 @@ async function loadMarkets() {
     if (!response.ok || !Array.isArray(markets) || !markets.length) {
       throw new Error((markets && typeof markets === "object" && markets.error) || "No market records returned.");
     }
-    marketRecords = markets;
+    marketRecords = markets.map(normalizeMarketRecord);
     renderMarketResults();
     marketGrid.setAttribute("aria-busy", "false");
   } catch (error) {
