@@ -552,3 +552,6 @@ button{cursor:pointer}
   .home-flow-grid strong { margin-top:28px; }
   .home-problem, .home-how { padding:60px 0; }
 }
+
+.workspace-empty.workspace-error{border-color:rgba(239,118,110,.18);color:var(--muted);background:rgba(239,118,110,.025)}
+[aria-busy="true"]{cursor:progress}
