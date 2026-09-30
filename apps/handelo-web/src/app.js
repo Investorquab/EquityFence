@@ -40,6 +40,27 @@ function addUserMessage(message) {
   scrollConversation();
 }
 
+function userFacingError(error, fallback) {
+  const message = error instanceof Error ? error.message : String(error ?? "");
+  if (/failed to fetch|networkerror|load failed/i.test(message)) {
+    return "Handelo could not reach the service. Please check that the API is running and try again.";
+  }
+  if (/spawn baw|enoent/i.test(message)) {
+    return "The Binance Agentic Wallet service is unavailable. Please make sure the wallet CLI is installed and try again.";
+  }
+  return message || fallback;
+}
+
+function addAgentError(message) {
+  const node = document.createElement("article");
+  node.className = "message agent-message error-message";
+  node.setAttribute("role", "alert");
+  node.innerHTML = '<div class="message-label">HANDELO / ERROR</div><div class="message-text"></div>';
+  node.querySelector(".message-text").textContent = message;
+  conversation.appendChild(node);
+  scrollConversation();
+}
+
 function addAgentMessage(data) {
   const node = document.createElement("article");
   node.className = "message agent-message";
@@ -112,7 +133,7 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
     button.removeAttribute("aria-busy");
     button.removeAttribute("aria-label");
     button.textContent = "Review";
-    addAgentMessage({ answer: `I could not complete the transaction review. ${error.message}` });
+    addAgentError(userFacingError(error, "I could not complete the transaction review. Please try again."));
   }
 }
 
@@ -216,7 +237,7 @@ async function confirmTrade(data, amountUsd, card) {
     button.removeAttribute("aria-busy");
     button.removeAttribute("aria-label");
     button.textContent = "Confirm purchase";
-    addAgentMessage({ answer: `The transaction was not completed. ${error.message}` });
+    addAgentError(userFacingError(error, "The transaction was not completed. Please try again."));
   }
 }
 
@@ -445,7 +466,7 @@ async function ask(message) {
       return;
     }
     thinking.remove();
-    addAgentMessage({ answer: `I could not reach the Handelo agent. ${error.message}` });
+    addAgentError(userFacingError(error, "I could not reach the Handelo agent. Please try again."));
   } finally {
     if (requestId !== chatRequestId) return;
     sendButton.disabled = false;
@@ -511,25 +532,25 @@ async function connectWallet() {
         } else if (auth.status === "FAILED") {
           clearWalletAuthPolling();
           closeWalletAuth();
-          addAgentMessage({ answer: `Wallet connection failed: ${auth.error || "The wallet did not complete authentication."}` });
+          addAgentError(auth.error || "The wallet did not complete authentication. Please try again.");
         }
       } catch (error) {
         if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
         clearWalletAuthPolling();
         closeWalletAuth();
-        addAgentMessage({ answer: `Wallet connection status could not be checked. ${error.message}` });
+        addAgentError(userFacingError(error, "Wallet connection status could not be checked. Please try again."));
       }
     }, 2500);
 
     walletAuthTimeout = setTimeout(() => {
       clearWalletAuthPolling();
       closeWalletAuth();
-      addAgentMessage({ answer: "Wallet connection timed out. Please try connecting again." });
+      addAgentError("Wallet connection timed out. Please try connecting again.");
     }, 5 * 60 * 1000);
   } catch (error) {
     if (sessionId !== walletAuthSessionId || !walletAuthActive) return;
     walletAuthActive = false;
-    addAgentMessage({ answer: `I could not start the wallet connection. ${error.message}` });
+    addAgentError(userFacingError(error, "I could not start the wallet connection. Please try again."));
   } finally {
     if (!walletAuthActive) {
       connectButton.disabled = false;
