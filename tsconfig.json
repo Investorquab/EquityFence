@@ -8,6 +8,7 @@
       "@handelo/agent":["packages/handelo-agent/src/index.ts"],
       "@handelo/policy":["packages/handelo-policy/src/index.ts"],
       "@handelo/portfolio":["packages/handelo-portfolio/src/index.ts"],
+      "@handelo/strategy":["packages/handelo-strategy/src/index.ts"],
       "@handelo/execution":["packages/handelo-execution/src/index.ts"],
       "@handelo/sdk":["packages/handelo-sdk/src/index.ts"],
       "@handelo/mcp":["packages/handelo-mcp/src/index.ts"]
