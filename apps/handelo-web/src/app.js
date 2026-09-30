@@ -760,7 +760,8 @@ async function loadHistory() {
     if (!response.ok) throw new Error((data && typeof data === "object" && data.error) || "History request failed.");
     if (!Array.isArray(data.transactions)) throw new Error("History response was invalid.");
     if (!data.transactions.length) {
-      target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p></div>';
+      target.innerHTML = '<div class="empty-state"><div class="empty-number">04</div><h3>No recent BSC transactions.</h3><p>Completed wallet activity will appear here when available.</p><button class="secondary-button" id="historyEmptyRefresh" type="button">Refresh</button></div>';
+      target.querySelector("#historyEmptyRefresh").addEventListener("click", loadHistory);
       target.setAttribute("aria-busy", "false");
       return;
     }
