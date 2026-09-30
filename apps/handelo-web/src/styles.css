@@ -130,7 +130,12 @@ button{cursor:pointer}
 
 .message{max-width:760px;margin:0 0 34px}
 .message-label{margin-bottom:9px;font:9px var(--mono);letter-spacing:.12em;color:var(--faint)}
-.message-text{font-size:14px;line-height:1.8;color:#d4cfc5;white-space:pre-wrap}
+.message-text{font-size:14px;line-height:1.8;color:#d4cfc5}
+.message-text p{margin:0 0 12px}
+.message-text p:last-child{margin-bottom:0}
+.message-text strong{font-weight:600;color:#eee8dd}
+.message-text ul,.message-text ol{margin:0 0 12px;padding-left:22px}
+.message-text li{padding-left:4px;margin:5px 0}
 .user-message{align-self:flex-end;text-align:right}
 .user-message .message-text{
   display:inline-block;text-align:left;padding:12px 15px;border:1px solid var(--line);
