@@ -944,13 +944,18 @@ async function loadHistory() {
   }
 }
 
-function showView() {
+function showView(view = "workspace") {
+  const nextView = view === "home" ? "home" : "workspace";
   document.querySelectorAll(".nav-item").forEach((item) => {
-    item.classList.toggle("active", true);
-    item.setAttribute("aria-current", "page");
+    const active = item.dataset.view === nextView;
+    item.classList.toggle("active", active);
+    if (active) item.setAttribute("aria-current", "page");
+    else item.removeAttribute("aria-current");
   });
-  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-workspace"));
-  refreshWorkspaceContext();
+  document.querySelectorAll(".view").forEach((section) => section.classList.toggle("active", section.id === "view-" + nextView));
+  const topbarLabel = document.querySelector("#topbarLabel");
+  if (topbarLabel) topbarLabel.textContent = "HANDELO / " + nextView.toUpperCase();
+  if (nextView === "workspace") refreshWorkspaceContext();
 }
 
 function openMarketDetail(index) {
@@ -1050,6 +1055,9 @@ document.querySelectorAll(".nav-item").forEach((button) => {
 });
 
 marketSearch?.addEventListener("input", renderMarketResults);
+
+document.querySelector("#homeWorkspaceCta")?.addEventListener("click", () => showView("workspace"));
+document.querySelector("#homeFinalCta")?.addEventListener("click", () => showView("workspace"));
 
 marketGrid.addEventListener("click", (event) => {
   const button = event.target.closest("[data-market-detail]");
