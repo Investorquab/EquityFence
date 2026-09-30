@@ -1,6 +1,20 @@
 import { HandeloAgent, type AgentResult } from "@handelo/agent";
 
-export interface HandeloClientOptions { apiKey?:string; baseUrl?:string; }
+export interface HandeloClientOptions {
+  apiKey?: string;
+  baseUrl?: string;
+  fetch?: typeof globalThis.fetch;
+}
+
+export class HandeloApiError extends Error {
+  readonly status: number;
+
+  constructor(message: string, status: number) {
+    super(message);
+    this.name = "HandeloApiError";
+    this.status = status;
+  }
+}
 export interface ChatRequest { message:string; }
 export interface HandeloClient {
   chat(request:ChatRequest):Promise<AgentResult>;
@@ -23,7 +37,7 @@ export function createHandeloClient(options:HandeloClientOptions={}):HandeloClie
         let payload:AgentResult & {error?:string};
         try{ payload=JSON.parse(raw) as AgentResult & {error?:string}; }
         catch{ throw new Error(`Handelo API returned invalid JSON (HTTP ${response.status}).`); }
-        if(!response.ok) throw new Error(payload.error??`Handelo API request failed with ${response.status}`);
+        if(!response.ok) throw new HandeloApiError(payload.error??`Handelo API request failed with ${response.status}`, response.status);
         return payload;
       }
     };
