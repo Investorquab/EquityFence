@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {calculateDivergencePercent, createRiskResult} from "./index.js";
+import {calculateDivergencePercent, createRiskResult, evaluatePortfolioStrategyRisk} from "./index.js";
 
 test("calculates reference vs on-chain divergence",()=>{
   assert.equal(calculateDivergencePercent(110,100),10);
