@@ -57,6 +57,14 @@ export interface RiskResult {
   constraints: StrategyConstraints;
 }
 
+export interface BasketDefinition {
+  id: string;
+  name: string;
+  assets: Array<{ asset: string; weightPercent: number }>;
+  strategyType: "REBALANCE";
+  status: "DRAFT";
+}
+
 export interface TransactionPreview {
   action: "BUY" | "SELL" | "REBALANCE";
   asset: string;
@@ -75,7 +83,8 @@ export type ChatCard =
   | {type:"STRATEGY_PREVIEW"; data:StrategyDefinition}
   | {type:"RISK_RESULT"; data:RiskResult}
   | {type:"TRANSACTION_PREVIEW"; data:TransactionPreview}
-  | {type:"PORTFOLIO_PREVIEW"; data:PortfolioSnapshot};
+  | {type:"PORTFOLIO_PREVIEW"; data:PortfolioSnapshot}
+  | {type:"BASKET_PREVIEW"; data:BasketDefinition};
 
 export interface ChatMessage {
   id: string;
@@ -195,6 +204,24 @@ export function evaluatePortfolioStrategyRisk(
   });
 }
 
+
+export function createBasketDefinition(input: {
+  name: string;
+  assets: string[];
+}): BasketDefinition {
+  const assets = input.assets.map((asset) => asset.trim()).filter(Boolean);
+  if (!input.name.trim() || assets.length < 2) {
+    throw new Error("A basket requires a name and at least two assets.");
+  }
+  const weightPercent = 100 / assets.length;
+  return {
+    id: createStrategyId("basket"),
+    name: input.name.trim(),
+    assets: assets.map((asset) => ({ asset, weightPercent })),
+    strategyType: "REBALANCE",
+    status: "DRAFT"
+  };
+}
 
 export function createTransactionPreview(input: {
   asset: string;
