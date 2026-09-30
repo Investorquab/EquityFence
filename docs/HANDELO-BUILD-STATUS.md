@@ -23,13 +23,13 @@ This file is the execution checklist for the locked Handelo product specificatio
 
 ## Phase 1 — Shared foundations
 
-- [ ] Shared workspace state model
-- [ ] Shared market insight model
-- [ ] Shared strategy model
-- [ ] Shared portfolio model
-- [ ] Shared risk decision model
-- [ ] Shared transaction preview model
-- [ ] Structured Chat response model
+- [x] Shared workspace state model
+- [x] Shared market insight model
+- [x] Shared strategy model
+- [x] Shared portfolio model
+- [x] Shared risk decision model
+- [x] Shared transaction preview model
+- [x] Structured Chat response model
 
 ## Phase 2 — Seven capabilities
 
@@ -167,12 +167,18 @@ After homepage + polish: user pulls and performs final demo/regression test.
 
 ## Current batch
 
-**Batch 0 — Product source of truth**
+**Batch 1 — Shared foundations + strategy construction**
 
 Completed:
-- Product specification created.
-- Build status created.
+- Product specification locked.
+- Persistent build status created.
+- BUILD.md aligned with the locked architecture.
+- Shared domain contracts created in @handelo/core.
+- Deterministic divergence calculation created.
+- Deterministic risk result model created.
+- Strategy construction and validation created in @handelo/strategy.
 
 Next:
-- Align BUILD.md.
-- Then begin shared domain/workspace foundations.
+- Integrate shared contracts with existing API/agent/portfolio surfaces.
+- Build the first Market Intelligence / Gap Radar slice.
+- Continue batching related commits before the next CI checkpoint.
