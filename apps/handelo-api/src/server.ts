@@ -7,6 +7,7 @@ import { BinanceAgenticWalletAdapter } from "@handelo/execution";
 import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, MarketUpstreamError } from "@handelo/market";
 import { auditToken, normalizeTokenAudit } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
+import { walletServiceError } from "./wallet-errors.js";
 
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
@@ -58,7 +59,7 @@ async function verifyWalletAuth(qrCodeId: string) {
     }
     walletAuth = { status: "SUCCESS" };
   } catch (error) {
-    walletAuth = { status: "FAILED", error: error instanceof Error ? error.message : String(error) };
+    walletAuth = { status: "FAILED", error: walletServiceError(error) };
   }
 }
 
@@ -132,7 +133,7 @@ const server = createServer(async (req, res) => {
       const status = await walletStatus();
       return json(res, 200, status);
     } catch (error) {
-      return json(res, 503, { status: "UNAVAILABLE", error: error instanceof Error ? error.message : String(error) });
+      return json(res, 503, { status: "UNAVAILABLE", error: walletServiceError(error) });
     }
   }
 
@@ -160,7 +161,7 @@ const server = createServer(async (req, res) => {
       void verifyWalletAuth(signin.qrCodeId).catch(() => undefined);
       return json(res, 200, walletAuth);
     } catch (error) {
-      return json(res, 502, { error: error instanceof Error ? error.message : String(error) });
+      return json(res, 502, { error: walletServiceError(error) });
     }
   }
 
@@ -188,7 +189,7 @@ const server = createServer(async (req, res) => {
       }
       return json(res, 200, { connected: true, address });
     } catch (error) {
-      return json(res, 503, { connected: false, address: null, error: error instanceof Error ? error.message : String(error) });
+      return json(res, 503, { connected: false, address: null, error: walletServiceError(error) });
     }
   }
 
