@@ -47,3 +47,20 @@ test("API startup does not require market provider credentials before market req
   assert.match(source, /function getMarket\(\): ReturnType<typeof marketClientFromEnv>/);
   assert.match(source, /market \?\?= marketClientFromEnv\(\)/);
 });
+
+
+test("execution boundary requires explicit enablement, non-default secret, wallet binding, fresh quote, and audit support", () => {
+  assert.match(source, /HANDELO_EXECUTION_ENABLED.*!== "true"/);
+  assert.match(source, /HANDELO_REVIEW_TOKEN_SECRET/);
+  assert.match(source, /reviewTokenSecret === "handelo-local-review-secret"/);
+  assert.match(source, /connectedAddress\.toLowerCase\(\) !== walletAddress\.toLowerCase\(\)/);
+  assert.match(source, /const reviewedQuote = await wallet\.quote/);
+  assert.match(source, /!securityAudit\.hasResult \|\| !securityAudit\.isSupported/);
+  assert.match(source, /consumeReviewToken\(reviewToken\)/);
+});
+
+test("execution never returns fabricated success state", () => {
+  assert.match(source, /const result = await wallet\.execute/);
+  assert.match(source, /return json\(res, 200, \{[\\s\\S]*result \}/);
+  assert.doesNotMatch(source, /txHash:\s*["']0x[0-9a-fA-F]{64}["']/);
+});
