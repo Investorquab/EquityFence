@@ -103,7 +103,9 @@ function renderWorkspaceGapRadar(markets) {
     const gapText = Number.isFinite(gap) ? (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%" : "—";
     const gapClass = gap > 0 ? "positive" : gap < 0 ? "negative" : "";
     const label = (market.underlyingTicker || "—") + " " + (market.tokenSymbol || "—") + " gap " + gapText;
-    return '<div class="workspace-gap-row" role="group" aria-label="' + escapeHtml(label) + '"><span><strong>' + escapeHtml(market.underlyingTicker || "—") + '</strong><small>' + escapeHtml(market.tokenSymbol || "—") + " · " + escapeHtml(market.provider || "BSC") + '</small></span><b class="' + gapClass + '">' + gapText + '</b></div>';
+    const status = market.marketStatus || "UNKNOWN";
+    const volume = market.liquidityContext || "Liquidity context unavailable";
+    return '<div class="workspace-gap-row" role="group" aria-label="' + escapeHtml(label + " status " + status) + '"><span><strong>' + escapeHtml(market.underlyingTicker || "—") + '</strong><small>' + escapeHtml(market.tokenSymbol || "—") + " · " + escapeHtml(market.provider || "BSC") + " · " + escapeHtml(status) + '</small><small>' + escapeHtml(volume) + '</small></span><b class="' + gapClass + '">' + gapText + '</b></div>';
   }).join("");
   workspaceGapRadar.setAttribute("aria-busy", "false");
 }
@@ -152,7 +154,15 @@ async function refreshWorkspaceContext() {
     if (workspacePortfolio && Array.isArray(portfolio?.positions)) workspacePortfolio.innerHTML = portfolio.positions.slice(0,4).map(position => `<div class="workspace-position"><span>${escapeHtml(position.tokenSymbol || position.asset)}</span><b>${position.allocationPercent == null ? "—" : position.allocationPercent.toFixed(1) + "%"}</b></div>`).join("") || '<div class="workspace-empty">No positions yet.</div>';
     const historyResponse = await fetch(API_BASE + "/api/history?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
     const history = await historyResponse.json();
-    if (workspaceActivity && Array.isArray(history?.transactions)) workspaceActivity.innerHTML = history.transactions.slice(0,3).map(tx => `<div class="workspace-activity"><span>${escapeHtml(tx.symbol || "BSC transaction")}</span><b>${escapeHtml(tx.txStatus || "UNKNOWN")}</b></div>`).join("") || '<div class="workspace-empty">No recent activity.</div>';
+    if (workspaceActivity && Array.isArray(history?.transactions)) workspaceActivity.innerHTML = history.transactions.slice(0,3).map(tx => {
+      const hash = String(tx.txHash || "");
+      const time = tx.txTime ? new Date(tx.txTime).toLocaleString() : "Time unavailable";
+      const hashLabel = hash ? hash.slice(0, 6) + "…" + hash.slice(-4) : "No hash";
+      const link = /^0x[a-fA-F0-9]{64}$/.test(hash)
+        ? '<a href="https://bscscan.com/tx/' + encodeURIComponent(hash) + '" target="_blank" rel="noopener noreferrer">' + hashLabel + '</a>'
+        : '<span>' + escapeHtml(hashLabel) + '</span>';
+      return '<div class="workspace-activity"><span><strong>' + escapeHtml(tx.symbol || "BSC transaction") + '</strong><small>' + escapeHtml(time) + '</small></span><b>' + escapeHtml(tx.txStatus || "UNKNOWN") + '</b><small>' + link + '</small></div>';
+    }).join("") || '<div class="workspace-empty">No recent activity.</div>';
   } catch {
     renderWorkspaceError(workspacePortfolio, "Portfolio data is unavailable. Try refreshing.");
     renderWorkspaceError(workspaceActivity, "Activity data is unavailable. Try refreshing.");

@@ -42,12 +42,12 @@ Last updated: 2026-10-01
 
 ### 2. Workspace completion
 - [x] Capability prompt chips
-- [ ] Complete structured-card coverage
-- [ ] Market Radar polish
-- [ ] Truthful chart/history source where available
+- [x] Complete structured-card coverage
+- [x] Market Radar polish
+- [x] Truthful chart/history source where available (transaction history; no unsupported synthetic price chart)
 - [x] Responsive behavior
 - [x] Loading/empty/error states
-- [ ] Accessibility
+- [x] Accessibility
 - [x] Motion/transitions pass
 
 ### 3. End-to-end validation
