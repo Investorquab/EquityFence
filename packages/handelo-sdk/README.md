@@ -9,7 +9,7 @@ import { createHandeloClient } from "@handelo/sdk";
 
 const handelo = createHandeloClient({
   baseUrl: "https://your-handelo-api.example",
-  apiKey: process.env.HANDELO_API_KEY,
+  apiKey: process.env.HANDELO_CLIENT_API_KEY,
 });
 
 const result = await handelo.chat({
