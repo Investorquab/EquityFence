@@ -1074,7 +1074,7 @@ function openMarketDetail(index) {
   };
   panel.querySelector('.market-detail-close').addEventListener('click', close);
   panel.querySelector('.market-detail-backdrop').addEventListener('click', close);
-  panel.querySelector('.market-detail-chat').addEventListener('click', () => { close(); showView('chat'); ask(`Explain ${market.tokenSymbol} compared with its reference price.`); });
+  panel.querySelector('.market-detail-chat').addEventListener('click', () => { close(); showView('workspace'); ask(`Explain ${market.tokenSymbol} compared with its reference price.`); });
   document.addEventListener("keydown", onKeydown);
   panel.querySelector('.market-detail-close').focus();
 }
