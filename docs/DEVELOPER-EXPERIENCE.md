@@ -22,7 +22,7 @@ The web app makes the boundary visible: market context first, then transaction r
 ## Environment
 
 ```
-HANDELO_API_KEY=
+HANDELO_CLIENT_API_KEY=
 BINANCE_WEB3_API_KEY=
 BINANCE_WEB3_SECRET_KEY=
 HANDELO_WALLET=
@@ -124,11 +124,11 @@ The language model never receives a private key.
 These are intentionally not described as completed:
 
 - A polished public deployment is still separate from the local developer workflow.
-- SDK and Telegram control surfaces are implemented and tested, but a public SDK release and deployed Telegram bot still need to be prepared.
+- SDK and Telegram control surfaces are implemented and tested; public release/deployment remains final-stage work.
 - A complete live end-to-end execution test with controlled funds still needs to be captured as demo evidence.
 - Direct raw-EVM transaction simulation is not yet wired into the Agentic Wallet execution path.
 - The final hackathon demo video and final narrative still need to be produced.
-- The workspace still needs final responsive/accessibility/demo QA and the submission checklist needs a final pass.
+- Responsive/accessibility implementation is complete; a final live browser/demo QA pass still remains.
 - This report should be updated after the first complete live end-to-end run with the exact observed setup time, failures, and fixes.
 
 ## Developer feedback
