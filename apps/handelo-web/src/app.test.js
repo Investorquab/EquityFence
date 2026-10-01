@@ -166,3 +166,18 @@ test("workspace surfaces loading and service errors instead of failing silently"
 
 
 test("chat renders deterministic policy results as a structured risk card",()=>{assert.match(source,/function addRiskPreview\(policy\)/);assert.match(source,/RISK RESULT/);assert.match(source,/data\.policy && data\.intent\?\.action !== "research"/);});
+
+
+test("workspace live context exposes accessible update regions", () => {
+  assert.match(indexSource, /id="workspaceMarket" aria-live="polite"/);
+  assert.match(indexSource, /id="workspaceMarketStatus" aria-live="polite"/);
+  assert.match(indexSource, /id="workspaceGapRadar" aria-live="polite" aria-busy="false"/);
+  assert.match(indexSource, /id="workspaceGapRadarStatus"[^>]*aria-live="polite"/);
+  assert.match(source, /role="group" aria-label=/);
+  assert.match(source, /workspaceGapRadar.setAttribute\("aria-busy", "false"\)/);
+});
+
+test("workspace market and radar failures clear loading state", () => {
+  assert.match(source, /workspaceMarket?.setAttribute\("aria-busy", "false"\)/);
+  assert.match(source, /No measurable gaps available/);
+});
