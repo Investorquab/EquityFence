@@ -1,84 +1,127 @@
 # Handelo
 
-**The agent that understands the market for the user, rather than simply trading for the user.**
+**Understand. Strategize. Execute.**
 
-Handelo is an AI-native interface for tokenized stocks on BNB Smart Chain. It is designed for people who may know what they want to invest in without knowing the mechanics underneath: market hours, reference prices, on-chain prices, tokenized representations, and execution conditions.
+Handelo is an AI operating layer for tokenized-stock markets on BNB Smart Chain. It combines live market intelligence, natural-language strategy construction, portfolio context, deterministic risk controls, human-approved transaction review, and a secured Agentic Wallet boundary.
 
-## Current architecture
+## Product workflow
+
+`Discover → Understand → Strategize → Check Risk → Review → Approve → Execute → Monitor`
+
+Handelo is not a chatbot-only product. The web workspace keeps market and portfolio context visible beside persistent AI Chat.
+
+## Product surfaces
+
+### Web
+Handelo has exactly two primary web pages:
+
+1. **Home** — product narrative, workflow and real UI demonstrations.
+2. **Workspace** — one persistent application page with financial/market context on the left and AI Chat on the right.
+
+### SDK
+`@handelo/sdk` provides a typed client for sending natural-language requests to the same Handelo runtime.
+
+### MCP
+`@handelo/mcp` exposes read-only tokenized-stock market-intelligence tools. MCP is not a signing boundary.
+
+### Telegram
+`@handelo/telegram` provides a private-chat conversational client over the same runtime. It does not hold private keys, activate strategies, or bypass risk/review controls.
+
+## Architecture
 
 ```
 User
   ↓
-Handelo Agent
-  ├── Intent understanding
-  ├── Live tokenized-stock market intelligence
-  ├── Reference vs on-chain price context
-  └── Explanation
-       ↓
-BNB Chain / Binance Web3 infrastructure
+Handelo control surface
+  ├── Web Workspace
+  ├── @handelo/sdk
+  ├── Telegram
+  └── MCP (read-only)
+        ↓
+   Handelo Agent
+        ↓
+  Market Intelligence
+  Strategy Engine
+  Portfolio Engine
+  Risk Governor
+        ↓
+ Human Approval / Review
+        ↓
+ Secured Agentic Wallet
+        ↓
+     BSC execution
 ```
 
-## First working slice
+AI interprets intent and explains context. Deterministic application code remains authoritative for policy, transaction construction, approval boundaries, execution state, and verification.
 
-The repository now contains a provider-agnostic LLM layer, a live Binance Web3 tokenized-stock market client, and a Handelo agent API.
-
-The agent accepts a normal-language request, resolves the relevant BSC tokenized-stock record, or discovers live BSC candidates when the user has not named a stock, and explains the market state using live data.\n\nPortfolio data is exposed through `GET /api/portfolio?wallet=...` and the developer surface is available through the read-only Handelo MCP server and `@handelo/sdk`.
-
-## AI provider
-
-Set one key:
-
-- `HANDELO_API_KEY=...` (or `API_KEY=...`)
-
-Handelo recognizes Groq, OpenAI, and Anthropic keys automatically and chooses a hardcoded supported model for the detected provider. No model dropdown is required.
-
-The current Groq path uses `openai/gpt-oss-120b`.
-
-## Binance Web3
-
-Set:
-
-- `BINANCE_WEB3_API_KEY=...`
-- `BINANCE_WEB3_SECRET_KEY=...`
-
-Do not commit secrets.
-
-## Run the agent
+## Local development
 
 ```bash
 pnpm install
+pnpm check
+pnpm test
+```
+
+Run the API:
+
+```bash
 pnpm --filter @handelo/api dev
 ```
+
+The web client uses `http://localhost:8787` by default.
+
+### SDK
+
+```ts
+import { createHandeloClient } from "@handelo/sdk";
+
+const handelo = createHandeloClient({
+  baseUrl: "http://localhost:8787",
+});
+
+const result = await handelo.chat({
+  message: "What is happening with NVIDIA?",
+});
+```
+
+### Telegram
+
+Set:
+
+- `TELEGRAM_BOT_TOKEN`
+- `HANDELO_API_URL` (optional; defaults to local API)
+- `HANDELO_API_KEY` when required by the API
 
 Then:
 
 ```bash
-curl -X POST http://localhost:8787/api/chat \
-  -H "content-type: application/json" \
-  -d '{"message":"I have $20. Tell me what is happening with NVIDIA."}'
+pnpm --filter @handelo/telegram start
 ```
 
-## Build direction
+The bot accepts private chats only.
 
-Handelo will grow in this order:
+## Live market data
 
-1. market intelligence
-2. portfolio understanding\n3. market discovery and candidate analysis
-4. decision and safety layer
-5. real BSC execution
-6. agent wallet integration
-7. MCP and SDK
-8. Telegram
-9. premium web product and storytelling landing page
-10. live demo and developer-experience documentation
+Configure Binance Web3 credentials in the runtime environment:
 
-The legacy EquityFence modules are being audited and replaced selectively rather than carried forward as a separate product.
+- `BINANCE_WEB3_API_KEY`
+- `BINANCE_WEB3_SECRET_KEY`
 
-## Security principle
+Never commit secrets or private keys.
 
-The language model does not receive private keys. AI decides *what the user is asking* and *what market context means*; deterministic application code and the wallet/execution layer remain responsible for transaction construction, policy checks, signing, and verification.
+## Security boundary
 
+- Private keys never enter the LLM, SDK, MCP or Telegram bot.
+- Transaction execution requires explicit user confirmation.
+- Risk and market checks are re-run at the execution boundary.
+- Unsupported or unavailable security/audit paths remain blocking conditions.
+- Handelo never fabricates transaction hashes or execution success.
+- Ambiguous tokenized-stock representations are surfaced rather than silently selected.
 
-## Representation safety
+## Current validation status
 
-A stock ticker can have multiple tokenized representations on BSC. Handelo does not silently choose a venue when the request is ambiguous. It exposes the live representations and their market context first; an exact token symbol such as a provider-qualified symbol can be resolved directly.
+The repository uses GitHub Actions for TypeScript checks, frontend syntax checks and the full workspace test suite. The current implementation includes regression coverage for market intelligence, strategy construction, portfolio/risk checks, transaction review, execution gating, baskets, homepage architecture, SDK behavior, Telegram handling and workspace resilience.
+
+## Hackathon direction
+
+Handelo is being built for the BNB Hack: Tokenized Stocks Edition with BSC mainnet tokenized-stock infrastructure at the center of the product. Final deployment, live demo evidence, demo video and submission packaging remain separate final-stage work.
