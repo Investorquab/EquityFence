@@ -555,3 +555,19 @@ button{cursor:pointer}
 
 .workspace-empty.workspace-error{border-color:rgba(239,118,110,.18);color:var(--muted);background:rgba(239,118,110,.025)}
 [aria-busy="true"]{cursor:progress}
+
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
