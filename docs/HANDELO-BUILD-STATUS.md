@@ -27,6 +27,7 @@ Last updated: 2026-10-01
 - [x] Homepage navigation regression coverage
 - [x] SDK typed client, API-key support, structured errors, tests and usage docs
 - [x] Server-side SDK client API-key enforcement
+- [x] Risk-gated strategy activation with persisted ACTIVE state
 
 ## Remaining work
 
@@ -35,7 +36,7 @@ Last updated: 2026-10-01
 - [x] `/start` and `/help`
 - [x] Natural-language requests through Handelo runtime
 - [x] Telegram-friendly structured responses
-- [x] Per-user/session isolation
+- [x] Private-chat isolation (no shared Telegram conversation state)
 - [x] Explicit review/approval boundary
 - [x] No private keys in bot
 - [x] Tests
@@ -52,9 +53,9 @@ Last updated: 2026-10-01
 - [x] Motion/transitions pass
 
 ### 3. End-to-end validation
-- [ ] Clean install (Checkpoint A)
-- [ ] Full build/check
-- [ ] Full test suite
+- [x] Clean install (CI Checkpoint A)
+- [x] Full typecheck/check
+- [x] Full test suite
 - [ ] API smoke tests
 - [ ] Web workspace smoke test
 - [ ] Chat smoke test
