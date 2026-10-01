@@ -6,6 +6,7 @@ export interface ReviewTokenInput {
   fromToken: string;
   contract: string;
   slippage?: string;
+  wallet: string;
 }
 
 const REVIEW_TOKEN_TTL_MS = 5 * 60 * 1000;
@@ -37,7 +38,8 @@ export function verifyReviewToken(token: string, input: ReviewTokenInput, now = 
       && parsed.amountUsd === input.amountUsd
       && parsed.fromToken.toLowerCase() === input.fromToken.toLowerCase()
       && parsed.contract.toLowerCase() === input.contract.toLowerCase()
-      && parsed.slippage === input.slippage;
+      && parsed.slippage === input.slippage
+      && parsed.wallet.toLowerCase() === input.wallet.toLowerCase();
   } catch {
     return false;
   }

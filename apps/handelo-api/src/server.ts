@@ -298,6 +298,9 @@ const server = createServer(async (req, res) => {
       }
 
       const walletAddress = String(body.wallet ?? "").trim();
+      if (!isEvmAddress(walletAddress)) {
+        return json(res, 400, { error: "A valid connected wallet address is required for transaction review." });
+      }
       const asset = await market.find(ticker);
       if (!isExecutableMarketAsset(asset)) {
         return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so Handelo will not create an executable review." });
@@ -398,7 +401,8 @@ const server = createServer(async (req, res) => {
           amountUsd,
           fromToken,
           contract: asset.tokenContractAddress,
-          slippage
+          slippage,
+          wallet: walletAddress
         }) : null
       });
     } catch (error) {
@@ -515,9 +519,22 @@ const server = createServer(async (req, res) => {
         amountUsd: amount,
         fromToken,
         contract: asset.tokenContractAddress,
-        slippage
+        slippage,
+        wallet: walletAddress
       })) {
         return json(res, 409, { error: "This transaction no longer matches the reviewed trade or the review has expired. Start a new review." });
+      }
+
+      const connectedWallet = await bawJson<{
+        addresses?: Array<{ binanceChainId?: string; address?: string }>;
+      }>(["wallet", "address"]);
+      const connectedAddress = connectedWallet.addresses
+        ?.find((entry) => entry.binanceChainId === "56")
+        ?.address?.trim() ?? "";
+      if (!isEvmAddress(connectedAddress) || connectedAddress.toLowerCase() !== walletAddress.toLowerCase()) {
+        return json(res, 409, {
+          error: "The connected Binance Agentic Wallet does not match the wallet approved in the transaction review."
+        });
       }
 
       const tokenPrice = Number(asset.tokenPrice);

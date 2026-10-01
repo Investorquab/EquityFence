@@ -10,6 +10,7 @@ const marketGrid = document.querySelector("#marketGrid");
 const marketSearch = document.querySelector("#marketSearch");
 const marketCount = document.querySelector("#marketCount");
 let marketRecords = [];
+let workspaceWalletAddressValue = "";
 const walletState = document.querySelector(".wallet-state");
 let walletAuthPoll = null;
 let walletAuthTimeout = null;
@@ -57,6 +58,17 @@ function renderWorkspaceRisk(risk) {
 function renderWorkspaceStrategies() {
   if (!workspaceStrategies) return;
   workspaceStrategies.innerHTML = '<div class="workspace-empty">No active strategies yet. Strategy activation will appear here.</div>';
+}
+
+function addPortfolioPreview(portfolio) {
+  if (!portfolio || !Array.isArray(portfolio.positions)) return;
+  const node = document.createElement("article");
+  node.className = "strategy-preview portfolio-preview";
+  node.setAttribute("role", "status");
+  const positions = portfolio.positions.slice(0, 6);
+  node.innerHTML = `<div class="strategy-preview-head"><div><div class="message-label">PORTFOLIO PREVIEW</div><h3>${escapeHtml(portfolio.wallet || "Connected wallet")}</h3></div><span class="strategy-draft">LIVE CONTEXT</span></div><div class="strategy-preview-grid"><div><small>TOTAL VALUE</small><strong>${money(portfolio.totalValueUsd ?? portfolio.balanceUsd)}</strong></div><div><small>POSITIONS</small><strong>${positions.length}</strong></div></div><div class="strategy-preview-grid">${positions.map(position => `<div><small>${escapeHtml(position.tokenSymbol || position.asset || "Asset")}</small><strong>${position.allocationPercent == null ? "—" : Number(position.allocationPercent).toFixed(1) + "%"}</strong></div>`).join("")}</div></div>`;
+  conversation.appendChild(node);
+  scrollConversation();
 }
 
 function renderWorkspaceError(element, message) {
@@ -127,10 +139,12 @@ async function refreshWorkspaceContext() {
     const addressResponse = await fetch(API_BASE + "/api/wallet/address", {cache:"no-store"});
     const address = await addressResponse.json();
     if (!address.connected || !address.address) {
+      workspaceWalletAddressValue = "";
       if (workspaceWalletBalance) workspaceWalletBalance.textContent = "—";
       if (workspaceWalletAddress) workspaceWalletAddress.textContent = "WALLET NOT CONNECTED";
       return;
     }
+    workspaceWalletAddressValue = address.address;
     if (workspaceWalletAddress) workspaceWalletAddress.textContent = address.address.slice(0,6) + "…" + address.address.slice(-4);
     const portfolioResponse = await fetch(API_BASE + "/api/portfolio?wallet=" + encodeURIComponent(address.address), {cache:"no-store"});
     const portfolio = await portfolioResponse.json();
@@ -223,6 +237,7 @@ function addAgentMessage(data) {
 
   if (data.strategy) addStrategyPreview(data.strategy);
   if (data.basket) addBasketPreview(data.basket);
+  if (data.portfolio) addPortfolioPreview(data.portfolio);
   if (data.policy && data.intent?.action !== "research") addRiskPreview(data.policy);
 
   if (data.market) {
@@ -329,7 +344,7 @@ async function reviewTrade(ticker, amountUsd, action, promptNode) {
     const response = await fetch(API_BASE + "/api/review", {
       method: "POST",
       headers: { "content-type": "application/json" },
-      body: JSON.stringify({ ticker, amountUsd, action, wallet: workspaceWalletAddress?.textContent?.trim() || "" })
+      body: JSON.stringify({ ticker, amountUsd, action, wallet: workspaceWalletAddressValue })
     });
     const data = await response.json();
     if (tradeReviewRequestIds.get(promptNode) !== requestId) return;
@@ -435,7 +450,7 @@ async function confirmTrade(data, amountUsd, card) {
         amountUsd,
         fromToken: data.quoteToken,
         reviewToken: data.reviewToken,
-        wallet: workspaceWalletAddress,
+        wallet: workspaceWalletAddressValue,
         confirmed: true
       })
     });

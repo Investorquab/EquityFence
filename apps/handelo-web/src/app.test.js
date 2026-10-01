@@ -62,6 +62,13 @@ test("transaction review requires policy and security checks before confirmation
   assert.match(source, /Confirm purchase/);
 });
 
+test("transaction review and execution bind to the full wallet address", () => {
+  assert.match(source, /workspaceWalletAddressValue = address\.address/);
+  assert.match(source, /wallet: workspaceWalletAddressValue/);
+  assert.doesNotMatch(source, /wallet: workspaceWalletAddress,\s*confirmed: true/);
+  assert.match(source, /wallet: workspaceWalletAddressValue\s*,\s*confirmed: true/);
+});
+
 test("transaction execution remains explicitly confirmed and status-aware", () => {
   assert.match(source, /wallet: workspaceWalletAddress/);
   assert.match(source, /confirmed: true/);
@@ -123,6 +130,12 @@ test("chat composer requires a non-empty message", () => {
 
 test("strategy preview is rendered from agent strategy data",()=>{assert.match(source,/data\.strategy/);assert.match(source,/function addStrategyPreview\(strategy\)/);assert.match(source,/STRATEGY PREVIEW/);});
 test("basket strategy intelligence renders a deterministic draft preview",()=>{assert.match(source,/data\.basket/);assert.match(source,/function addBasketPreview\(basket\)/);assert.match(source,/BASKET PREVIEW/);assert.match(source,/REBALANCE strategy/);});
+
+test("portfolio preview is a supported structured chat card", () => {
+  assert.match(source, /function addPortfolioPreview\(portfolio\)/);
+  assert.match(source, /PORTFOLIO PREVIEW/);
+  assert.match(source, /data\.portfolio\) addPortfolioPreview\(data\.portfolio\)/);
+});
 
 test("strategy preview exposes deterministic portfolio risk review",()=>{assert.match(source,/api\/strategy\/risk/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/activation remains blocked/);});
 
