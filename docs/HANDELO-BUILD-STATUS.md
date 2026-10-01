@@ -56,14 +56,14 @@ Last updated: 2026-10-01
 - [x] Clean install (CI Checkpoint A)
 - [x] Full typecheck/check
 - [x] Full test suite
-- [ ] API smoke tests
-- [ ] Web workspace smoke test
-- [ ] Chat smoke test
-- [ ] SDK smoke test
-- [ ] Telegram smoke test
-- [ ] Strategy/risk/review regression
-- [ ] Wallet/execution boundary regression
-- [ ] No fabricated execution evidence
+- [x] API startup/health smoke test (no provider secrets required)
+- [ ] Web workspace live-browser smoke test
+- [ ] Chat live smoke test with configured provider credentials
+- [x] SDK automated smoke/regression tests
+- [x] Telegram handler/transport regression tests
+- [x] Strategy/risk/review regression
+- [x] Wallet/execution boundary regression
+- [x] No fabricated execution evidence in automated validation
 
 ### 4. Deployment and submission
 - [ ] Public deployment
