@@ -78,13 +78,13 @@ Last updated: 2026-10-01
 ## Execution order
 
 1. Workspace UX completion.
-3. Full regression/security validation.
-4. Deployment, demo and submission.
+2. Full regression/security validation.
+3. Deployment, demo and submission.
 
 ## Checkpoints
 
 ### Checkpoint A
-After Workspace UX completion: local clean install/check/test and both web/Telegram smoke tests.
+After Workspace UX completion: clean install/check/test plus automated API startup, SDK, Telegram-handler, strategy/risk and execution-boundary regression coverage. Live browser/provider smoke remains a separate validation step.
 
 ### Checkpoint B
 Final: security regression, deployment verification, demo evidence and submission package.
