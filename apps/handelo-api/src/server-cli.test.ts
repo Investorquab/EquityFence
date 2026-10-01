@@ -15,3 +15,11 @@ test("wallet address reads the BSC address from the Agentic Wallet address list"
   assert.match(source, /\.find\(\(entry\) => entry\.binanceChainId === "56"\)/);
   assert.match(source, /\.address\?\.trim\(\) \?\? ""/);
 });
+
+
+test("chat boundary enforces the configured client API key", () => {
+  assert.match(source, /const CLIENT_API_KEY = process\.env\.HANDELO_CLIENT_API_KEY/);
+  assert.match(source, /req\.headers\["x-handelo-api-key"\] !== CLIENT_API_KEY/);
+  assert.match(source, /A valid Handelo client API key is required/);
+  assert.match(source, /access-control-allow-headers": "content-type, x-handelo-api-key"/);
+});
