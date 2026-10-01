@@ -178,6 +178,6 @@ test("workspace live context exposes accessible update regions", () => {
 });
 
 test("workspace market and radar failures clear loading state", () => {
-  assert.match(source, /workspaceMarket?.setAttribute\("aria-busy", "false"\)/);
+  assert.match(source, /workspaceMarket\?\.setAttribute\("aria-busy", "false"\)/);
   assert.match(source, /No measurable gaps available/);
 });
