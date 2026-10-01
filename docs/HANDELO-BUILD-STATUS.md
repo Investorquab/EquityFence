@@ -26,6 +26,7 @@ Last updated: 2026-10-01
 - [x] Homepage and real Handelo UI snippets
 - [x] Homepage navigation regression coverage
 - [x] SDK typed client, API-key support, structured errors, tests and usage docs
+- [x] Server-side SDK client API-key enforcement
 
 ## Remaining work
 
@@ -51,7 +52,7 @@ Last updated: 2026-10-01
 - [x] Motion/transitions pass
 
 ### 3. End-to-end validation
-- [ ] Clean install
+- [ ] Clean install (Checkpoint A)
 - [ ] Full build/check
 - [ ] Full test suite
 - [ ] API smoke tests
