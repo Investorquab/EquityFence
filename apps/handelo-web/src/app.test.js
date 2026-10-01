@@ -204,3 +204,12 @@ test("market detail actions remain inside the two-page workspace", () => {
   assert.match(source, /showView\(["']workspace["']\)/);
   assert.doesNotMatch(source, /showView\(["']chat["']\)/);
 });
+
+
+test("workspace loads and activates persisted strategies through the API", () => {
+  assert.match(source, /\/api\/strategies\?wallet=/);
+  assert.match(source, /\/api\/strategies\/activate/);
+  assert.match(source, /data-activate/);
+  assert.match(source, /Review &amp; Activate/);
+  assert.match(source, /No transaction or schedule was created automatically/);
+});
