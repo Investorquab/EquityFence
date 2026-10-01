@@ -70,7 +70,7 @@ test("transaction review and execution bind to the full wallet address", () => {
 });
 
 test("transaction execution remains explicitly confirmed and status-aware", () => {
-  assert.match(source, /wallet: workspaceWalletAddress/);
+  assert.match(source, /wallet: workspaceWalletAddressValue/);
   assert.match(source, /confirmed: true/);
   assert.match(source, /result\.status === "FINISHED"/);
   assert.match(source, /result\.status === "PENDING"/);
@@ -139,7 +139,7 @@ test("portfolio preview is a supported structured chat card", () => {
 
 test("strategy preview exposes deterministic portfolio risk review",()=>{assert.match(source,/api\/strategy\/risk/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/activation remains blocked/);});
 
-test("transaction preview requires portfolio risk to pass before confirmation",()=>{assert.match(source,/riskDecision !== "PASS"/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/TRANSACTION PREVIEW/);assert.match(source,/wallet: workspaceWalletAddress/);});
+test("transaction preview requires portfolio risk to pass before confirmation",()=>{assert.match(source,/riskDecision !== "PASS"/);assert.match(source,/PORTFOLIO RISK/);assert.match(source,/TRANSACTION PREVIEW/);assert.match(source,/wallet: workspaceWalletAddressValue/);});
 
 
 test("Handelo exposes exactly two primary navigation destinations", () => {
