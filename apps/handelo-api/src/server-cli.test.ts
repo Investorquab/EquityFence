@@ -61,6 +61,6 @@ test("execution boundary requires explicit enablement, non-default secret, walle
 
 test("execution never returns fabricated success state", () => {
   assert.match(source, /const result = await wallet\.execute/);
-  assert.match(source, /return json\(res, 200, \{[\\s\\S]*result \}/);
+  assert.match(source, /securityAudit,\\s+result\\s+\}\);/);
   assert.doesNotMatch(source, /txHash:\s*["']0x[0-9a-fA-F]{64}["']/);
 });
