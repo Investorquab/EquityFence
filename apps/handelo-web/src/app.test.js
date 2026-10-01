@@ -201,6 +201,6 @@ test("workspace activity exposes truthful transaction time and safe explorer lin
 
 
 test("market detail actions remain inside the two-page workspace", () => {
-  assert.match(source, /showView\\([\"']workspace[\"']\\)/);
-  assert.doesNotMatch(source, /showView\\([\"']chat[\"']\\)/);
+  assert.match(source, /showView\(["']workspace["']\)/);
+  assert.doesNotMatch(source, /showView\(["']chat["']\)/);
 });
