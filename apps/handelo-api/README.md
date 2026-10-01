@@ -6,6 +6,7 @@ The first Handelo agent runtime.
 
 Set:
 - `HANDELO_API_KEY` (or `API_KEY`) — a Groq, OpenAI, or Anthropic API key.
+- `HANDELO_CLIENT_API_KEY` — optional shared client key for `/api/chat`; required when configured and sent as `x-handelo-api-key`.
 - `BINANCE_WEB3_API_KEY`
 - `BINANCE_WEB3_SECRET_KEY`
 
