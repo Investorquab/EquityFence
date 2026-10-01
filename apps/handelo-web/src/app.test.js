@@ -163,3 +163,6 @@ test("workspace remains the single persistent AI control surface", () => {
 
 
 test("workspace surfaces loading and service errors instead of failing silently",()=>{assert.match(source,/function renderWorkspaceError\(element, message\)/);assert.match(source,/Market data is unavailable right now/);assert.match(source,/Could not reach the Gap Radar service/);assert.match(source,/aria-busy/);});
+
+
+test("chat renders deterministic policy results as a structured risk card",()=>{assert.match(source,/function addRiskPreview\(policy\)/);assert.match(source,/RISK RESULT/);assert.match(source,/data\.policy && data\.intent\?\.action !== "research"/);});
