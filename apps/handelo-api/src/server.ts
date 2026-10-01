@@ -17,6 +17,7 @@ const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
 const CORS_ORIGIN = process.env.HANDELO_CORS_ORIGIN?.trim() || "*";
+const CLIENT_API_KEY = process.env.HANDELO_CLIENT_API_KEY?.trim() || "";
 function isEvmAddress(value: string): boolean {
   return /^0x[a-fA-F0-9]{40}$/.test(value.trim());
 }
@@ -109,7 +110,7 @@ function json(res: import("node:http").ServerResponse, status: number, payload: 
     "content-type": "application/json",
     "cache-control": "no-store",
     "access-control-allow-origin": CORS_ORIGIN,
-    "access-control-allow-headers": "content-type"
+    "access-control-allow-headers": "content-type, x-handelo-api-key"
   });
   res.end(body);
 }
@@ -637,6 +638,10 @@ const server = createServer(async (req, res) => {
 
   if (req.method !== "POST" || req.url !== "/api/chat") {
     return json(res, 404, { error: "Not found" });
+  }
+
+  if (CLIENT_API_KEY && req.headers["x-handelo-api-key"] !== CLIENT_API_KEY) {
+    return json(res, 401, { error: "A valid Handelo client API key is required." });
   }
 
   try {
