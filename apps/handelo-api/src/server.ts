@@ -13,7 +13,11 @@ import { activateStoredStrategy, listActiveStrategies } from "./strategy-store.j
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
 let walletAuth: { status: "IDLE" | "WAITING" | "SUCCESS" | "FAILED"; urlForWeb?: string; pairingCode?: string; error?: string } = { status: "IDLE" };
-const agent = new HandeloAgent();
+let agent: HandeloAgent | null = null;
+function getAgent(): HandeloAgent {
+  agent ??= new HandeloAgent();
+  return agent;
+}
 const market = marketClientFromEnv();
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
@@ -696,7 +700,7 @@ const server = createServer(async (req, res) => {
       return json(res, 400, { error: "message is required" });
     }
 
-    const result = await agent.run(body.message.trim());
+    const result = await getAgent().run(body.message.trim());
     return json(res, 200, result);
   } catch (error) {
     const status = error instanceof SyntaxError ? 400 : marketErrorStatus(error);
