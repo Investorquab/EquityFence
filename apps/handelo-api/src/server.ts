@@ -119,7 +119,7 @@ const server = createServer(async (req, res) => {
   if (req.method === "OPTIONS") {
     res.writeHead(204, {
       "access-control-allow-origin": CORS_ORIGIN,
-      "access-control-allow-headers": "content-type",
+      "access-control-allow-headers": "content-type, x-handelo-api-key",
       "access-control-allow-methods": "POST,GET,OPTIONS"
     });
     return res.end();
