@@ -83,14 +83,17 @@ function renderWorkspaceGapRadar(markets) {
   if (!workspaceGapRadar) return;
   if (!Array.isArray(markets) || !markets.length) {
     workspaceGapRadar.innerHTML = '<div class="workspace-empty">No measurable gaps available.</div>';
+    workspaceGapRadar.setAttribute("aria-busy", "false");
     return;
   }
   workspaceGapRadar.innerHTML = markets.slice(0, 5).map((market) => {
     const gap = Number(market.divergencePercent);
     const gapText = Number.isFinite(gap) ? (gap >= 0 ? "+" : "") + gap.toFixed(2) + "%" : "—";
     const gapClass = gap > 0 ? "positive" : gap < 0 ? "negative" : "";
-    return '<div class="workspace-gap-row"><span><strong>' + escapeHtml(market.underlyingTicker || "—") + '</strong><small>' + escapeHtml(market.tokenSymbol || "—") + " · " + escapeHtml(market.provider || "BSC") + '</small></span><b class="' + gapClass + '">' + gapText + '</b></div>';
+    const label = (market.underlyingTicker || "—") + " " + (market.tokenSymbol || "—") + " gap " + gapText;
+    return '<div class="workspace-gap-row" role="group" aria-label="' + escapeHtml(label) + '"><span><strong>' + escapeHtml(market.underlyingTicker || "—") + '</strong><small>' + escapeHtml(market.tokenSymbol || "—") + " · " + escapeHtml(market.provider || "BSC") + '</small></span><b class="' + gapClass + '">' + gapText + '</b></div>';
   }).join("");
+  workspaceGapRadar.setAttribute("aria-busy", "false");
 }
 
 async function refreshWorkspaceContext() {
@@ -101,8 +104,8 @@ async function refreshWorkspaceContext() {
   try {
     const marketsResponse = await fetch(API_BASE + "/api/markets", {cache:"no-store"});
     const markets = await marketsResponse.json();
-    if (marketsResponse.ok && Array.isArray(markets) && markets.length) renderWorkspaceMarket(normalizeMarketRecord(markets[0]));
-    else renderWorkspaceError(workspaceMarket, "Market data is unavailable right now.");
+    if (marketsResponse.ok && Array.isArray(markets) && markets.length) { renderWorkspaceMarket(normalizeMarketRecord(markets[0])); workspaceMarket?.setAttribute("aria-busy", "false"); }
+    else { renderWorkspaceError(workspaceMarket, "Market data is unavailable right now."); workspaceMarket?.setAttribute("aria-busy", "false"); }
   } catch {
     renderWorkspaceError(workspaceMarket, "Could not reach market data. Try again.");
   }
