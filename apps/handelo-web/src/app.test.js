@@ -198,3 +198,9 @@ test("workspace market and radar failures clear loading state", () => {
 
 test("market radar exposes live status and liquidity context",()=>{assert.match(source,/market\.marketStatus/);assert.match(source,/market\.liquidityContext/);assert.match(source,/label \+ " status " \+ status/);});
 test("workspace activity exposes truthful transaction time and safe explorer links",()=>{assert.match(source,/new Date\(tx\.txTime\)\.toLocaleString/);assert.match(source,/https:\/\/bscscan\.com\/tx\//);assert.match(source,/noopener noreferrer/);});
+
+
+test("market detail actions remain inside the two-page workspace", () => {
+  assert.match(source, /showView\\([\"']workspace[\"']\\)/);
+  assert.doesNotMatch(source, /showView\\([\"']chat[\"']\\)/);
+});
