@@ -35,6 +35,7 @@ jobs:
       - name: API health smoke
         shell: bash
         run: |
+          touch .env
           node --import tsx apps/handelo-api/src/server.ts > /tmp/handelo-api.log 2>&1 &
           pid=$!
           trap "kill $pid 2>/dev/null || true" EXIT
