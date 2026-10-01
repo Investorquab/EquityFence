@@ -8,7 +8,7 @@ Set:
 
 - `TELEGRAM_BOT_TOKEN`
 - `HANDELO_API_URL` (defaults to `http://localhost:8787`)
-- `HANDELO_API_KEY` when the API requires it
+- `HANDELO_CLIENT_API_KEY` when the API requires it
 
 Then run:
 
