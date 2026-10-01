@@ -23,3 +23,13 @@ test("chat boundary enforces the configured client API key", () => {
   assert.match(source, /A valid Handelo client API key is required/);
   assert.match(source, /access-control-allow-headers": "content-type, x-handelo-api-key"/);
 });
+
+
+test("strategy activation boundary is wallet-scoped and risk-gated", () => {
+  assert.match(source, /GET.*\/api\/strategies/);
+  assert.match(source, /POST.*\/api\/strategies\/activate/);
+  assert.match(source, /listActiveStrategies\(walletAddress\)/);
+  assert.match(source, /evaluatePortfolioStrategyRisk\(snapshot, strategy\.asset, strategy\.amountUsd, strategy\.constraints\)/);
+  assert.match(source, /status !== "DRAFT"/);
+  assert.match(source, /executionScheduled: false/);
+});
