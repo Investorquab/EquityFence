@@ -141,7 +141,7 @@ export async function runTelegramBot(options: TelegramBotOptions): Promise<void>
   const transport = createTelegramTransport(options.token, requestFetch);
   const client = createHandeloClient({
     baseUrl: options.handeloBaseUrl ?? process.env.HANDELO_API_URL ?? "http://localhost:8787",
-    apiKey: options.handeloApiKey ?? process.env.HANDELO_API_KEY,
+    apiKey: options.handeloApiKey ?? process.env.HANDELO_CLIENT_API_KEY,
     fetch: requestFetch,
   });
   const handleUpdate = createTelegramHandler(client, transport);
@@ -175,6 +175,6 @@ if (import.meta.url === `file://${process.argv[1]}`) {
   await runTelegramBot({
     token: process.env.TELEGRAM_BOT_TOKEN ?? "",
     handeloBaseUrl: process.env.HANDELO_API_URL,
-    handeloApiKey: process.env.HANDELO_API_KEY,
+    handeloApiKey: process.env.HANDELO_CLIENT_API_KEY,
   });
 }
