@@ -33,3 +33,10 @@ test("strategy activation boundary is wallet-scoped and risk-gated", () => {
   assert.match(source, /status !== "DRAFT"/);
   assert.match(source, /executionScheduled: false/);
 });
+
+
+test("API startup does not require the LLM key before a chat request", () => {
+  assert.match(source, /let agent: HandeloAgent \| null = null/);
+  assert.match(source, /function getAgent\(\): HandeloAgent/);
+  assert.match(source, /agent \?\?= new HandeloAgent\(\)/);
+});
