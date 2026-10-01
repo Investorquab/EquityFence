@@ -124,9 +124,11 @@ The language model never receives a private key.
 These are intentionally not described as completed:
 
 - A polished public deployment is still separate from the local developer workflow.
+- SDK and Telegram control surfaces are implemented and tested, but a public SDK release and deployed Telegram bot still need to be prepared.
 - A complete live end-to-end execution test with controlled funds still needs to be captured as demo evidence.
 - Direct raw-EVM transaction simulation is not yet wired into the Agentic Wallet execution path.
 - The final hackathon demo video and final narrative still need to be produced.
+- The workspace still needs final responsive/accessibility/demo QA and the submission checklist needs a final pass.
 - This report should be updated after the first complete live end-to-end run with the exact observed setup time, failures, and fixes.
 
 ## Developer feedback
