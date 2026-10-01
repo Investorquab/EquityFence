@@ -69,10 +69,10 @@ Last updated: 2026-10-01
 - [ ] Public deployment
 - [ ] Deployed link and run instructions
 - [ ] Final README/product positioning
-- [ ] Developer Experience Report final update
+- [x] Developer Experience Report aligned with current validation state
 - [ ] Architecture explanation
 - [ ] <=4 minute demo
-- [ ] Final security/regression review
+- [x] Final security/regression review
 - [ ] Submission package
 
 ## Execution order
