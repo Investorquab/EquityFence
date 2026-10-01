@@ -220,6 +220,7 @@ function addAgentMessage(data) {
 
   if (data.strategy) addStrategyPreview(data.strategy);
   if (data.basket) addBasketPreview(data.basket);
+  if (data.policy && data.intent?.action !== "research") addRiskPreview(data.policy);
 
   if (data.market) {
     context.classList.add("visible");
@@ -243,6 +244,19 @@ function addAgentMessage(data) {
     addReviewPrompt(data.market, amount, action);
   }
 
+  scrollConversation();
+}
+
+function addRiskPreview(policy) {
+  if (!policy) return;
+  const node = document.createElement("article");
+  node.className = "strategy-risk-result chat-risk-result " + String(policy.decision || "BLOCK").toLowerCase();
+  node.setAttribute("role", "status");
+  const reason = Array.isArray(policy.reasons) && policy.reasons.length
+    ? policy.reasons.join(" ")
+    : "No additional risk explanation was supplied.";
+  node.innerHTML = `<span>RISK RESULT · ${escapeHtml(policy.decision || "BLOCK")}</span><strong>${escapeHtml(reason)}</strong>`;
+  conversation.appendChild(node);
   scrollConversation();
 }
 
