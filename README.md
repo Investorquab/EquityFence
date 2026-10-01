@@ -90,7 +90,7 @@ Set:
 
 - `TELEGRAM_BOT_TOKEN`
 - `HANDELO_API_URL` (optional; defaults to local API)
-- `HANDELO_API_KEY` when required by the API
+- `HANDELO_CLIENT_API_KEY` when required by the API
 
 Then:
 
