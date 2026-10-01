@@ -8,6 +8,7 @@ import { isExecutableMarketAsset, marketClientFromEnv, MarketResolutionError, Ma
 import { auditToken, normalizeTokenAudit } from "@handelo/execution";
 import { consumeReviewToken, createReviewToken, verifyReviewToken } from "./review-token.js";
 import { walletServiceError } from "./wallet-errors.js";
+import { activateStoredStrategy, listActiveStrategies } from "./strategy-store.js";
 
 const port = Number(process.env.PORT ?? "8787");
 const execFileAsync = promisify(execFile);
@@ -249,6 +250,49 @@ const server = createServer(async (req, res) => {
       return json(res, 200, await portfolioSnapshot(walletAddress));
     } catch (error) {
       const status = marketErrorStatus(error);
+      return json(res, status ?? 500, { error: errorMessage(error) });
+    }
+  }
+
+  if (req.method === "GET" && req.url?.startsWith("/api/strategies")) {
+    const walletAddress = new URL(req.url, "http://localhost").searchParams.get("wallet")?.trim() ?? "";
+    if (!isEvmAddress(walletAddress)) return json(res, 400, { error: "A valid wallet is required." });
+    try {
+      return json(res, 200, { strategies: await listActiveStrategies(walletAddress) });
+    } catch (error) {
+      return json(res, 500, { error: errorMessage(error) });
+    }
+  }
+
+  if (req.method === "POST" && req.url === "/api/strategies/activate") {
+    try {
+      const raw = await readRequestBody(req);
+      const body = parseJsonBody<{ wallet?: unknown; strategy?: unknown }>(raw);
+      const walletAddress = String(body.wallet ?? "").trim();
+      if (!isEvmAddress(walletAddress) || !body.strategy || typeof body.strategy !== "object") {
+        return json(res, 400, { error: "A valid wallet and strategy are required." });
+      }
+
+      const strategy = body.strategy as import("@handelo/core").StrategyDefinition;
+      if (strategy.status !== "DRAFT") return json(res, 409, { error: "Only draft strategies can be activated." });
+      if (!strategy.id || !strategy.asset || !strategy.type) return json(res, 400, { error: "Strategy definition is incomplete." });
+
+      if (strategy.amountUsd !== undefined) {
+        if (!Number.isFinite(strategy.amountUsd) || strategy.amountUsd <= 0) {
+          return json(res, 400, { error: "Strategy amount must be greater than zero." });
+        }
+        const snapshot = await portfolioSnapshot(walletAddress);
+        const { evaluatePortfolioStrategyRisk } = await import("@handelo/core");
+        const risk = evaluatePortfolioStrategyRisk(snapshot, strategy.asset, strategy.amountUsd, strategy.constraints);
+        if (risk.decision !== "PASS") {
+          return json(res, 409, { error: "Strategy activation is blocked by portfolio risk controls.", risk });
+        }
+      }
+
+      const activated = await activateStoredStrategy(walletAddress, strategy);
+      return json(res, 200, { strategy: activated, executionScheduled: false });
+    } catch (error) {
+      const status = requestBodyErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
     }
   }
