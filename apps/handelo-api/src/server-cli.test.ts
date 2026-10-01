@@ -40,3 +40,10 @@ test("API startup does not require the LLM key before a chat request", () => {
   assert.match(source, /function getAgent\(\): HandeloAgent/);
   assert.match(source, /agent \?\?= new HandeloAgent\(\)/);
 });
+
+
+test("API startup does not require market provider credentials before market requests", () => {
+  assert.match(source, /let market: ReturnType<typeof marketClientFromEnv> \| null = null/);
+  assert.match(source, /function getMarket\(\): ReturnType<typeof marketClientFromEnv>/);
+  assert.match(source, /market \?\?= marketClientFromEnv\(\)/);
+});
