@@ -18,7 +18,11 @@ function getAgent(): HandeloAgent {
   agent ??= new HandeloAgent();
   return agent;
 }
-const market = marketClientFromEnv();
+let market: ReturnType<typeof marketClientFromEnv> | null = null;
+function getMarket(): ReturnType<typeof marketClientFromEnv> {
+  market ??= marketClientFromEnv();
+  return market;
+}
 const wallet = new BinanceAgenticWalletAdapter();
 const DEFAULT_BSC_QUOTE_TOKEN = "0x55d398326f99059fF775485246999027B3197955";
 const CORS_ORIGIN = process.env.HANDELO_CORS_ORIGIN?.trim() || "*";
@@ -173,7 +177,7 @@ const server = createServer(async (req, res) => {
 
   if (req.method === "GET" && req.url === "/api/markets") {
     try {
-      return json(res, 200, await market.discover(8));
+      return json(res, 200, await getMarket().discover(8));
     } catch (error) {
       const status = marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
@@ -184,7 +188,7 @@ const server = createServer(async (req, res) => {
     const requestedLimit = Number(new URL(req.url, "http://localhost").searchParams.get("limit") ?? "8");
     const limit = Number.isFinite(requestedLimit) ? Math.min(Math.max(Math.floor(requestedLimit), 1), 25) : 8;
     try {
-      const assets = rankGapRadarAssets(await market.tokens());
+      const assets = rankGapRadarAssets(await getMarket().tokens());
       return json(res, 200, {
         markets: assets.slice(0, limit).map(toMarketInsight),
         generatedAt: new Date().toISOString()
@@ -231,7 +235,7 @@ const server = createServer(async (req, res) => {
     }
 
     try {
-      return json(res, 200, { wallet: walletAddress, transactions: await market.transactions(walletAddress, 20) });
+      return json(res, 200, { wallet: walletAddress, transactions: await getMarket().transactions(walletAddress, 20) });
     } catch (error) {
       const status = marketErrorStatus(error);
       return json(res, status ?? 500, { error: errorMessage(error) });
@@ -350,7 +354,7 @@ const server = createServer(async (req, res) => {
       if (!isEvmAddress(walletAddress)) {
         return json(res, 400, { error: "A valid connected wallet address is required for transaction review." });
       }
-      const asset = await market.find(ticker);
+      const asset = await getMarket().find(ticker);
       if (!isExecutableMarketAsset(asset)) {
         return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so Handelo will not create an executable review." });
       }
@@ -485,7 +489,7 @@ const server = createServer(async (req, res) => {
       if (slippageResult.error) return json(res, 400, { error: slippageResult.error });
       const slippage = slippageResult.value;
 
-      const asset = await market.find(ticker);
+      const asset = await getMarket().find(ticker);
       const quote = await wallet.quote({
         fromTokenQty: String(amount),
         fromToken,
@@ -555,7 +559,7 @@ const server = createServer(async (req, res) => {
         return json(res, 400, { error: "Handelo's USD-notional execution path currently requires the BSC USDT quote token." });
       }
 
-      const asset = await market.find(ticker);
+      const asset = await getMarket().find(ticker);
       if (!isExecutableMarketAsset(asset)) {
         return json(res, 422, { error: "Live market data is invalid for this tokenized stock, so execution is blocked." });
       }
