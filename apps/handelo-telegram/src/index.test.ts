@@ -2,6 +2,10 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { createTelegramHandler, formatHandeloResponse } from "./index.js";
 import type { AgentResult } from "@handelo/agent";
+import { readFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
+
+const telegramSource = readFileSync(fileURLToPath(new URL("./index.ts", import.meta.url)), "utf8");
 
 test("Telegram formatter renders structured Handelo context", () => {
   const result = {
@@ -70,4 +74,10 @@ test("Telegram /start and /help are handled without the LLM", async () => {
 
   assert.match(messages[0], /Welcome to Handelo/);
   assert.match(messages[1], /Telegram does not hold private keys/);
+});
+
+
+test("Telegram uses the server-side client API key configuration", () => {
+  assert.match(telegramSource, /HANDELO_CLIENT_API_KEY/);
+  assert.doesNotMatch(telegramSource, /HANDELO_API_KEY/);
 });
