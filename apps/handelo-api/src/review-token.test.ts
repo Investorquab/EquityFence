@@ -7,7 +7,8 @@ const input: ReviewTokenInput = {
   amountUsd: 20,
   fromToken: "0x55d398326f99059fF775485246999027B3197955",
   contract: "0x0000000000000000000000000000000000000001",
-  slippage: "0.50"
+  slippage: "0.50",
+  wallet: "0x0000000000000000000000000000000000000003"
 };
 
 test("review token accepts the exact reviewed trade", () => {
@@ -61,4 +62,14 @@ test("review token can only be consumed once during its lifetime", () => {
   const token = createReviewToken(input, now);
   assert.equal(consumeReviewToken(token, now + 1), true);
   assert.equal(consumeReviewToken(token, now + 2), false);
+});
+
+
+test("review token rejects a changed wallet", () => {
+  const now = 1_000_000;
+  const token = createReviewToken(input, now);
+  assert.equal(
+    verifyReviewToken(token, { ...input, wallet: "0x0000000000000000000000000000000000000004" }, now + 1_000),
+    false
+  );
 });
